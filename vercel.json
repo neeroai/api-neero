@@ -1,0 +1,15 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "app/api/**/*.ts": {
+      "runtime": "edge"
+    }
+  },
+  "env": {
+    "OPENAI_API_KEY": "@openai-api-key",
+    "WHATSAPP_TOKEN": "@whatsapp-token",
+    "WHATSAPP_PHONE_ID": "@whatsapp-phone-id",
+    "WHATSAPP_VERIFY_TOKEN": "@whatsapp-verify-token",
+    "WHATSAPP_APP_SECRET": "@whatsapp-app-secret"
+  }
+}
