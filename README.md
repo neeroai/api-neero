@@ -133,9 +133,19 @@ See CLAUDE.md for detailed project context and guidelines.
 
 ---
 
-## Resources
+## Documentation
 
-**Documentation:**
+**Project Guides** (`/docs`):
+- [Architecture](docs/architecture.md) - System design, runtime decisions, performance patterns
+- [WhatsApp Integration](docs/whatsapp-integration.md) - Message types, webhooks, rate limits, 2025 changes
+- [AI Integration](docs/ai-integration.md) - Model selection, streaming, tool calling, prompts
+- [Edge Runtime](docs/edge-runtime.md) - Edge Functions, Web APIs, optimization, limits
+- [Security](docs/security.md) - HMAC validation, input sanitization, rate limiting
+- [Deployment](docs/deployment.md) - Vercel setup, environment variables, monitoring, costs
+- [Customization](docs/customization-guide.md) - Prompts, tools, persistence, business logic
+- [API Reference](docs/api-reference.md) - Routes, functions, types, error codes
+
+**External Resources:**
 - Vercel AI SDK: https://sdk.vercel.ai/docs
 - WhatsApp Cloud API: https://developers.facebook.com/docs/whatsapp/cloud-api
 - Next.js: https://nextjs.org/docs
@@ -146,4 +156,4 @@ See CLAUDE.md for detailed project context and guidelines.
 
 ---
 
-**Version:** 1.0.0 | **Last Updated:** 2025-11-11 | **Lines:** 149
+**Version:** 1.0.0 | **Last Updated:** 2025-11-12 | **Lines:** 155

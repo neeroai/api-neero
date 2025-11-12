@@ -1,64 +1,49 @@
 # CLAUDE.md - ai-sdk-wp Template
 
-**Scope:** Template repository for Vercel AI SDK + WhatsApp Business API projects
-**Type:** Configuration-only template (clone and customize)
-**Last Updated:** 2025-11-11
+**Scope:** Full-featured starter kit for Vercel AI SDK + WhatsApp Business API projects
+**Type:** Clone and customize for production use
+**Last Updated:** 2025-11-12
 
 ---
 
-## 4-Level Hierarchy Reference
+## 4-Level Hierarchy
 
-This file follows Neero's 4-level configuration hierarchy:
-
-1. **USER** - ~/.claude/CLAUDE.md (personal preferences)
-2. **COMPANY** - /Users/mercadeo/neero/CLAUDE.md (Neero standards)
-3. **GLOBAL** - /Users/mercadeo/neero/docs-global/ (shared documentation)
-4. **PROJECT** - This file (project-specific context)
-
-Load order: USER overrides COMPANY, COMPANY overrides GLOBAL, GLOBAL overrides PROJECT
+Load order: USER → COMPANY → GLOBAL → PROJECT
+1. USER: ~/.claude/CLAUDE.md
+2. COMPANY: /Users/mercadeo/neero/CLAUDE.md
+3. GLOBAL: /Users/mercadeo/neero/docs-global/
+4. PROJECT: This file
 
 ---
 
 ## Project Overview
 
-This is a template repository for projects that integrate:
-- Vercel AI SDK for AI-powered conversations
-- WhatsApp Business API for messaging
+Full-featured template integrating:
+- Vercel AI SDK 5.0 (streaming, tool calling, structured outputs)
+- WhatsApp Business API v23.0 (Cloud API)
+- Complete utilities for production deployment
 
-Clone this repo to start a new project with validated configuration.
+Clone this repo to start a new AI+WhatsApp project with validated configuration.
 
 ---
 
-## Tech Stack (Validated Sources)
+## Tech Stack
 
-### Core Framework
-- **Next.js 16.0** - App Router, Edge Runtime, Turbopack
-- **React 19.2** - Server Components, Suspense
-- **TypeScript 5.9** - Strict mode, path aliases
-- Source: https://nextjs.org/docs
+**Core:** Next.js 16 + React 19 + TypeScript 5.9 + Vercel Edge Runtime
+**AI:** Vercel AI SDK 5.0 + OpenAI SDK 2.0 + Zod 3.23
+**WhatsApp:** Cloud API v23.0 (text, interactive, media, webhooks)
+**Dev Tools:** Biome 2.3 + Tailwind CSS 4.1 + pnpm 9.15
 
-### AI Integration
-- **Vercel AI SDK 5.0** - Streaming, tool calling, structured outputs
-- **OpenAI SDK 2.0** - GPT-4 Turbo, function calling
-- **Zod 3.23** - Schema validation
-- Source: https://sdk.vercel.ai/docs
-
-### WhatsApp Business API
-- **API Version:** v23.0 (Cloud API)
-- **Features:** Text, interactive messages, media, webhooks
-- **Limits:** 1000 free conversations/month
-- Source: https://developers.facebook.com/docs/whatsapp/cloud-api
-
-### Development Tools
-- **Biome 2.3** - Linter and formatter (replaces ESLint + Prettier)
-- **Tailwind CSS 4.1** - Utility-first styling
-- **pnpm 9.15** - Fast, efficient package manager
+**Sources:**
+- https://sdk.vercel.ai/docs
+- https://developers.facebook.com/docs/whatsapp/cloud-api
+- https://nextjs.org/docs
 
 ---
 
 ## Stack Deviations
 
-None. This template follows Neero standards exactly.
+None. Template follows Neero standards exactly.
 
 ---
 
@@ -66,81 +51,63 @@ None. This template follows Neero standards exactly.
 
 ```
 ai-sdk-wp/
-├── .claude/              (empty - add custom agents as needed)
-├── app/
-│   └── api/              (empty - implement your routes here)
+├── app/api/               (webhook, send, chat, example)
 ├── lib/
-│   └── types/
-│       ├── whatsapp.ts   (WhatsApp API types)
-│       └── ai.ts         (AI SDK types)
-├── public/               (empty - add static assets)
-├── .env.example          (copy to .env.local)
-├── CLAUDE.md             (this file)
-├── README.md             (usage instructions)
-├── plan.md               (architecture template)
-├── todo.md               (tasks template)
-├── prd.md                (requirements template)
-└── [config files]
+│   ├── whatsapp/          (messaging, webhook, media, rate-limit)
+│   ├── ai/                (client, streaming, tools, prompts, context)
+│   ├── security/          (crypto, env, sanitize)
+│   ├── db/                (drizzle examples)
+│   └── types/             (whatsapp.ts, ai.ts)
+├── docs/                  (complete project documentation)
+├── .env.example
+└── [tracking files]
 ```
 
 ---
 
-## Environment Variables
+## Environment Setup
 
-See `.env.example` for complete list. Required variables:
+Copy `.env.example` to `.env.local` and configure:
 
-**OpenAI:**
-- OPENAI_API_KEY
+```bash
+OPENAI_API_KEY=sk-...
+WHATSAPP_TOKEN=...
+WHATSAPP_PHONE_ID=...
+WHATSAPP_VERIFY_TOKEN=...
+WHATSAPP_APP_SECRET=...
+NEXT_PUBLIC_APP_URL=https://...
+```
 
-**WhatsApp:**
-- WHATSAPP_TOKEN
-- WHATSAPP_PHONE_ID
-- WHATSAPP_VERIFY_TOKEN
-- WHATSAPP_APP_SECRET
-
-**App:**
-- NEXT_PUBLIC_APP_URL
+See `.env.example` for complete list with descriptions.
 
 ---
 
-## How to Customize
+## Quick Start
 
-1. Clone this repo: `git clone /Users/mercadeo/neero/ai-sdk-wp your-project`
-2. Update package.json name and description
-3. Copy .env.example to .env.local and fill in credentials
-4. Update CLAUDE.md with your project context
-5. Update plan.md with your architecture decisions
-6. Implement your routes in app/api/
-7. Add your business logic in lib/
+```bash
+git clone /Users/mercadeo/neero/ai-sdk-wp your-project
+cd your-project
+cp .env.example .env.local   # Fill in credentials
+pnpm install
+pnpm dev                      # Test /api/example
+```
+
+Update: package.json, CLAUDE.md, prd.md, plan.md
 
 ---
 
 ## For Claude Code
 
-**Rules:**
-- This is a template repo. Users clone it to start new projects.
-- Do NOT install dependencies here. Users do that after cloning.
-- Do NOT create application code. Only configuration and types.
-- Follow Neero standards: 100-line limit, NO EMOJIS, ClaudeCode&OnlyMe philosophy
-- Validation Protocol: NO INVENTAR - verify with docs-global/
+**Template Rules:**
+- Full-featured starter kit (NOT configuration-only)
+- All implementations completed (utilities + API routes)
+- Users customize for specific use cases
+- NO INVENTAR: Validate with docs-global/platforms/vercel/ and /whatsapp/
+- Line limits: CLAUDE.md ≤100, prd.md ≤100, plan.md ≤50, todo.md ≤50
+- See /docs for detailed guides
 
-**Directories:**
-- /Users/mercadeo/neero/docs-global/platforms/vercel/ - AI SDK documentation
-- /Users/mercadeo/neero/docs-global/platforms/whatsapp/ - WhatsApp API documentation
-
----
-
-## Links
-
-**Documentation:**
-- Vercel AI SDK: https://sdk.vercel.ai/docs
-- WhatsApp Cloud API: https://developers.facebook.com/docs/whatsapp/cloud-api
-- Next.js: https://nextjs.org/docs
-
-**Neero Resources:**
-- Global docs: /Users/mercadeo/neero/docs-global/
-- Company CLAUDE.md: /Users/mercadeo/neero/CLAUDE.md
+**Philosophy:** ClaudeCode&OnlyMe (2-person team, no enterprise bloat)
 
 ---
 
-**Token Tracking:** ~580 tokens | Context: 0.29% of 200K | Lines: 95
+**Token Tracking:** ~420 tokens | Context: 0.21% of 200K | Lines: 100
