@@ -5,6 +5,7 @@
  *
  * Automatically falls back to OpenAI if Groq fails or times out.
  * Supports budget-aware timeout management.
+ * Optional post-processing with Groq LLM (feature-flagged).
  */
 
 import { transcribeAudio as transcribeGroq } from './groq';
@@ -16,14 +17,22 @@ import {
   shouldAttemptAudioFallback,
   formatElapsed,
 } from './timeout';
+import {
+  postProcessTranscript,
+  isPostProcessingEnabled,
+  type AudioIntent,
+} from './post-process';
 
 /**
  * Transcription result with provider metadata
  */
 export interface TranscribeResult {
   text: string;
+  originalText?: string;
+  intent?: AudioIntent;
   provider: 'groq' | 'openai';
   fallbackUsed: boolean;
+  postProcessed?: boolean;
 }
 
 /**
@@ -69,15 +78,33 @@ export async function transcribeWithFallback(
 
   try {
     // Try Groq first (primary provider)
-    const text = await transcribeGroq(audioBuffer, {
+    const rawText = await transcribeGroq(audioBuffer, {
       ...options,
       timeoutMs: groqTimeout,
     });
 
+    // Optional post-processing (feature-flagged)
+    if (isPostProcessingEnabled() && timeTracker) {
+      const postProcessed = await postProcessTranscript(rawText, {
+        language: options.language || 'es',
+        timeTracker,
+      });
+
+      return {
+        text: postProcessed.text,
+        originalText: postProcessed.originalText,
+        intent: postProcessed.intent,
+        provider: 'groq',
+        fallbackUsed: false,
+        postProcessed: postProcessed.enhanced,
+      };
+    }
+
     return {
-      text,
+      text: rawText,
       provider: 'groq',
       fallbackUsed: false,
+      postProcessed: false,
     };
   } catch (groqError) {
     // Check if fallback should be attempted based on remaining budget
@@ -101,15 +128,33 @@ export async function transcribeWithFallback(
         : undefined;
 
       // Fallback to OpenAI
-      const text = await transcribeAudioOpenAI(audioBuffer, {
+      const rawText = await transcribeAudioOpenAI(audioBuffer, {
         ...options,
         timeoutMs: openaiTimeout,
       });
 
+      // Optional post-processing (feature-flagged)
+      if (isPostProcessingEnabled() && timeTracker) {
+        const postProcessed = await postProcessTranscript(rawText, {
+          language: options.language || 'es',
+          timeTracker,
+        });
+
+        return {
+          text: postProcessed.text,
+          originalText: postProcessed.originalText,
+          intent: postProcessed.intent,
+          provider: 'openai',
+          fallbackUsed: true,
+          postProcessed: postProcessed.enhanced,
+        };
+      }
+
       return {
-        text,
+        text: rawText,
         provider: 'openai',
         fallbackUsed: true,
+        postProcessed: false,
       };
     } catch (openaiError) {
       // Both providers failed - throw with context
