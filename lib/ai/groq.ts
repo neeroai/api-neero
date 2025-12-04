@@ -1,10 +1,13 @@
 /**
  * Groq Audio Transcription
- * Direct Groq API integration for Whisper Large v3 Turbo
+ * Vercel AI SDK integration for Groq Whisper Large v3 Turbo
  * Spanish-optimized voice note transcription
  *
- * Note: Uses Groq REST API directly as @ai-sdk/groq doesn't expose transcription
+ * Uses Vercel AI SDK transcribe() function for Edge Runtime compatibility
  */
+
+import { groq } from '@ai-sdk/groq';
+import { experimental_transcribe as transcribe } from 'ai';
 
 /**
  * Groq Whisper model configuration
@@ -34,27 +37,18 @@ export interface TranscriptionResult {
   duration?: number;
 }
 
-/**
- * Groq API transcription response
- */
-interface GroqTranscriptionResponse {
-  text: string;
-  task?: string;
-  language?: string;
-  duration?: number;
-}
 
 /**
  * Transcribe audio using Groq Whisper Large v3 Turbo
  *
  * @param audioBuffer - Audio file as ArrayBuffer (from downloadMedia)
- * @param options - Transcription options (language, prompt)
+ * @param options - Transcription options (language, prompt, timeout)
  * @returns Transcription text
  * @throws Error if GROQ_API_KEY is not set or transcription fails
  *
  * Edge Runtime compatible:
- * - Uses fetch (Web API)
- * - Uses ArrayBuffer (not Node.js Buffer)
+ * - Uses Vercel AI SDK transcribe() (Web API compatible)
+ * - Uses ArrayBuffer converted to Uint8Array
  * - Supports WhatsApp audio formats (ogg, mp3, m4a, wav)
  *
  * Usage:
@@ -75,44 +69,27 @@ export async function transcribeAudio(
   const timeoutMs = options.timeoutMs ?? GroqWhisperModel.timeout;
 
   try {
-    // Create FormData with audio file
-    const formData = new FormData();
+    // Convert ArrayBuffer to Uint8Array for AI SDK
+    const audioData = new Uint8Array(audioBuffer);
 
-    // Convert ArrayBuffer to Blob
-    const audioBlob = new Blob([audioBuffer], {
-      type: 'audio/ogg', // WhatsApp default format
-    });
-
-    // Append file to FormData
-    formData.append('file', audioBlob, 'audio.ogg');
-    formData.append('model', GroqWhisperModel.id);
-
-    // Add language if specified
+    // Build provider options (only include defined values)
+    const groqOptions: Record<string, string> = {};
     if (options.language && options.language !== 'auto') {
-      formData.append('language', options.language);
+      groqOptions.language = options.language;
     }
-
-    // Add prompt for context (improves accuracy)
     if (options.prompt) {
-      formData.append('prompt', options.prompt);
+      groqOptions.prompt = options.prompt;
     }
 
-    // Call Groq transcription API with timeout enforcement
-    const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
+    // Transcribe with Groq Whisper using AI SDK with timeout enforcement
+    const result = await transcribe({
+      model: groq.transcription(GroqWhisperModel.id),
+      audio: audioData,
+      abortSignal: AbortSignal.timeout(timeoutMs),
+      providerOptions: {
+        groq: groqOptions,
       },
-      body: formData,
-      signal: AbortSignal.timeout(timeoutMs),
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Groq API error: ${response.status} ${errorText}`);
-    }
-
-    const result = (await response.json()) as GroqTranscriptionResponse;
 
     if (!result.text || result.text.trim().length === 0) {
       throw new Error('Transcription returned empty text');
@@ -121,6 +98,10 @@ export async function transcribeAudio(
     return result.text.trim();
   } catch (error) {
     if (error instanceof Error) {
+      // Handle timeout errors specifically
+      if (error.name === 'AbortError' || error.name === 'TimeoutError') {
+        throw new Error('Audio transcription timed out');
+      }
       throw new Error(`Audio transcription failed: ${error.message}`);
     }
     throw new Error('Unknown error during audio transcription');
@@ -138,11 +119,43 @@ export async function transcribeAudioDetailed(
   audioBuffer: ArrayBuffer,
   options: TranscriptionOptions = {}
 ): Promise<TranscriptionResult> {
-  const text = await transcribeAudio(audioBuffer, options);
+  if (!process.env.GROQ_API_KEY) {
+    throw new Error('GROQ_API_KEY environment variable is not set');
+  }
 
-  return {
-    text,
-    language: options.language ?? 'es',
-    duration: undefined, // Duration not available from Groq API
-  };
+  // Use provided timeout or default to model timeout
+  const timeoutMs = options.timeoutMs ?? GroqWhisperModel.timeout;
+
+  try {
+    const audioData = new Uint8Array(audioBuffer);
+
+    // Build provider options (only include defined values)
+    const groqOptions: Record<string, string> = {};
+    if (options.language && options.language !== 'auto') {
+      groqOptions.language = options.language;
+    }
+    if (options.prompt) {
+      groqOptions.prompt = options.prompt;
+    }
+
+    const result = await transcribe({
+      model: groq.transcription(GroqWhisperModel.id),
+      audio: audioData,
+      abortSignal: AbortSignal.timeout(timeoutMs),
+      providerOptions: {
+        groq: groqOptions,
+      },
+    });
+
+    return {
+      text: result.text?.trim() ?? '',
+      language: result.language ?? options.language ?? 'es',
+      duration: result.durationInSeconds,
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(`Audio transcription failed: ${error.message}`);
+    }
+    throw new Error('Unknown error during audio transcription');
+  }
 }
