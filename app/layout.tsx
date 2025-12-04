@@ -3,11 +3,11 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'AI WhatsApp Bot',
-  description: 'AI-powered WhatsApp bot using Vercel AI SDK'
+  description: 'AI-powered WhatsApp bot using Vercel AI SDK',
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {

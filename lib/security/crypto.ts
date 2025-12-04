@@ -63,10 +63,7 @@ export async function verifyHMAC(
  * });
  * ```
  */
-export async function generateHMAC(
-  payload: string,
-  secret: string
-): Promise<string> {
+export async function generateHMAC(payload: string, secret: string): Promise<string> {
   const encoder = new TextEncoder();
 
   const key = await crypto.subtle.importKey(
@@ -77,11 +74,7 @@ export async function generateHMAC(
     ['sign']
   );
 
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    encoder.encode(payload)
-  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(payload));
 
   return bufferToHex(signature);
 }

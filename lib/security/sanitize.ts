@@ -4,7 +4,6 @@
  */
 
 import { z } from 'zod';
-import type { WhatsAppWebhookPayload } from '@/lib/types/whatsapp';
 
 /**
  * Sanitizes phone number to E.164 format
@@ -77,10 +76,7 @@ export function sanitizeText(text: string, maxLength = 4096): string {
  * sanitizeUrl('http://example.com', ['https:']) // null (http not allowed)
  * ```
  */
-export function sanitizeUrl(
-  url: string,
-  allowedProtocols = ['https:', 'http:']
-): string | null {
+export function sanitizeUrl(url: string, allowedProtocols = ['https:', 'http:']): string | null {
   try {
     const parsed = new URL(url);
 
@@ -110,14 +106,16 @@ const webhookPayloadSchema = z.object({
               display_phone_number: z.string(),
               phone_number_id: z.string(),
             }),
-            contacts: z.array(
-              z.object({
-                profile: z.object({
-                  name: z.string(),
-                }),
-                wa_id: z.string(),
-              })
-            ).optional(),
+            contacts: z
+              .array(
+                z.object({
+                  profile: z.object({
+                    name: z.string(),
+                  }),
+                  wa_id: z.string(),
+                })
+              )
+              .optional(),
             messages: z.array(z.any()).optional(),
             statuses: z.array(z.any()).optional(),
           }),
@@ -152,7 +150,7 @@ const webhookPayloadSchema = z.object({
  * }
  * ```
  */
-export function validateWebhookPayload(payload: unknown): WhatsAppWebhookPayload {
+export function validateWebhookPayload(payload: unknown) {
   return webhookPayloadSchema.parse(payload);
 }
 

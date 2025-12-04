@@ -1,159 +1,211 @@
-# ai-sdk-wp Template
+# api-neero
 
-Template repository for building AI-powered WhatsApp bots using Vercel AI SDK and WhatsApp Business API.
+Cost-optimized multimodal API for Bird.com AI employees with intelligent image routing. Processes images, documents, and audio from WhatsApp in MAX 9 seconds.
 
----
-
-## Purpose
-
-This is a configuration-only template that provides:
-- Validated tech stack for AI + WhatsApp integration
-- Type-safe TypeScript configuration
-- Production-ready project structure
-- Neero company standards compliance
-
-Clone this repo to start a new AI WhatsApp project in minutes instead of hours.
+**Version:** 2.2.0 | **Status:** Phase 3 - Image Routing | **Cost:** 89% cheaper than Claude
 
 ---
 
-## What's Included
+## Features
 
-### Utility Libraries
-- **lib/whatsapp/** - Complete WhatsApp API integration (messaging, webhooks, media, rate limiting)
-- **lib/ai/** - OpenAI client, streaming, tools, prompts, context management
-- **lib/security/** - HMAC validation, env validation, input sanitization (Edge Runtime)
-- **lib/db/** - Drizzle ORM patterns for conversations and users
-- **lib/types/** - Complete TypeScript types for WhatsApp & AI SDK
+### Intelligent Image Routing
+Two-stage pipeline for optimal model selection based on image type:
 
-### API Routes (Working Examples)
-- **app/api/whatsapp/webhook/** - Webhook handler (verification + message receiving)
-- **app/api/whatsapp/send/** - Send messages (text, buttons, lists)
-- **app/api/chat/** - AI chat endpoint with streaming
-- **app/api/example/** - Complete echo bot example with tool calling
+| Type | Model | Timeout | Use Case |
+|------|-------|---------|----------|
+| photo | Gemini 2.0 Flash | 4s | People, objects, scenes |
+| invoice | Gemini 2.0 Flash | 5s | Invoices, receipts, OCR |
+| document | Gemini 2.5 Flash | 5.5s | Cedulas, contracts, policies |
+| unknown | Gemini 2.0 Flash | 4s | Fallback |
 
-### Configuration
-- Edge Runtime compatible (Web Crypto API)
-- Environment variables pre-configured
-- TypeScript strict mode with path aliases
-- Biome for linting and formatting
-- Vercel deployment ready
+**Pipeline:** Image → Classify (2s) → Route (<10ms) → Process (4-5.5s) → Response
+
+### Image Processing
+- ID documents: Extract name, ID number, expiry date
+- Invoices/receipts: Extract totals, items, dates, tax (IVA aware)
+- Clothing/products: Describe, categorize
+- LATAM-optimized: Spanish prompts, Colombian formats (NIT, CC)
+
+### Document Processing
+- Multi-page PDF extraction (Gemini PDF native)
+- Scanned document OCR
+- Cedula recognition
+
+### Audio Processing
+- Voice note transcription (Spanish primary)
+- Groq Whisper v3 Turbo ($0.67/1K minutes, primary)
+- OpenAI Whisper fallback ($6.00/1K minutes)
+- 228x realtime processing
+
+### Bird Actions Integration
+- HTTP POST from Bird AI Employees (not webhooks)
+- Optional API key authentication
+- 9-second timeout enforcement
+- Synchronous JSON responses
 
 ---
 
 ## Quick Start
 
-### 1. Clone this template
-
-```bash
-cd /Users/mercadeo/neero
-git clone ai-sdk-wp your-project-name
-cd your-project-name
-```
-
-### 2. Initialize as new repo
-
-```bash
-rm -rf .git
-git init
-git add .
-git commit -m "feat: initial commit from ai-sdk-wp template"
-```
-
-### 3. Install dependencies
+### 1. Install dependencies
 
 ```bash
 pnpm install
 ```
 
-### 4. Configure environment
+### 2. Configure environment
 
 ```bash
 cp .env.example .env.local
-# Edit .env.local with your credentials
 ```
 
-### 5. Start development
+Required environment variables:
+
+```bash
+# AI Services (REQUIRED)
+GOOGLE_GENERATIVE_AI_API_KEY=xxx  # Gemini 2.0/2.5 Flash
+GROQ_API_KEY=xxx                   # Groq Whisper v3
+
+# Optional
+OPENAI_API_KEY=xxx                 # OpenAI Whisper fallback
+BIRD_ACCESS_KEY=xxx                # If Bird CDN requires auth
+NEERO_API_KEY=xxx                  # API authentication
+```
+
+### 3. Start development
 
 ```bash
 pnpm dev
 ```
 
+### 4. Test endpoints
+
+```bash
+# Health check
+curl http://localhost:3000/api/bird
+
+# Test with Bird Actions payload
+curl -X POST http://localhost:3000/api/bird \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-key" \
+  -d @test-payload.json
+```
+
 ---
 
-## Stack Overview
+## Tech Stack
 
-**Runtime:** Next.js 16 + React 19 + TypeScript 5.9
-**AI:** Vercel AI SDK 5.0 + OpenAI 2.0
-**Messaging:** WhatsApp Business API v23.0
-**Styling:** Tailwind CSS 4.1
-**Tooling:** Biome 2.3 + pnpm 9.15
-
-All dependencies are pinned to validated versions.
+**Runtime:** Vercel Edge (V8 isolates, Web APIs only, 128MB memory)
+**Framework:** Next.js 16 + React 19 + TypeScript 5.9
+**AI SDK:** Vercel AI SDK 5.0 (`@ai-sdk/google`, `@ai-sdk/groq`, `@ai-sdk/openai`)
+**Vision:** Google Gemini 2.0 Flash ($0.17/1K images), Gemini 2.5 Flash (complex docs)
+**Audio:** Groq Whisper Large v3 ($0.67/1K min, primary) + OpenAI Whisper (fallback)
+**Validation:** Zod 3.23
+**Dev Tools:** Biome 2.3 + Tailwind CSS 4.1 + pnpm 9.15
 
 ---
 
-## Directory Structure
+## Development Commands
+
+```bash
+pnpm dev              # Start dev server (localhost:3000) with Turbopack
+pnpm build            # Production build (checks types automatically)
+pnpm start            # Start production server
+pnpm lint             # Check code with Biome
+pnpm lint:fix         # Auto-fix linting issues
+pnpm format           # Format code with Biome
+pnpm typecheck        # TypeScript type checking (no emit)
+```
+
+---
+
+## Project Structure
 
 ```
-your-project/
-├── app/api/              API routes (webhook, send, chat, example)
-│   ├── chat/            AI streaming endpoint
-│   ├── example/         Complete echo bot example
-│   └── whatsapp/        Webhook + send message routes
+api-neero/
+├── app/api/bird/         Bird Actions endpoint
 ├── lib/
-│   ├── ai/              OpenAI client, streaming, tools, prompts
-│   ├── db/              Drizzle ORM examples (conversation, user)
-│   ├── security/        HMAC validation, env, sanitization
-│   ├── types/           TypeScript types (WhatsApp, AI SDK)
-│   └── whatsapp/        Messaging, webhook, media, rate limiting
-├── .claude/             Add custom Claude Code agents
-├── public/              Static assets
-└── [config files]       Pre-configured, ready to use
+│   ├── ai/               AI processing core
+│   │   ├── classify.ts   Image classification (Stage 1)
+│   │   ├── router.ts     Model routing table
+│   │   ├── pipeline.ts   Two-stage orchestration
+│   │   ├── gateway.ts    Gemini model config
+│   │   ├── groq.ts       Groq Whisper (primary)
+│   │   ├── openai-whisper.ts  OpenAI Whisper (fallback)
+│   │   ├── transcribe.ts Fallback orchestration
+│   │   ├── timeout.ts    Time budget manager
+│   │   ├── processors/   Type-specific processors
+│   │   ├── schemas/      Zod validation schemas
+│   │   └── prompts/      LATAM-optimized prompts
+│   ├── auth/             API key validation
+│   ├── bird/             Bird integration
+│   │   ├── types.ts      Bird Actions schemas
+│   │   └── media.ts      CDN media download
+│   ├── security/         Crypto, sanitization, env
+│   └── types/            TypeScript types
+├── docs/                 Documentation
+│   ├── codebase-guide.md LLM reference (24 files)
+│   ├── architecture.md   System design
+│   ├── ai-integration.md AI SDK details
+│   └── bird/             Bird Actions guides
+├── plan/                 Tracking files
+│   ├── plan.md           Architecture, phases
+│   ├── todo.md           Task tracking
+│   └── prd.md            Product requirements
+└── CHANGELOG.md          Version history
 ```
-
----
-
-## Next Steps
-
-After cloning and setup:
-
-1. **Test the example bot** - Send a message to your WhatsApp number to test `/api/example`
-2. **Customize for your use case:**
-   - Add custom tools in `lib/ai/tools.ts`
-   - Modify prompts in `lib/ai/prompts.ts`
-   - Add conversation persistence using `lib/db/` patterns
-   - Handle media messages with `lib/whatsapp/media.ts`
-3. **Update project files:**
-   - `plan.md` - Your architecture decisions
-   - `todo.md` - Implementation tasks
-   - `prd.md` - Product requirements
-4. **Deploy to Vercel** - See `.env.example` for webhook configuration
-
-See CLAUDE.md for detailed project context and guidelines.
 
 ---
 
 ## Documentation
 
-**Project Guides** (`/docs`):
-- [Architecture](docs/architecture.md) - System design, runtime decisions, performance patterns
-- [WhatsApp Integration](docs/whatsapp-integration.md) - Message types, webhooks, rate limits, 2025 changes
-- [AI Integration](docs/ai-integration.md) - Model selection, streaming, tool calling, prompts
-- [Edge Runtime](docs/edge-runtime.md) - Edge Functions, Web APIs, optimization, limits
-- [Security](docs/security.md) - HMAC validation, input sanitization, rate limiting
-- [Deployment](docs/deployment.md) - Vercel setup, environment variables, monitoring, costs
-- [Customization](docs/customization-guide.md) - Prompts, tools, persistence, business logic
-- [API Reference](docs/api-reference.md) - Routes, functions, types, error codes
+**Project Docs (`/docs`):**
+- [Architecture](docs/architecture.md) - System design, Actions pattern, Edge Runtime
+- [Codebase Guide](docs/codebase-guide.md) - LLM-optimized reference (24 files)
+- [Bird Actions](docs/bird/bird-actions-architecture.md) - Primary implementation guide
+- [AI Integration](docs/ai-integration.md) - Gemini, Groq, OpenAI via AI SDK
+- [Deployment](docs/deployment.md) - Vercel deployment, environment config
 
-**External Resources:**
-- Vercel AI SDK: https://sdk.vercel.ai/docs
-- WhatsApp Cloud API: https://developers.facebook.com/docs/whatsapp/cloud-api
+**Reference:**
+- Vercel AI SDK: https://ai-sdk.dev
+- Google Gemini: https://ai.google.dev/gemini-api/docs
+- Groq: https://groq.com/groqcloud
+- Bird: https://bird.com/docs
 - Next.js: https://nextjs.org/docs
-
-**Neero Standards:**
-- Global docs: /Users/mercadeo/neero/docs-global/
-- Company CLAUDE.md: /Users/mercadeo/neero/CLAUDE.md
 
 ---
 
-**Version:** 1.0.0 | **Last Updated:** 2025-11-12 | **Lines:** 155
+## Key Constraints
+
+1. **9-Second Timeout:** MAX 9 seconds processing or return error immediately (CRITICAL)
+2. **Bird Actions:** Synchronous JSON response, no background processing
+3. **Edge Runtime:** Web APIs only, no Node.js modules (fs, Buffer, crypto.createHmac)
+4. **File Limits:** 5MB images, 25MB audio (WhatsApp constraints)
+5. **Cost Optimization:** Gemini 2.0 Flash primary, avoid Claude (too expensive)
+
+---
+
+## Cost Analysis
+
+**Monthly Cost (10K images + 10K audio minutes):**
+
+| Service | Model | Rate | Monthly | Notes |
+|---------|-------|------|---------|-------|
+| Image (90%) | Gemini 2.0 Flash | $0.17/1K | $1.53 | General images |
+| Image (10%) | Gemini 2.5 Flash | $0.30/1K | $0.30 | Complex docs |
+| Audio | Groq Whisper v3 | $0.67/1K min | $6.70 | Primary (95%) |
+| Audio | OpenAI Whisper | $6.00/1K min | $0.30 | Fallback (5%) |
+| **TOTAL** | - | - | **$8.83** | 89% cheaper than Claude |
+
+**Comparison:** Claude-based alternative would cost ~$75+/month for same workload.
+
+---
+
+## Versioning
+
+**Current:** 2.2.0 (Semantic Versioning)
+**See:** [CHANGELOG.md](CHANGELOG.md) for version history
+
+---
+
+**Version:** 2.2.0 | **Last Updated:** 2025-12-04 | **Lines:** 195

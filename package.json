@@ -1,7 +1,7 @@
 {
-  "name": "ai-sdk-wp-template",
-  "version": "1.0.0",
-  "description": "Template repository for Vercel AI SDK + WhatsApp Business API projects",
+  "name": "api-neero",
+  "version": "2.2.0",
+  "description": "Cost-optimized multimodal API for Bird.com AI employees",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.3.3",
+    "@tailwindcss/postcss": "^4.1.17",
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.6",
     "@types/react-dom": "^19.0.3",

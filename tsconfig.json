@@ -1,8 +1,12 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "jsx": "preserve",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "jsx": "react-jsx",
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
@@ -20,10 +24,18 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@/*": ["./*"],
-      "@/lib/*": ["./lib/*"],
-      "@/app/*": ["./app/*"],
-      "@/types/*": ["./lib/types/*"]
+      "@/*": [
+        "./*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
+      ],
+      "@/app/*": [
+        "./app/*"
+      ],
+      "@/types/*": [
+        "./lib/types/*"
+      ]
     },
     "plugins": [
       {
@@ -35,7 +47,8 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"

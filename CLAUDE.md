@@ -24,7 +24,7 @@ Cost-optimized multimodal API for Bird.com AI employees (corporate clients):
 - **Image Processing:** Gemini 2.0/2.5 Flash - ID docs, cedulas, invoices, clothing, products
 - **Image Routing:** Intelligent classification → Optimal model selection (photo/invoice/document)
 - **Document Processing:** Gemini PDF native - Multi-page PDFs, scanned docs
-- **Audio Processing:** Groq Whisper v3 - Voice notes (Spanish primary)
+- **Audio Processing:** Groq Whisper v3 (primary) + OpenAI Whisper (fallback) - Voice notes (Spanish primary)
 - **Cost:** $2.50/10K images (with routing) vs $75+ with Claude
 - **Constraint:** MAX 9 seconds response or immediate error
 
@@ -53,9 +53,9 @@ pnpm typecheck        # TypeScript type checking (no emit)
 ## Tech Stack
 
 **Core:** Next.js 16 + React 19 + TypeScript 5.9 + Vercel Edge Runtime
-**AI SDK:** Vercel AI SDK 5.0 (`@ai-sdk/google`, `@ai-sdk/groq`) + Zod 3.23
+**AI SDK:** Vercel AI SDK 5.0 (`@ai-sdk/google`, `@ai-sdk/groq`, `@ai-sdk/openai`) + Zod 3.23
 **Vision:** Google Gemini 2.0 Flash ($0.17/1K images, PDF native)
-**Audio:** Groq Whisper Large v3 ($0.67/1K minutes, Spanish optimized)
+**Audio:** Groq Whisper Large v3 ($0.67/1K minutes, primary) + OpenAI Whisper ($6.00/1K minutes, fallback)
 **Integration:** Bird AI Employees Actions + Media CDN (conditional auth)
 **Dev Tools:** Biome 2.3 + Tailwind CSS 4.1 + pnpm 9.15
 
@@ -81,7 +81,7 @@ Bird AI Employees call our API directly via HTTP Actions (not webhooks). Impleme
 1. Bird AI Employee triggers Action → HTTP POST to `/api/bird`
 2. Optional API key validation (`X-API-Key` header)
 3. Download media from Bird CDN (conditional `BIRD_ACCESS_KEY`)
-4. Process with AI (Gemini/Groq) - synchronous, < 9 seconds
+4. Process with AI (Gemini/Groq/OpenAI) - synchronous, < 9 seconds
 5. Return JSON response to Bird AI Employee
 6. Bird AI Employee continues conversation with data
 
@@ -154,7 +154,7 @@ Image: bird/media.ts → lib/ai/classify.ts → lib/ai/router.ts → processor
                                                                (photo/invoice/document)
 
 Document: bird/media.ts → Gemini PDF → extracted text
-Audio: bird/media.ts → Groq Whisper v3 → transcription
+Audio: bird/media.ts → lib/ai/transcribe.ts (Groq → OpenAI fallback) → transcription
 ```
 
 **Image Routing Files:**
@@ -182,10 +182,10 @@ Copy `.env.example` to `.env.local`:
 ```bash
 # AI Services (REQUIRED)
 GOOGLE_GENERATIVE_AI_API_KEY=xxx  # Gemini 2.0 Flash
-GROQ_API_KEY=xxx                   # Groq Whisper v3
+GROQ_API_KEY=xxx                   # Groq Whisper v3 (primary audio)
 
 # Optional
-OPENAI_API_KEY=xxx                 # Fallback for complex cases
+OPENAI_API_KEY=xxx                 # OpenAI Whisper (audio fallback)
 
 # Bird Integration (CONDITIONAL - test needed)
 BIRD_ACCESS_KEY=xxx                # Only if Bird CDN requires auth
@@ -219,10 +219,50 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 - `architecture.md` - System design, Actions pattern, Edge Runtime
 - `bird/bird-actions-architecture.md` - Primary implementation guide (Actions)
 - `bird/` - Other Bird docs (webhooks for reference only)
-- `ai-integration.md` - Gemini, Groq integration via AI SDK
+- `ai-integration.md` - Gemini, Groq, OpenAI integration via AI SDK
 - `deployment.md` - Vercel deployment, environment configuration
 
 **Reference:** /Users/mercadeo/neero/docs-global/platforms/{vercel,bird}/
+
+---
+
+## Versioning Workflow
+
+**Current Version:** 2.2.0 (Semantic Versioning)
+
+**Version Sources (keep synchronized):**
+- `/package.json` - version field
+- `/CHANGELOG.md` - latest entry
+- `/README.md` - version badge
+- `/plan/prd.md` - Version header
+
+**Release Process:**
+1. Update CHANGELOG.md with new entries (follow Keep a Changelog format)
+2. Bump version in package.json (semantic versioning)
+3. Update prd.md version header
+4. Update README.md version badge
+5. Commit: `chore: release vX.Y.Z`
+6. Tag: `git tag vX.Y.Z -m "Release vX.Y.Z: description"`
+7. Push: `git push && git push --tags`
+
+**Semantic Versioning (MAJOR.MINOR.PATCH):**
+- MAJOR: Breaking changes (API incompatibility)
+- MINOR: New features (backwards compatible)
+- PATCH: Bug fixes
+
+**Commit Prefixes → Version Bumps:**
+| Prefix | Version Bump | Example |
+|--------|--------------|---------|
+| `feat:` | MINOR | feat: add PDF support |
+| `fix:` | PATCH | fix: timeout handling |
+| `BREAKING:` or `!` | MAJOR | feat!: new API format |
+| `docs:`, `chore:` | No bump | docs: update readme |
+
+**Changelog Format:**
+- [Keep a Changelog](https://keepachangelog.com) - Human-readable format
+- Sections: Added, Changed, Deprecated, Removed, Fixed, Security
+- Group commits by type, summarize user-facing changes
+- Include file paths for technical changes
 
 ---
 

@@ -1,16 +1,6 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js'
-        }
-      }
-    }
-  },
   images: {
     remotePatterns: [
       {
@@ -20,14 +10,15 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'graph.facebook.com'
+      },
+      {
+        protocol: 'https',
+        hostname: 'media.nest.messagebird.com'
       }
     ]
   },
   typescript: {
     ignoreBuildErrors: false
-  },
-  eslint: {
-    ignoreDuringBuilds: false
   },
   poweredByHeader: false,
   compress: true,

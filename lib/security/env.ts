@@ -114,10 +114,7 @@ export function validateOpenAIEnv(): z.infer<typeof openAIEnvSchema> {
   const result = openAIEnvSchema.safeParse(process.env);
 
   if (!result.success) {
-    throw new EnvValidationError(
-      'OpenAI environment validation failed',
-      result.error
-    );
+    throw new EnvValidationError('OpenAI environment validation failed', result.error);
   }
 
   return result.data;
@@ -139,10 +136,7 @@ export function validateWhatsAppEnv(): z.infer<typeof whatsAppEnvSchema> {
   const result = whatsAppEnvSchema.safeParse(process.env);
 
   if (!result.success) {
-    throw new EnvValidationError(
-      'WhatsApp environment validation failed',
-      result.error
-    );
+    throw new EnvValidationError('WhatsApp environment validation failed', result.error);
   }
 
   return result.data;
