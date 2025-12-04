@@ -1,8 +1,10 @@
-# CLAUDE.md - ai-sdk-wp Template
+# CLAUDE.md
 
-**Scope:** Full-featured starter kit for Vercel AI SDK + WhatsApp Business API projects
-**Type:** Clone and customize for production use
-**Last Updated:** 2025-11-12
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+**Scope:** Cost-optimized multimodal API for Bird.com AI employees
+**Type:** Production API - 89% cheaper than Claude-based alternatives
+**Last Updated:** 2025-12-04
 
 ---
 
@@ -18,25 +20,50 @@ Load order: USER → COMPANY → GLOBAL → PROJECT
 
 ## Project Overview
 
-Full-featured template integrating:
-- Vercel AI SDK 5.0 (streaming, tool calling, structured outputs)
-- WhatsApp Business API v23.0 (Cloud API)
-- Complete utilities for production deployment
+Cost-optimized multimodal API for Bird.com AI employees (corporate clients):
+- **Image Processing:** Gemini 2.0/2.5 Flash - ID docs, cedulas, invoices, clothing, products
+- **Image Routing:** Intelligent classification → Optimal model selection (photo/invoice/document)
+- **Document Processing:** Gemini PDF native - Multi-page PDFs, scanned docs
+- **Audio Processing:** Groq Whisper v3 - Voice notes (Spanish primary)
+- **Cost:** $2.50/10K images (with routing) vs $75+ with Claude
+- **Constraint:** MAX 9 seconds response or immediate error
 
-Clone this repo to start a new AI+WhatsApp project with validated configuration.
+Processes multimedia from WhatsApp via Bird AI Employees Actions using Vercel AI SDK.
+
+---
+
+## Development Commands
+
+```bash
+pnpm dev              # Start dev server (localhost:3000) with Turbopack
+pnpm build            # Production build (checks types automatically)
+pnpm start            # Start production server
+pnpm lint             # Check code with Biome
+pnpm lint:fix         # Auto-fix linting issues
+pnpm format           # Format code with Biome
+pnpm typecheck        # TypeScript type checking (no emit)
+```
+
+**Test endpoints locally:**
+- `curl http://localhost:3000/api/example` - Echo bot example
+- `curl http://localhost:3000/api/chat` - AI streaming endpoint
 
 ---
 
 ## Tech Stack
 
 **Core:** Next.js 16 + React 19 + TypeScript 5.9 + Vercel Edge Runtime
-**AI:** Vercel AI SDK 5.0 + OpenAI SDK 2.0 + Zod 3.23
-**WhatsApp:** Cloud API v23.0 (text, interactive, media, webhooks)
+**AI SDK:** Vercel AI SDK 5.0 (`@ai-sdk/google`, `@ai-sdk/groq`) + Zod 3.23
+**Vision:** Google Gemini 2.0 Flash ($0.17/1K images, PDF native)
+**Audio:** Groq Whisper Large v3 ($0.67/1K minutes, Spanish optimized)
+**Integration:** Bird AI Employees Actions + Media CDN (conditional auth)
 **Dev Tools:** Biome 2.3 + Tailwind CSS 4.1 + pnpm 9.15
 
 **Sources:**
-- https://sdk.vercel.ai/docs
-- https://developers.facebook.com/docs/whatsapp/cloud-api
+- https://ai-sdk.dev (Vercel AI SDK)
+- https://ai.google.dev/gemini-api/docs
+- https://groq.com/groqcloud
+- https://bird.com/docs
 - https://nextjs.org/docs
 
 ---
@@ -47,67 +74,176 @@ None. Template follows Neero standards exactly.
 
 ---
 
-## File Structure
+## Architecture Patterns
 
+### Bird Actions Pattern (HTTP Requests)
+Bird AI Employees call our API directly via HTTP Actions (not webhooks). Implementation:
+1. Bird AI Employee triggers Action → HTTP POST to `/api/bird`
+2. Optional API key validation (`X-API-Key` header)
+3. Download media from Bird CDN (conditional `BIRD_ACCESS_KEY`)
+4. Process with AI (Gemini/Groq) - synchronous, < 9 seconds
+5. Return JSON response to Bird AI Employee
+6. Bird AI Employee continues conversation with data
+
+**Critical:** Must return JSON response in < 9 seconds or immediate error.
+
+**No HMAC validation needed** - Actions don't use webhook signatures.
+
+### Intelligent Image Routing
+Two-stage pipeline for optimal model selection based on image type:
+
+**Pipeline:**
 ```
-ai-sdk-wp/
-├── app/api/               (webhook, send, chat, example)
-├── lib/
-│   ├── whatsapp/          (messaging, webhook, media, rate-limit)
-│   ├── ai/                (client, streaming, tools, prompts, context)
-│   ├── security/          (crypto, env, sanitize)
-│   ├── db/                (drizzle examples)
-│   └── types/             (whatsapp.ts, ai.ts)
-├── docs/                  (complete project documentation)
-├── .env.example
-└── [tracking files]
+Image → Classify (2s) → Route (<10ms) → Process (4-5.5s) → Response
+         Gemini 2.0 Flash  Route table    Type-specific
 ```
+
+**Model Selection:**
+
+| Type | Model | Timeout | Use Case |
+|------|-------|---------|----------|
+| photo | Gemini 2.0 Flash | 4s | People, objects, scenes |
+| invoice | Gemini 2.0 Flash | 5s | Invoices, receipts, OCR |
+| document | Gemini 2.5 Flash | 5.5s | Cedulas, contracts, policies |
+| unknown | Gemini 2.0 Flash | 4s | Fallback |
+
+**Key Features:**
+- Dynamic timeout adjustment if classification is slow
+- `forceType` parameter to skip classification (saves 2s)
+- Spanish-optimized prompts for LATAM documents
+- Fallback to fast path if remaining time <3s
+
+**Implementation:** See `plan/image-routing-spec.md` for complete specification.
+
+### Edge Runtime Constraints
+All API routes use `export const runtime = 'edge'`:
+- **NO Node.js APIs** (fs, crypto.createHmac, Buffer)
+- **USE Web APIs** (crypto.subtle, ReadableStream, fetch)
+- **Timeouts:** 25s default, 300s for streaming responses
+- **Memory:** 128MB limit
+- **See:** `lib/security/crypto.ts` for Web Crypto HMAC implementation
+
+### Rate Limiting Strategy
+WhatsApp API: 250 messages/sec per phone number.
+- **Implementation:** Token bucket (`lib/whatsapp/rate-limit.ts`)
+- **Storage:** In-memory Map (survives across requests in same Edge Function instance)
+- **Pattern:** Check bucket → Consume token → Process or reject
+
+### Message Deduplication
+WhatsApp may retry webhooks if response slow.
+- **Pattern:** 60-second window tracking (`lib/whatsapp/webhook.ts:isDuplicateMessage`)
+- **Storage:** In-memory Map with message IDs
+- **Cleanup:** Auto-expire after 60 seconds
+
+---
+
+## Key File Relationships
+
+**Bird Actions Flow:**
+```
+/api/bird/route.ts → API key validation (optional)
+    → bird/media.ts (download from CDN)
+    → Process based on type: image/document/audio
+    → Return JSON response
+```
+
+**Multimodal Processing:**
+```
+Image: bird/media.ts → lib/ai/classify.ts → lib/ai/router.ts → processor
+        (download)       Gemini 2.0 Flash    Route table       Type-specific
+                                                               (photo/invoice/document)
+
+Document: bird/media.ts → Gemini PDF → extracted text
+Audio: bird/media.ts → Groq Whisper v3 → transcription
+```
+
+**Image Routing Files:**
+- `lib/ai/classify.ts` - Classification with Gemini 2.0 Flash
+- `lib/ai/router.ts` - Model routing table
+- `lib/ai/pipeline.ts` - Two-stage orchestration
+- `lib/ai/processors/*.ts` - Type-specific processors
+- `lib/ai/schemas/*.ts` - Zod output schemas
+
+**Type Safety:**
+- `lib/bird/types.ts` - Bird webhook and API types (Zod schemas)
+- Import via `@/lib/bird/types` path alias
+
+**Path Aliases (tsconfig.json:22-26):**
+- `@/*` → root
+- `@/lib/*` → lib directory
+- `@/app/*` → app directory
+- `@/types/*` → lib/types
 
 ---
 
 ## Environment Setup
 
-Copy `.env.example` to `.env.local` and configure:
-
+Copy `.env.example` to `.env.local`:
 ```bash
-OPENAI_API_KEY=sk-...
-WHATSAPP_TOKEN=...
-WHATSAPP_PHONE_ID=...
-WHATSAPP_VERIFY_TOKEN=...
-WHATSAPP_APP_SECRET=...
-NEXT_PUBLIC_APP_URL=https://...
+# AI Services (REQUIRED)
+GOOGLE_GENERATIVE_AI_API_KEY=xxx  # Gemini 2.0 Flash
+GROQ_API_KEY=xxx                   # Groq Whisper v3
+
+# Optional
+OPENAI_API_KEY=xxx                 # Fallback for complex cases
+
+# Bird Integration (CONDITIONAL - test needed)
+BIRD_ACCESS_KEY=xxx                # Only if Bird CDN requires auth
+
+# API Authentication (OPTIONAL)
+NEERO_API_KEY=xxx                  # Your custom API key for Bird Actions
 ```
 
-See `.env.example` for complete list with descriptions.
+**Removed:** `BIRD_SIGNING_KEY`, `BIRD_WORKSPACE_ID`, `BIRD_CHANNEL_ID` - Not needed for Actions pattern.
+
+See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 ---
 
-## Quick Start
+## Critical Constraints
 
-```bash
-git clone /Users/mercadeo/neero/ai-sdk-wp your-project
-cd your-project
-cp .env.example .env.local   # Fill in credentials
-pnpm install
-pnpm dev                      # Test /api/example
-```
+1. **9-Second Timeout:** MAX 9 seconds processing or return error immediately (CRITICAL)
+2. **Bird Actions:** Synchronous JSON response, no background processing
+3. **Edge Runtime:** Web APIs only, no Node.js modules (fs, Buffer, crypto.createHmac)
+4. **Media Download:** May require `Authorization: AccessKey {BIRD_ACCESS_KEY}` (test needed)
+5. **Authentication:** Optional API key (`X-API-Key` header, no HMAC)
+6. **File Limits:** 5MB images, 25MB audio (WhatsApp constraints)
+7. **Cost Optimization:** Gemini 2.0 Flash primary, avoid Claude (too expensive)
+8. **TypeScript Strict:** noUncheckedIndexedAccess, noUnusedLocals enabled
 
-Update: package.json, CLAUDE.md, prd.md, plan.md
+---
+
+## Documentation
+
+**Project Docs (`/docs`):**
+- `architecture.md` - System design, Actions pattern, Edge Runtime
+- `bird/bird-actions-architecture.md` - Primary implementation guide (Actions)
+- `bird/` - Other Bird docs (webhooks for reference only)
+- `ai-integration.md` - Gemini, Groq integration via AI SDK
+- `deployment.md` - Vercel deployment, environment configuration
+
+**Reference:** /Users/mercadeo/neero/docs-global/platforms/{vercel,bird}/
 
 ---
 
 ## For Claude Code
 
-**Template Rules:**
-- Full-featured starter kit (NOT configuration-only)
-- All implementations completed (utilities + API routes)
-- Users customize for specific use cases
-- NO INVENTAR: Validate with docs-global/platforms/vercel/ and /whatsapp/
-- Line limits: CLAUDE.md ≤100, prd.md ≤100, plan.md ≤50, todo.md ≤50
-- See /docs for detailed guides
+**Project Philosophy:**
+- Production API for Bird.com AI Employees (Actions pattern)
+- Process images/documents/audio for corporate clients
+- NO INVENTAR: Validate with docs-global/ before implementing
+- Edge Runtime compatible (Web APIs only)
+- 2-person team optimization (no enterprise bloat)
 
-**Philosophy:** ClaudeCode&OnlyMe (2-person team, no enterprise bloat)
+**When Adding Features:**
+1. Check Edge Runtime compatibility (no Node.js APIs)
+2. Validate against docs-global/platforms/{bird,vercel}/
+3. Maintain < 9 sec synchronous response
+4. Test with Bird Actions (HTTP request, not webhooks)
+5. Update tracking files (plan.md, todo.md, prd.md)
+6. Keep files < 600 lines
+7. See `/docs/bird/bird-actions-architecture.md` for implementation patterns
 
 ---
 
-**Token Tracking:** ~420 tokens | Context: 0.21% of 200K | Lines: 100
+**Lines:** 150 | **Token Budget:** ~720 tokens

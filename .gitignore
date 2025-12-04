@@ -37,8 +37,14 @@ pnpm-debug.log*
 # TypeScript
 *.tsbuildinfo
 
-# Claude Code local settings
-.claude/settings.local.json
+# Claude Code (no necesario en GitHub/Vercel)
+.claude/
+
+# Plan files (local only)
+plan/
+
+# Symlinks
+docs-global
 
 # Archive folders
 .archive
