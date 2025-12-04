@@ -162,3 +162,101 @@ export function checkTimeout(tracker: TimeTracker): void {
 export function formatElapsed(tracker: TimeTracker): string {
   return `${(getElapsed(tracker) / 1000).toFixed(1)}s`;
 }
+
+/**
+ * Audio processing phase for timeout calculation
+ */
+export type AudioPhase = 'groq' | 'openai' | 'postprocess';
+
+/**
+ * Audio timeout configuration by phase
+ */
+const AUDIO_TIMEOUT_CONFIG = {
+  groq: {
+    default: 3000, // 3s for primary Groq transcription
+    minimum: 1000, // Minimum 1s to attempt transcription
+  },
+  openai: {
+    default: 3000, // 3s for OpenAI fallback
+    minimum: 2500, // Minimum 2.5s required for fallback attempt
+  },
+  postprocess: {
+    default: 1500, // 1.5s for text post-processing
+    minimum: 1000, // Minimum 1s required for post-processing
+  },
+} as const;
+
+/**
+ * Get audio-specific timeout based on remaining budget
+ *
+ * Calculates optimal timeout for audio processing phase while respecting
+ * the remaining time budget. Ensures minimum timeout requirements per phase.
+ *
+ * @param tracker - Time tracker with remaining budget
+ * @param phase - Audio processing phase ('groq', 'openai', 'postprocess')
+ * @param bufferMs - Safety buffer to reserve (default: 500ms)
+ * @returns Timeout in milliseconds
+ * @throws TimeoutBudgetError if insufficient time remaining
+ *
+ * @example
+ * ```typescript
+ * const tracker = startTimeTracking(8500);
+ * // After 2s elapsed, 6.5s remaining
+ * const groqTimeout = getAudioTimeout(tracker, 'groq'); // Returns 3000ms
+ * // After Groq fails, 3s remaining
+ * const openaiTimeout = getAudioTimeout(tracker, 'openai'); // Returns 2500ms
+ * ```
+ */
+export function getAudioTimeout(
+  tracker: TimeTracker,
+  phase: AudioPhase,
+  bufferMs = 500
+): number {
+  const remaining = getRemaining(tracker);
+  const config = AUDIO_TIMEOUT_CONFIG[phase];
+
+  // Calculate max available time (remaining - buffer)
+  const maxAvailable = remaining - bufferMs;
+
+  // Check if minimum time requirement is met
+  if (maxAvailable < config.minimum) {
+    throw new TimeoutBudgetError(
+      `Insufficient time for ${phase} phase: ${maxAvailable}ms available, ${config.minimum}ms required (${formatElapsed(tracker)} elapsed)`
+    );
+  }
+
+  // Return the lesser of: default timeout OR available time
+  return Math.min(config.default, maxAvailable);
+}
+
+/**
+ * Check if there's sufficient budget for audio fallback
+ *
+ * @param tracker - Time tracker
+ * @param bufferMs - Safety buffer (default: 500ms)
+ * @returns true if fallback should be attempted
+ */
+export function shouldAttemptAudioFallback(
+  tracker: TimeTracker,
+  bufferMs = 500
+): boolean {
+  const remaining = getRemaining(tracker);
+  const minRequired = AUDIO_TIMEOUT_CONFIG.openai.minimum;
+  return remaining - bufferMs >= minRequired;
+}
+
+/**
+ * Check if there's sufficient budget for text post-processing
+ *
+ * @param tracker - Time tracker
+ * @param bufferMs - Safety buffer (default: 500ms)
+ * @returns true if post-processing should be attempted
+ */
+export function shouldAttemptPostProcessing(
+  tracker: TimeTracker,
+  bufferMs = 500
+): boolean {
+  const remaining = getRemaining(tracker);
+  const minRequired = AUDIO_TIMEOUT_CONFIG.postprocess.minimum;
+  return remaining - bufferMs >= minRequired;
+}

@@ -25,6 +25,7 @@ export const OpenAIWhisperModel = {
 export interface TranscriptionOptions {
   language?: 'es' | 'en' | 'auto';
   prompt?: string; // Context hint for better accuracy
+  timeoutMs?: number; // Override default timeout (useful for budget-aware processing)
 }
 
 /**
@@ -63,6 +64,9 @@ export async function transcribeAudioOpenAI(
     throw new Error('OPENAI_API_KEY environment variable is not set');
   }
 
+  // Use provided timeout or default to model timeout
+  const timeoutMs = options.timeoutMs ?? OpenAIWhisperModel.timeout;
+
   try {
     // Convert ArrayBuffer to Uint8Array for AI SDK
     const audioData = new Uint8Array(audioBuffer);
@@ -76,11 +80,11 @@ export async function transcribeAudioOpenAI(
       openaiOptions.prompt = options.prompt;
     }
 
-    // Transcribe with OpenAI Whisper using AI SDK
+    // Transcribe with OpenAI Whisper using AI SDK with dynamic timeout
     const result = await transcribe({
       model: openai.transcription(OpenAIWhisperModel.id),
       audio: audioData,
-      abortSignal: AbortSignal.timeout(OpenAIWhisperModel.timeout),
+      abortSignal: AbortSignal.timeout(timeoutMs),
       providerOptions: {
         openai: openaiOptions,
       },
@@ -118,6 +122,9 @@ export async function transcribeAudioOpenAIDetailed(
     throw new Error('OPENAI_API_KEY environment variable is not set');
   }
 
+  // Use provided timeout or default to model timeout
+  const timeoutMs = options.timeoutMs ?? OpenAIWhisperModel.timeout;
+
   try {
     const audioData = new Uint8Array(audioBuffer);
 
@@ -133,7 +140,7 @@ export async function transcribeAudioOpenAIDetailed(
     const result = await transcribe({
       model: openai.transcription(OpenAIWhisperModel.id),
       audio: audioData,
-      abortSignal: AbortSignal.timeout(OpenAIWhisperModel.timeout),
+      abortSignal: AbortSignal.timeout(timeoutMs),
       providerOptions: {
         openai: openaiOptions,
       },

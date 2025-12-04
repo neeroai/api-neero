@@ -22,6 +22,7 @@ export const GroqWhisperModel = {
 export interface TranscriptionOptions {
   language?: 'es' | 'en' | 'auto';
   prompt?: string; // Context hint for better accuracy
+  timeoutMs?: number; // Override default timeout (useful for budget-aware processing)
 }
 
 /**
@@ -70,6 +71,9 @@ export async function transcribeAudio(
     throw new Error('GROQ_API_KEY environment variable is not set');
   }
 
+  // Use provided timeout or default to model timeout
+  const timeoutMs = options.timeoutMs ?? GroqWhisperModel.timeout;
+
   try {
     // Create FormData with audio file
     const formData = new FormData();
@@ -93,13 +97,14 @@ export async function transcribeAudio(
       formData.append('prompt', options.prompt);
     }
 
-    // Call Groq transcription API
+    // Call Groq transcription API with timeout enforcement
     const response = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${process.env.GROQ_API_KEY}`,
       },
       body: formData,
+      signal: AbortSignal.timeout(timeoutMs),
     });
 
     if (!response.ok) {

@@ -11,7 +11,7 @@ import { processImage } from '@/lib/ai/pipeline';
 import type { DocumentData as AIDocumentData } from '@/lib/ai/schemas/document';
 import type { InvoiceData } from '@/lib/ai/schemas/invoice';
 import type { PhotoAnalysis } from '@/lib/ai/schemas/photo';
-import { TimeBudget, TimeoutBudgetError } from '@/lib/ai/timeout';
+import { TimeBudget, TimeoutBudgetError, type TimeTracker } from '@/lib/ai/timeout';
 import { createUnauthorizedResponse, validateApiKey } from '@/lib/auth/api-key';
 import { downloadMedia } from '@/lib/bird/media';
 import type {
@@ -181,15 +181,27 @@ async function handleImageProcessing(
 }
 
 /**
- * Process audio media type
+ * Process audio media type with budget-aware timeout management
  */
 async function handleAudioProcessing(
   mediaBuffer: ArrayBuffer,
+  budget: TimeBudget,
   startTime: number
 ): Promise<Response> {
-  const result = await transcribeWithFallback(mediaBuffer, {
-    language: 'es',
-  });
+  // Create TimeTracker from remaining budget
+  const timeTracker: TimeTracker = {
+    startTime: Date.now(),
+    budgetMs: budget.getRemainingMs(),
+  };
+
+  // Transcribe with fallback, passing time tracker for dynamic timeout
+  const result = await transcribeWithFallback(
+    mediaBuffer,
+    {
+      language: 'es',
+    },
+    timeTracker
+  );
 
   const response: BirdActionSuccessResponse = {
     success: true,
@@ -270,7 +282,7 @@ export async function POST(request: Request): Promise<Response> {
         case 'image':
           return await handleImageProcessing(body.mediaUrl, budget, startTime);
         case 'audio':
-          return await handleAudioProcessing(mediaBuffer, startTime);
+          return await handleAudioProcessing(mediaBuffer, budget, startTime);
         case 'document':
           return await handleDocumentProcessing(body.mediaUrl, budget, startTime);
         default: {
