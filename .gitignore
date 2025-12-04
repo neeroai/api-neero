@@ -38,10 +38,10 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 # Claude Code (no necesario en GitHub/Vercel)
-.claude/
+
 
 # Plan files (local only)
-plan/
+
 
 # Symlinks
 docs-global

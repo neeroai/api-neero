@@ -47,6 +47,7 @@ export function sanitizeText(text: string, maxLength = 4096): string {
   if (!text) return '';
 
   let sanitized = text
+    // biome-ignore lint/suspicious/noControlCharactersInRegex: Needed for sanitization
     .replace(/\x00/g, '')
     .replace(/<script[^>]*>.*?<\/script>/gi, '')
     .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')

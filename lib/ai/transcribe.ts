@@ -8,20 +8,16 @@
  * Optional post-processing with Groq LLM (feature-flagged).
  */
 
+import type { TranscriptionOptions } from './groq';
 import { transcribeAudio as transcribeGroq } from './groq';
 import { transcribeAudioOpenAI } from './openai-whisper';
-import type { TranscriptionOptions } from './groq';
+import { type AudioIntent, isPostProcessingEnabled, postProcessTranscript } from './post-process';
 import {
-  type TimeTracker,
+  formatElapsed,
   getAudioTimeout,
   shouldAttemptAudioFallback,
-  formatElapsed,
+  type TimeTracker,
 } from './timeout';
-import {
-  postProcessTranscript,
-  isPostProcessingEnabled,
-  type AudioIntent,
-} from './post-process';
 
 /**
  * Transcription result with provider metadata
@@ -33,6 +29,19 @@ export interface TranscribeResult {
   provider: 'groq' | 'openai';
   fallbackUsed: boolean;
   postProcessed?: boolean;
+  metrics?: TranscriptionMetrics;
+}
+
+/**
+ * Transcription performance metrics
+ */
+export interface TranscriptionMetrics {
+  totalMs: number;
+  transcriptionMs: number;
+  postProcessMs?: number;
+  provider: 'groq' | 'openai';
+  fallbackUsed: boolean;
+  estimatedCost: number;
 }
 
 /**
@@ -72,9 +81,7 @@ export async function transcribeWithFallback(
   timeTracker?: TimeTracker
 ): Promise<TranscribeResult> {
   // Calculate dynamic timeout for Groq if budget tracking enabled
-  const groqTimeout = timeTracker
-    ? getAudioTimeout(timeTracker, 'groq')
-    : undefined;
+  const groqTimeout = timeTracker ? getAudioTimeout(timeTracker, 'groq') : undefined;
 
   try {
     // Try Groq first (primary provider)
@@ -123,9 +130,7 @@ export async function transcribeWithFallback(
 
     try {
       // Calculate dynamic timeout for OpenAI if budget tracking enabled
-      const openaiTimeout = timeTracker
-        ? getAudioTimeout(timeTracker, 'openai')
-        : undefined;
+      const openaiTimeout = timeTracker ? getAudioTimeout(timeTracker, 'openai') : undefined;
 
       // Fallback to OpenAI
       const rawText = await transcribeAudioOpenAI(audioBuffer, {

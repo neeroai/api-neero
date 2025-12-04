@@ -207,11 +207,7 @@ const AUDIO_TIMEOUT_CONFIG = {
  * const openaiTimeout = getAudioTimeout(tracker, 'openai'); // Returns 2500ms
  * ```
  */
-export function getAudioTimeout(
-  tracker: TimeTracker,
-  phase: AudioPhase,
-  bufferMs = 500
-): number {
+export function getAudioTimeout(tracker: TimeTracker, phase: AudioPhase, bufferMs = 500): number {
   const remaining = getRemaining(tracker);
   const config = AUDIO_TIMEOUT_CONFIG[phase];
 
@@ -236,10 +232,7 @@ export function getAudioTimeout(
  * @param bufferMs - Safety buffer (default: 500ms)
  * @returns true if fallback should be attempted
  */
-export function shouldAttemptAudioFallback(
-  tracker: TimeTracker,
-  bufferMs = 500
-): boolean {
+export function shouldAttemptAudioFallback(tracker: TimeTracker, bufferMs = 500): boolean {
   const remaining = getRemaining(tracker);
   const minRequired = AUDIO_TIMEOUT_CONFIG.openai.minimum;
   return remaining - bufferMs >= minRequired;
@@ -252,10 +245,7 @@ export function shouldAttemptAudioFallback(
  * @param bufferMs - Safety buffer (default: 500ms)
  * @returns true if post-processing should be attempted
  */
-export function shouldAttemptPostProcessing(
-  tracker: TimeTracker,
-  bufferMs = 500
-): boolean {
+export function shouldAttemptPostProcessing(tracker: TimeTracker, bufferMs = 500): boolean {
   const remaining = getRemaining(tracker);
   const minRequired = AUDIO_TIMEOUT_CONFIG.postprocess.minimum;
   return remaining - bufferMs >= minRequired;

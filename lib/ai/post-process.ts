@@ -8,7 +8,7 @@
  * Feature-flagged: Disabled by default (enable with AUDIO_POSTPROCESS_ENABLED=true)
  */
 
-import { generateTextWithGroq, GroqTextModels } from './groq-text';
+import { GroqTextModels, generateTextWithGroq } from './groq-text';
 import type { TimeTracker } from './timeout';
 import { getAudioTimeout, shouldAttemptPostProcessing } from './timeout';
 
@@ -85,9 +85,7 @@ export async function postProcessTranscript(
 
   try {
     // Calculate timeout if budget tracking enabled
-    const timeoutMs = timeTracker
-      ? getAudioTimeout(timeTracker, 'postprocess')
-      : 1500;
+    const timeoutMs = timeTracker ? getAudioTimeout(timeTracker, 'postprocess') : 1500;
 
     const prompt = buildPostProcessPrompt(text, language);
 
@@ -160,6 +158,11 @@ function parsePostProcessResponse(response: string): [AudioIntent, string] {
   }
 
   const [intentStr, enhancedText] = parts;
+
+  if (!intentStr || !enhancedText) {
+    return ['unknown', response];
+  }
+
   const intent = parseIntent(intentStr.trim().toLowerCase());
 
   return [intent, enhancedText.trim()];

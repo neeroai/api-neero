@@ -37,7 +37,6 @@ export interface TranscriptionResult {
   duration?: number;
 }
 
-
 /**
  * Transcribe audio using Groq Whisper Large v3 Turbo
  *

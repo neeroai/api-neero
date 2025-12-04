@@ -6,12 +6,12 @@
 
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { transcribeWithFallback } from '@/lib/ai/transcribe';
 import { processImage } from '@/lib/ai/pipeline';
 import type { DocumentData as AIDocumentData } from '@/lib/ai/schemas/document';
 import type { InvoiceData } from '@/lib/ai/schemas/invoice';
 import type { PhotoAnalysis } from '@/lib/ai/schemas/photo';
 import { TimeBudget, TimeoutBudgetError, type TimeTracker } from '@/lib/ai/timeout';
+import { transcribeWithFallback } from '@/lib/ai/transcribe';
 import { createUnauthorizedResponse, validateApiKey } from '@/lib/auth/api-key';
 import { downloadMedia } from '@/lib/bird/media';
 import type {

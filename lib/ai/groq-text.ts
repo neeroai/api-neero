@@ -22,8 +22,7 @@ export const GroqTextModels = {
 /**
  * Groq text model type
  */
-export type GroqTextModel =
-  (typeof GroqTextModels)[keyof typeof GroqTextModels];
+export type GroqTextModel = (typeof GroqTextModels)[keyof typeof GroqTextModels];
 
 /**
  * Text generation options
@@ -59,19 +58,13 @@ export async function generateTextWithGroq(
     throw new Error('GROQ_API_KEY environment variable is not set');
   }
 
-  const {
-    model = GroqTextModels.INSTANT_8B,
-    temperature = 0.3,
-    maxTokens = 500,
-    timeoutMs = 3000,
-  } = options;
+  const { model = GroqTextModels.INSTANT_8B, temperature = 0.3, timeoutMs = 3000 } = options;
 
   try {
     const result = await generateText({
       model: groq(model),
       prompt,
       temperature,
-      maxTokens,
       abortSignal: AbortSignal.timeout(timeoutMs),
     });
 
