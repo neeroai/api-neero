@@ -15,11 +15,23 @@ Versioning: [Semantic Versioning](https://semver.org)
 - codebase-guide.md for LLM reference (24 files documented)
 - Time budget management system (8.5s internal, 500ms buffer)
 - Dynamic timeout adjustment based on classification performance
+- Groq text post-processing (llama-3.1-8b-instant) for transcript enhancement
+- Audio transcription with Groq Whisper v3 Turbo + OpenAI fallback
+- Budget-aware timeout management for audio processing
+- Feature flag for post-processing (AUDIO_POSTPROCESS_ENABLED)
 
 ### Changed
 - Migrated to Gemini 2.0/2.5 Flash via AI Gateway
 - Two-stage pipeline: classify (2s) + process (4-5.5s)
 - Model routing: photo→2.0, invoice→2.0, document→2.5
+- Migrated Groq from REST to AI SDK transcribe()
+
+### Research & Validation
+- Comprehensive model selection research (Groq, Gemini, OpenAI comparison)
+- Validated current stack as optimal for LATAM/Spanish market
+- Confirmed 83-88% cost savings vs Claude/OpenAI alternatives
+- Evaluated Groq Llama 4 Scout vision (preview only, not production-ready)
+- Cost analysis: ~$92/10K requests vs $600-750+ for alternatives
 
 ### Technical
 - lib/ai/classify.ts - Image classification with Gemini 2.0 Flash
@@ -28,7 +40,11 @@ Versioning: [Semantic Versioning](https://semver.org)
 - lib/ai/processors/ - Type-specific processors
 - lib/ai/schemas/ - Zod validation for outputs
 - lib/ai/prompts/ - LATAM-optimized prompts
-- lib/ai/timeout.ts - Time budget manager
+- lib/ai/timeout.ts - Time budget manager with audio support
+- lib/ai/groq.ts - Groq Whisper integration via AI SDK
+- lib/ai/groq-text.ts - Groq text model gateway
+- lib/ai/post-process.ts - Transcript enhancement
+- lib/ai/transcribe.ts - Fallback orchestration with budget awareness
 
 ## [2.1.0] - 2025-12-03
 

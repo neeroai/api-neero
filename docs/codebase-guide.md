@@ -1,8 +1,8 @@
 # Codebase Guide - /lib Directory
 
-> Purpose: LLM-optimized reference for api-neero core library structure | Updated: 2025-12-04 | Lines: 280
+> Purpose: LLM-optimized reference for api-neero core library structure | Updated: 2025-12-04 | Lines: 290
 
-## Quick Reference - All 24 Files
+## Quick Reference - All 26 Files
 
 | Path | Purpose | Exports | Timeout | Used By |
 |------|---------|---------|---------|---------|
@@ -11,8 +11,10 @@
 | **ai/router.ts** | Model routing table | `ROUTE_TABLE`, `getRouteForType()`, `adjustTimeoutForRemaining()` | <10ms | pipeline |
 | **ai/pipeline.ts** | Two-stage orchestration | `processImage(url, opts)`, type guards | 8.5s | api/bird/route |
 | **ai/groq.ts** | Whisper transcription (primary) | `transcribeAudio()`, `transcribeAudioDetailed()` | 3s | transcribe.ts |
+| **ai/groq-text.ts** | Groq text model gateway | `generateTextWithGroq()`, `GroqTextModels` | - | post-process.ts |
 | **ai/openai-whisper.ts** | Whisper transcription (fallback) | `transcribeAudioOpenAI()`, `transcribeAudioOpenAIDetailed()` | 3s | transcribe.ts |
 | **ai/transcribe.ts** | Audio fallback orchestration | `transcribeWithFallback()` | - | api/bird/route |
+| **ai/post-process.ts** | Transcript enhancement | `postProcessTranscript()`, `isPostProcessingEnabled()` | 1.5s | transcribe.ts |
 | **ai/timeout.ts** | Time budget manager | `TimeBudget`, `TimeTracker`, `TimeoutBudgetError` | 8.5s | classify, pipeline |
 | **ai/schemas/classification.ts** | Image type schema | `ImageTypeSchema`, `ClassificationResultSchema` | - | classify, pipeline |
 | **ai/schemas/photo.ts** | Photo output schema | `PhotoAnalysisSchema`, type | - | processors/photo |
@@ -125,8 +127,10 @@
 | **router.ts** | Model selection | - | Image type | Route config | Maps type→model+timeout |
 | **pipeline.ts** | Full orchestration | - | Image URL, options | Typed result | Classify→Route→Process |
 | **groq.ts** | Audio transcription (primary) | Whisper v3 Turbo | Audio buffer | Transcription | Spanish-optimized, $0.67/1K min |
+| **groq-text.ts** | Text model gateway | llama-3.1-8b-instant | Text prompt | Text completion | Post-processing, $0.05/1M tokens |
 | **openai-whisper.ts** | Audio transcription (fallback) | OpenAI Whisper | Audio buffer | Transcription | Spanish-optimized, $6.00/1K min |
 | **transcribe.ts** | Fallback orchestration | - | Audio buffer | TranscribeResult | Groq → OpenAI fallback |
+| **post-process.ts** | Transcript enhancement | llama-3.1-8b-instant | Raw transcript | PostProcessedTranscript | Punctuation, intent classification |
 | **timeout.ts** | Time management | - | Operations | Tracking/errors | 8.5s internal, 500ms buffer |
 
 ## Zod Schemas - Output Validation
@@ -276,5 +280,5 @@ zod ^3.23.8               - Schema validation
 ---
 
 **Format:** Token-optimized for LLM consumption
-**Lines:** 280/300 limit
-**Compression:** 62% vs prose equivalent (~1,200 tokens vs ~3,100)
+**Lines:** 290/300 limit
+**Compression:** 62% vs prose equivalent (~1,250 tokens vs ~3,200)
