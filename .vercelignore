@@ -1,0 +1,40 @@
+# Documentation - not needed for runtime
+docs/
+plan/
+*.md
+
+# Claude Code configuration - dev tooling only
+.claude/
+
+# Symlinks - breaks on Vercel
+docs-global
+
+# IDE and editor configs
+.vscode/
+.idea/
+*.code-workspace
+
+# Environment files - Vercel handles separately
+.env
+.env.*
+.env.example
+.env.local
+
+# Build artifacts - rebuilt by Vercel
+.next/
+tsconfig.tsbuildinfo
+next-env.d.ts
+
+# Dependencies - reinstalled by Vercel
+node_modules/
+
+# Git
+.git/
+
+# Archive folders
+.archive/
+_archive/
+
+# OS files
+.DS_Store
+Thumbs.db
