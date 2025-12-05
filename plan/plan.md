@@ -1,12 +1,13 @@
 # plan.md - Cost-Optimized Multimodal API
 
-**Project:** api-neero | **Version:** 2.2.0 | **Updated:** 2025-12-04
+**Project:** api-neero | **Version:** 2.2.1 | **Updated:** 2025-12-04
 
 ---
 
-## Current Status: Phase 5 VALIDATED ✓
+## Current Status: Phase 5 DEPLOYED ✓
 
-**Build:** PASSING | **Lint:** PASSING (1 warning) | **Deploy:** READY
+**Build:** PASSING | **Lint:** PASSING (1 warning) | **Deploy:** LIVE
+**Production:** https://api-neero-eeivwqwa9-neero.vercel.app
 
 All sub-phases complete:
 - 5.1: Critical Fixes (Groq timeout + audio budget)
@@ -43,4 +44,4 @@ All sub-phases complete:
 
 ---
 
-**Status:** Phase 5 VALIDATED - Ready for Vercel deployment | **Lines:** 50
+**Status:** Phase 5 DEPLOYED - Live on Vercel Production | **Lines:** 50

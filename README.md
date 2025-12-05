@@ -2,7 +2,9 @@
 
 Cost-optimized multimodal API for Bird.com AI employees with intelligent image routing. Processes images, documents, and audio from WhatsApp in MAX 9 seconds.
 
-**Version:** 2.2.0 | **Status:** Phase 5 Complete - Validated | **Cost:** 89% cheaper than Claude
+**Version:** 2.2.1 | **Status:** Deployed to Production | **Cost:** 89% cheaper than Claude
+
+**Production:** https://api-neero-eeivwqwa9-neero.vercel.app
 
 ---
 

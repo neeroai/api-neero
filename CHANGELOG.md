@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com)
 Versioning: [Semantic Versioning](https://semver.org)
 
+## [2.2.1] - 2025-12-04
+
+### Fixed
+- Removed invalid secret references from vercel.json (OPENAI_API_KEY, WhatsApp variables)
+- Simplified vercel.json - runtime now managed by Next.js route exports
+- Added .vercelignore to exclude documentation and dev tooling from deployment
+
+### Deployment
+- Successfully deployed to Vercel Production
+- Production URL: https://api-neero-eeivwqwa9-neero.vercel.app
+- Edge Runtime confirmed working
+- Environment variables configured via Vercel dashboard
+
 ## [2.2.0] - 2025-12-04
 
 ### Added

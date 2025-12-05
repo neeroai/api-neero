@@ -1,6 +1,6 @@
 # PRD - Cost-Optimized Multimodal API for Bird.com
 
-**Version:** 2.2.0 | **Updated:** 2025-12-04
+**Version:** 2.2.1 | **Updated:** 2025-12-04
 
 ---
 

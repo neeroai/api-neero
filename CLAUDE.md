@@ -228,7 +228,7 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 ## Versioning Workflow
 
-**Current Version:** 2.2.0 (Semantic Versioning)
+**Current Version:** 2.2.1 (Semantic Versioning)
 
 **Version Sources (keep synchronized):**
 - `/package.json` - version field

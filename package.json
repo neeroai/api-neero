@@ -1,6 +1,6 @@
 {
   "name": "api-neero",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Cost-optimized multimodal API for Bird.com AI employees",
   "private": true,
   "scripts": {
