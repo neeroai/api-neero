@@ -3,15 +3,15 @@
  * Vercel AI SDK 5.0 integration for Google Gemini models
  */
 
-import { google } from '@ai-sdk/google';
+import { createOpenAI } from '@ai-sdk/openai';
 import type { LanguageModel } from 'ai';
 
 /**
  * Supported Gemini model IDs
  */
 export const GeminiModelId = {
-  FLASH_2_0: 'gemini-2.0-flash-exp',
-  FLASH_2_5: 'gemini-2.5-flash',
+  FLASH_2_0: 'google/gemini-2.0-flash-exp', // Prefixed for Gateway
+  FLASH_2_5: 'google/gemini-2.5-flash',     // Prefixed for Gateway
 } as const;
 
 export type GeminiModelIdType = (typeof GeminiModelId)[keyof typeof GeminiModelId];
@@ -37,24 +37,26 @@ export const GeminiModelConfig = {
 } as const;
 
 /**
- * Get configured Gemini model from Vercel AI SDK
+ * Vercel AI Gateway Configuration
+ */
+const gateway = createOpenAI({
+  apiKey: process.env.AI_GATEWAY_API_KEY,
+  baseURL: 'https://ai-gateway.vercel.sh/v1',
+});
+
+/**
+ * Get configured Gemini model from Vercel AI Gateway
  *
- * @param modelId - Gemini model identifier
+ * @param modelId - Gemini model identifier (must include provider prefix)
  * @returns LanguageModel instance configured with API key
- * @throws Error if GOOGLE_GENERATIVE_AI_API_KEY is not set
- *
- * Usage:
- * ```typescript
- * const model = getGeminiModel(GeminiModelId.FLASH_2_0);
- * const result = await generateText({ model, prompt: '...' });
- * ```
+ * @throws Error if AI_GATEWAY_API_KEY is not set
  */
 export function getGeminiModel(modelId: GeminiModelIdType): LanguageModel {
-  if (!process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
-    throw new Error('GOOGLE_GENERATIVE_AI_API_KEY environment variable is not set');
+  if (!process.env.AI_GATEWAY_API_KEY) {
+    throw new Error('AI_GATEWAY_API_KEY environment variable is not set');
   }
 
-  return google(modelId);
+  return gateway(modelId);
 }
 
 /**

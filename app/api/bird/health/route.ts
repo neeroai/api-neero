@@ -35,11 +35,11 @@ export async function GET(): Promise<Response> {
     openai: undefined as boolean | undefined,
   };
 
-  // Check Gemini API key (required)
-  if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
+  // Check AI Gateway (required for Gemini)
+  if (process.env.AI_GATEWAY_API_KEY) {
     services.gemini = true;
   } else {
-    errors.push('Missing GOOGLE_GENERATIVE_AI_API_KEY');
+    errors.push('Missing AI_GATEWAY_API_KEY');
   }
 
   // Check Groq API key (required)
