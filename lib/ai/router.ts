@@ -22,7 +22,7 @@ export interface RouteConfig {
  * - photo: 4s (Gemini 2.0 Flash - fast general vision)
  * - invoice: 5s (Gemini 2.0 Flash - OCR + structure)
  * - document: 5.5s (Gemini 2.5 Flash - complex docs)
- * - unknown: 4s (Gemini 2.0 Flash - fallback)
+ * - unknown: 5.5s (Gemini 2.5 Flash - complex fallback)
  */
 export const ROUTE_TABLE: Record<ImageType, RouteConfig> = {
   photo: {
@@ -41,9 +41,9 @@ export const ROUTE_TABLE: Record<ImageType, RouteConfig> = {
     description: 'Complex document processing (cedulas, contracts)',
   },
   unknown: {
-    modelId: GeminiModelId.FLASH_2_0,
-    timeoutMs: 4000,
-    description: 'Fallback processing for unclear images',
+    modelId: GeminiModelId.FLASH_2_5,
+    timeoutMs: 5500,
+    description: 'Fallback processing for unclear images (assumes complex)',
   },
 };
 
