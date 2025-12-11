@@ -181,7 +181,7 @@ Audio: bird/media.ts → lib/ai/transcribe.ts (Groq → OpenAI fallback) → tra
 Copy `.env.example` to `.env.local`:
 ```bash
 # AI Services (REQUIRED)
-GOOGLE_GENERATIVE_AI_API_KEY=xxx  # Gemini 2.0 Flash
+AI_GATEWAY_API_KEY=xxx             # Vercel AI Gateway (Gemini models)
 GROQ_API_KEY=xxx                   # Groq Whisper v3 (primary audio)
 
 # Optional

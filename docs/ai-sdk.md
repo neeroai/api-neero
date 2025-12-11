@@ -407,7 +407,7 @@ try {
 **Environment Variables:**
 ```bash
 # REQUIRED
-GOOGLE_GENERATIVE_AI_API_KEY=xxx
+AI_GATEWAY_API_KEY=xxx             # Vercel AI Gateway (Gemini models)
 GROQ_API_KEY=xxx
 
 # OPTIONAL

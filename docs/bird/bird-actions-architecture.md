@@ -184,7 +184,7 @@ Trust Bird's network security. Only viable if:
 
 ```bash
 # AI Services (REQUIRED)
-GOOGLE_GENERATIVE_AI_API_KEY=xxx  # Gemini 2.0 Flash
+AI_GATEWAY_API_KEY=xxx             # Vercel AI Gateway (Gemini models)
 GROQ_API_KEY=xxx                   # Groq Whisper v3
 
 # Optional Fallback

@@ -64,7 +64,7 @@ See `bird-actions-architecture.md` for primary implementation pattern.
 ```bash
 # .env.local
 # AI Services (REQUIRED)
-GOOGLE_GENERATIVE_AI_API_KEY=xxx
+AI_GATEWAY_API_KEY=xxx      # Vercel AI Gateway (Gemini models)
 GROQ_API_KEY=xxx
 
 # Optional

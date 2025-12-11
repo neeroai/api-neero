@@ -1,17 +1,16 @@
 /**
  * Gemini AI Gateway
- * Vercel AI SDK 5.0 integration for Google Gemini models
+ * Vercel AI SDK 5.0 integration for Google Gemini models via Vercel AI Gateway
  */
 
-import { createOpenAI } from '@ai-sdk/openai';
-import type { LanguageModel } from 'ai';
+import { createGateway, type LanguageModel } from 'ai';
 
 /**
  * Supported Gemini model IDs
  */
 export const GeminiModelId = {
-  FLASH_2_0: 'google/gemini-2.0-flash-exp', // Prefixed for Gateway
-  FLASH_2_5: 'google/gemini-2.5-flash',     // Prefixed for Gateway
+  FLASH_2_0: 'google/gemini-2.0-flash', // Vercel AI Gateway format
+  FLASH_2_5: 'google/gemini-2.5-flash', // Vercel AI Gateway format
 } as const;
 
 export type GeminiModelIdType = (typeof GeminiModelId)[keyof typeof GeminiModelId];
@@ -38,10 +37,10 @@ export const GeminiModelConfig = {
 
 /**
  * Vercel AI Gateway Configuration
+ * @see https://ai-sdk.dev/providers/ai-sdk-providers/ai-gateway
  */
-const gateway = createOpenAI({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-  baseURL: 'https://ai-gateway.vercel.sh/v1',
+const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY ?? '',
 });
 
 /**

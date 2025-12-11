@@ -129,11 +129,10 @@ Image Input → Classify (2s) → Route (<10ms) → Process (4-5.5s) → Respons
 ### 1. AI Gateway Client (`lib/ai/gateway.ts`)
 
 ```typescript
-import { createOpenAI } from '@ai-sdk/openai';
+import { createGateway } from 'ai';
 
-export const gateway = createOpenAI({
-  apiKey: process.env.AI_GATEWAY_API_KEY,
-  baseURL: 'https://ai-gateway.vercel.sh/v1',
+const gateway = createGateway({
+  apiKey: process.env.AI_GATEWAY_API_KEY ?? '',
 });
 
 // Usage
