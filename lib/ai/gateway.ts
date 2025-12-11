@@ -3,7 +3,8 @@
  * Vercel AI SDK 5.0 integration for Google Gemini models via Vercel AI Gateway
  */
 
-import { createGateway, type LanguageModel } from 'ai';
+import { createGateway } from '@ai-sdk/gateway';
+import type { LanguageModel } from 'ai';
 
 /**
  * Supported Gemini model IDs
