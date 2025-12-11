@@ -38,10 +38,10 @@ export const GeminiModelConfig = {
 /**
  * Vercel AI Gateway Configuration
  * @see https://ai-sdk.dev/providers/ai-sdk-providers/ai-gateway
+ *
+ * Uses lazy initialization pattern to ensure API key is validated before gateway creation
  */
-const gateway = createGateway({
-  apiKey: process.env.AI_GATEWAY_API_KEY ?? '',
-});
+let gatewayInstance: ReturnType<typeof createGateway> | null = null;
 
 /**
  * Get configured Gemini model from Vercel AI Gateway
@@ -51,11 +51,18 @@ const gateway = createGateway({
  * @throws Error if AI_GATEWAY_API_KEY is not set
  */
 export function getGeminiModel(modelId: GeminiModelIdType): LanguageModel {
-  if (!process.env.AI_GATEWAY_API_KEY) {
-    throw new Error('AI_GATEWAY_API_KEY environment variable is not set');
+  // Lazy initialization: create gateway on first call
+  if (!gatewayInstance) {
+    const apiKey = process.env.AI_GATEWAY_API_KEY;
+
+    if (!apiKey) {
+      throw new Error('AI_GATEWAY_API_KEY environment variable is not set');
+    }
+
+    gatewayInstance = createGateway({ apiKey });
   }
 
-  return gateway(modelId);
+  return gatewayInstance(modelId);
 }
 
 /**
