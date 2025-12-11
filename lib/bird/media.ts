@@ -18,6 +18,7 @@
  */
 export async function downloadMedia(url: string): Promise<ArrayBuffer> {
   const TIMEOUT_MS = 1000; // 1 second max download time
+  const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB limit for Edge Runtime (128MB max memory)
 
   // Create AbortController for timeout
   const controller = new AbortController();
@@ -35,6 +36,17 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
       signal: controller.signal,
     });
 
+    // Safety check: Validate Content-Length before reading body
+    const contentLength = response.headers.get('content-length');
+    if (contentLength) {
+      const sizeBytes = parseInt(contentLength, 10);
+      if (sizeBytes > MAX_FILE_SIZE) {
+        throw new Error(
+          `File size (${(sizeBytes / 1024 / 1024).toFixed(2)}MB) exceeds limit of 25MB`
+        );
+      }
+    }
+
     clearTimeout(timeoutId);
 
     if (!response.ok) {
@@ -45,6 +57,13 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
 
     if (buffer.byteLength === 0) {
       throw new Error('Downloaded media is empty');
+    }
+
+    // Secondary safety check: Verify actual buffer size
+    if (buffer.byteLength > MAX_FILE_SIZE) {
+      throw new Error(
+        `File size (${(buffer.byteLength / 1024 / 1024).toFixed(2)}MB) exceeds limit of 25MB`
+      );
     }
 
     return buffer;

@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com)
 Versioning: [Semantic Versioning](https://semver.org)
 
+## [2.2.2] - 2025-12-11
+
+### Fixed
+- Added safety check for media downloads (25MB limit) to prevent Edge Runtime OOM errors
+- Validates `Content-Length` header before download
+- Validates final buffer size after download
+
 ## [2.2.1] - 2025-12-04
 
 ### Fixed
@@ -14,7 +21,7 @@ Versioning: [Semantic Versioning](https://semver.org)
 
 ### Deployment
 - Successfully deployed to Vercel Production
-- Production URL: https://api-neero-eeivwqwa9-neero.vercel.app
+- Production URL: https://api-neero.vercel.app
 - Edge Runtime confirmed working
 - Environment variables configured via Vercel dashboard
 
