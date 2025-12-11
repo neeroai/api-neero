@@ -33,8 +33,12 @@ export async function classifyImage(
 
   const remainingMs = getRemaining(timeTracker);
 
-  // Use max 2 seconds for classification, or remaining time if less
-  const classificationTimeout = Math.min(2000, remainingMs - 500);
+  // Use max 3 seconds for classification (accounts for AI Gateway latency)
+  // Adaptive: 1.5s minimum, up to 3s if budget allows, reserve 1s buffer for downstream
+  const classificationTimeout = Math.max(
+    1500,  // Minimum viable timeout
+    Math.min(3000, remainingMs - 1000)  // Max 3s, reserve 1s buffer
+  );
 
   if (classificationTimeout < 1000) {
     throw new Error(

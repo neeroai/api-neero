@@ -96,10 +96,22 @@ export async function processImage(
       const classifyStart = Date.now();
       checkTimeout(timeTracker);
 
-      const classification = await classifyImage(imageUrl, timeTracker);
-      imageType = classification.type;
-
-      classificationMs = Date.now() - classifyStart;
+      try {
+        const classification = await classifyImage(imageUrl, timeTracker);
+        imageType = classification.type;
+        classificationMs = Date.now() - classifyStart;
+      } catch (error) {
+        // Fast-path fallback: if classification times out, use 'unknown' type
+        // Better to process as generic photo than fail completely
+        if (error instanceof Error && error.message.includes('timeout')) {
+          console.warn('[Pipeline] Classification timeout, using fast path with unknown type');
+          imageType = 'unknown'; // Fallback to Gemini 2.0 Flash (4s)
+          classificationMs = Date.now() - classifyStart;
+        } else {
+          // Non-timeout errors are still fatal
+          throw error;
+        }
+      }
     }
 
     // Stage 2: Type-specific processing
