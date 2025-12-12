@@ -114,7 +114,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://api-neero.vercel.app",
+			"value": "https://api.neero.ai",
 			"type": "string"
 		},
 		{

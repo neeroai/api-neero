@@ -2,7 +2,7 @@
 
 **For:** api-neero implementation
 **Purpose:** Document Bird Actions pattern (HTTP requests from AI Employees)
-**Last Updated:** 2025-12-03
+**Last Updated:** 2025-12-11
 
 ---
 
@@ -58,18 +58,51 @@ Bird AI Employees can call external APIs via **Actions** (HTTP requests) to exte
 
 ## Bird Actions Configuration
 
-### 1. Arguments (Input Parameters)
+### 1. Task Arguments (Input Parameters)
 
-Define what data the AI Employee collects before calling your API:
+**IMPORTANT:** Task Arguments are manually defined parameters that the AI Employee must populate before calling the Action.
+
+**Critical Distinction:**
+- **Bird Native Variables** (`{{messageImage}}`, `{{messageFile}}`, `{{messageAudio}}`) are available to the AI Employee but NOT automatically passed to Actions
+- **Task Arguments** must be explicitly defined in Arguments Configuration and populated by the AI Employee
+
+**Required Task Arguments:**
+
+```
+Name: mediaType        Type: string  # AI Employee sets: "image", "document", or "audio"
+Name: mediaUrl         Type: string  # AI Employee extracts from Bird native variables
+Name: conversationId   Type: string  # From Bird conversation context
+Name: contactName      Type: string  # From Bird contact info
+```
+
+**Optional Context Arguments:**
 
 ```
 Name: email        Type: string
-Name: name         Type: string
 Name: pais         Type: string
 Name: telefono     Type: string
 ```
 
-These are populated from the conversation context.
+**How AI Employee Populates These:**
+
+The AI Employee accesses Bird native variables and sets task arguments:
+
+```
+If user sends image:
+  - Detect {{messageImage}} has value
+  - Set mediaType = "image"
+  - Set mediaUrl = {{messageImage}}
+
+If user sends document:
+  - Detect {{messageFile}} has value
+  - Set mediaType = "document"
+  - Set mediaUrl = {{messageFile}}
+
+If user sends audio:
+  - Detect {{messageAudio}} has value
+  - Set mediaType = "audio"
+  - Set mediaUrl = {{messageAudio}}
+```
 
 ### 2. HTTP Request Step
 
@@ -84,31 +117,54 @@ Headers:
 
 Request Body:
 {
-  "type": "{{messageType}}",
-  "mediaUrl": "{{messageImage}}",
+  "type": "{{mediaType}}",           # Task Argument (not {{messageType}})
+  "mediaUrl": "{{mediaUrl}}",        # Task Argument (not {{messageImage}})
   "context": {
+    "conversationId": "{{conversationId}}",
+    "contactName": "{{contactName}}",
     "email": "{{email}}",
-    "name": "{{name}}",
-    "pais": "{{pais}}",
-    "telefono": "{{telefono}}"
+    "pais": "{{pais}}"
   }
 }
 ```
+
+**Variable Selection:**
+- Use Bird UI dropdown (type `{{`) to select variables
+- If dropdown shows `Arguments.mediaType`, use that full path
+- DO NOT manually type variable names
 
 ---
 
 ## Media Handling
 
-### Bird Media Variables
+### Bird Native Variables vs Task Arguments
 
-Bird provides these variables in Flow Builder:
+**CRITICAL UNDERSTANDING:**
 
-| Variable | Type | Example |
-|----------|------|---------|
-| `{{messageImage}}` | Image URL | `https://media.nest.messagebird.com/.../photo.jpg` |
-| `{{messageFile}}` | File URL | `https://media.nest.messagebird.com/.../doc.pdf` |
-| `{{messageFileName}}` | String | `"cedula-123.pdf"` |
-| `{{messageAudio}}` | Audio URL | `https://media.nest.messagebird.com/.../voice.ogg` |
+Bird provides native variables in Flow Builder context, but these are NOT automatically available in AI Employee Actions. The AI Employee can access these variables and use them to populate Task Arguments.
+
+**Bird Native Variables (AI Employee can access):**
+
+| Variable | Type | Availability | Example |
+|----------|------|--------------|---------|
+| `{{messageImage}}` | Image URL | Flow Builder, AI Employee | `https://media.nest.messagebird.com/.../photo.jpg` |
+| `{{messageFile}}` | File URL | Flow Builder, AI Employee | `https://media.nest.messagebird.com/.../doc.pdf` |
+| `{{messageFileName}}` | String | Flow Builder, AI Employee | `"cedula-123.pdf"` |
+| `{{messageAudio}}` | Audio URL | Flow Builder, AI Employee | `https://media.nest.messagebird.com/.../voice.ogg` |
+| `{{conversationId}}` | UUID | Flow Builder, AI Employee | `"550e8400-e29b-41d4-a716-446655440000"` |
+| `{{contact.name}}` | String | Flow Builder, AI Employee | `"Juan Perez"` |
+
+**NOT Bird Variables (Documentation Error):**
+- `{{conversationMessageType}}` - This does NOT exist in Bird
+
+**Task Arguments (Manually defined, AI Employee populates):**
+
+| Argument | Populated From | Example Value |
+|----------|----------------|---------------|
+| `mediaType` | AI Employee logic | `"image"`, `"document"`, `"audio"` |
+| `mediaUrl` | `{{messageImage}}` or `{{messageFile}}` or `{{messageAudio}}` | `https://media.nest.messagebird.com/...` |
+| `conversationId` | `{{conversationId}}` | `"550e8400..."` |
+| `contactName` | `{{contact.name}}` | `"Juan Perez"` |
 
 ### Media URL Authentication (TBD - Test Required)
 

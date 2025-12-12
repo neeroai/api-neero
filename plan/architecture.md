@@ -68,7 +68,7 @@ Image Input → Classify (2s) → Route (<10ms) → Process (4-5.5s) → Respons
 | photo | google/gemini-2.0-flash | 4s | People, objects, scenes |
 | invoice | google/gemini-2.0-flash | 5s | Invoices, receipts, OCR |
 | document | google/gemini-2.5-flash | 5.5s | Cedulas, contracts |
-| unknown | google/gemini-2.0-flash | 4s | Fallback |
+| unknown | google/gemini-2.5-flash | 5.5s | Fallback (complex) |
 
 ### Timeout Budget (8.5s total)
 

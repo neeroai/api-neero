@@ -2,9 +2,9 @@
 
 Cost-optimized multimodal API for Bird.com AI employees with intelligent image routing. Processes images, documents, and audio from WhatsApp in MAX 9 seconds.
 
-**Version:** 2.2.1 | **Status:** Deployed to Production | **Cost:** 89% cheaper than Claude
+**Version:** 2.2.3 | **Status:** Deployed to Production | **Cost:** 89% cheaper than Claude
 
-**Production:** https://api-neero-eeivwqwa9-neero.vercel.app
+**Production:** https://api.neero.ai
 
 ---
 
@@ -18,7 +18,7 @@ Two-stage pipeline for optimal model selection based on image type:
 | photo | Gemini 2.0 Flash | 4s | People, objects, scenes |
 | invoice | Gemini 2.0 Flash | 5s | Invoices, receipts, OCR |
 | document | Gemini 2.5 Flash | 5.5s | Cedulas, contracts, policies |
-| unknown | Gemini 2.0 Flash | 4s | Fallback |
+| unknown | Gemini 2.5 Flash | 5.5s | Fallback (complex) |
 
 **Pipeline:** Image → Classify (2s) → Route (<10ms) → Process (4-5.5s) → Response
 
@@ -177,6 +177,29 @@ api-neero/
 
 ---
 
+## Bird AI Employee Setup
+
+**Complete Guide:** See [Bird AI Employees Setup Guide](docs/bird/bird-ai-employees-setup-guide.md) (45-60 min setup)
+
+**Quick Start:**
+
+1. **Define Task Arguments** in Bird Action Configuration:
+   - `mediaType`, `mediaUrl`, `conversationId`, `contactName`
+
+2. **Configure HTTP Request:**
+   - URL: `https://api.neero.ai/api/bird`
+   - Method: POST
+   - Headers: `X-API-Key: {{env.NEERO_API_KEY}}` (optional)
+   - Body: See [setup guide](docs/bird/bird-ai-employees-setup-guide.md#44-http-request-configuration)
+
+3. **Configure AI Employee** to populate arguments before calling Action
+
+4. **Test** with WhatsApp media (image/document/audio)
+
+**Important:** Bird native variables (`{{messageImage}}`, etc.) are NOT automatically passed to Actions. The AI Employee must populate Task Arguments. See [Bird Variables Reference](docs/bird/bird-variables-reference.md).
+
+---
+
 ## Key Constraints
 
 1. **9-Second Timeout:** MAX 9 seconds processing or return error immediately (CRITICAL)
@@ -205,9 +228,9 @@ api-neero/
 
 ## Versioning
 
-**Current:** 2.2.0 (Semantic Versioning)
+**Current:** 2.2.3 (Semantic Versioning)
 **See:** [CHANGELOG.md](CHANGELOG.md) for version history
 
 ---
 
-**Version:** 2.2.0 | **Last Updated:** 2025-12-04 | **Lines:** 195
+**Version:** 2.2.3 | **Last Updated:** 2025-12-11 | **Lines:** ~230

@@ -88,9 +88,10 @@
                  │                                                                 │
                  ▼                                                                 ▼
         ┌────────────────────┐                                      ┌─────────────────────┐
-        │ ai/router.ts       │ ROUTE_TABLE lookup                   │ ai/gateway.ts       │
-        │ getRouteForType()  │ photo→4s, invoice→5s, doc→5.5s      │ getGeminiModel()    │
-        └────────┬───────────┘                                      └──────────┬──────────┘
+        │ ai/router.ts       │ ROUTE_TABLE lookup                              │ ai/gateway.ts       │
+        │ getRouteForType()  │ photo→4s, invoice→5s, doc→5.5s,                │ getGeminiModel()    │
+        │                    │ unknown→5.5s (2.5 Flash)                        │                     │
+        └────────┬───────────┘                                                 └──────────┬──────────┘
                  │                                                              │
                  ▼                                                              │
         ┌────────────────────────────────────────────────────────┐            │
@@ -231,7 +232,7 @@ import { TimeTracker } from '@/lib/ai/timeout'
 photo      → Gemini 2.0 Flash (4s)  - Fast, general-purpose
 invoice    → Gemini 2.0 Flash (5s)  - OCR + structured extraction
 document   → Gemini 2.5 Flash (5.5s) - Complex docs, cedulas
-unknown    → Gemini 2.0 Flash (4s)  - Fallback to fast model
+unknown    → Gemini 2.5 Flash (5.5s) - Fallback (assumes complex)
 ```
 
 **Force Type Override:**

@@ -149,38 +149,56 @@ Main task
    - **Description:** `Process image, audio, or document via api-neero`
 4. Click "Setup flow"
 
-### 4.3 Arguments Configuration
+### 4.3 Task Arguments Configuration
 
-**Purpose:** Define input parameters manually (CRITICAL STEP)
+**Purpose:** Define custom input parameters that AI Employee will populate (CRITICAL STEP)
 
-**IMPORTANT:** Variables like `{{messageImage}}` do NOT come automatically. You MUST define each argument explicitly.
+**IMPORTANT:** Task Arguments are NOT Bird native variables. The AI Employee must set these values before calling the Action.
 
-#### Add Arguments in Configuration Section
+#### Add Task Arguments in Configuration Section
 
 Click the **"+" button** in the Configuration section and add each argument:
 
 | Name | Type | Required | Description |
 |------|------|----------|-------------|
-| `messageImage` | string | Yes | Image URL from WhatsApp |
-| `messageAudio` | string | Yes | Audio URL from WhatsApp |
-| `messageFile` | string | Yes | Document/PDF URL |
-| `conversationMessageType` | string | Yes | Message type: "image", "audio", "file" |
-| `name` | string | Yes | Contact name |
-| `conversationId` | string | Yes | Conversation UUID |
+| `mediaType` | string | Yes | AI Employee sets to: "image", "document", or "audio" |
+| `mediaUrl` | string | Yes | AI Employee extracts appropriate media URL |
+| `conversationId` | string | Yes | Conversation UUID (from Bird context) |
+| `contactName` | string | Yes | Contact display name (from Bird context) |
 
 **Steps:**
 1. In Arguments step, click "Configuration" section
 2. Click "+" to add new argument
 3. Enter **Name** (exactly as shown above)
 4. Select **Type** (string)
-5. Repeat for ALL 6 arguments
+5. Repeat for ALL 4 task arguments
 6. Verify no validation errors
 
-**Note:** Configuration only defines argument schema (Name + Type). Values come from WhatsApp context automatically or via LLM in AI Employee flow.
+**Critical Distinction:**
+- **Bird Native Variables** (`{{messageImage}}`, `{{messageFile}}`, `{{messageAudio}}`) are ONLY available in Flow Builder triggers, NOT in AI Employee Actions
+- **Task Arguments** (`mediaType`, `mediaUrl`) must be manually defined and populated by the AI Employee before calling this Action
+
+**How AI Employee Populates Arguments:**
+
+The AI Employee must determine `mediaType` and `mediaUrl` based on the message received:
+
+```
+If user sends image:
+  - Set mediaType = "image"
+  - Set mediaUrl = value from messageImage
+
+If user sends document/PDF:
+  - Set mediaType = "document"
+  - Set mediaUrl = value from messageFile
+
+If user sends audio/voice note:
+  - Set mediaType = "audio"
+  - Set mediaUrl = value from messageAudio
+```
 
 **Common Errors:**
-- `"invalid variable: messageImage"` → Argument not defined in Configuration
-- `"type: Required, mediaUrl: Required"` → Variable scope issue, use Custom Function (section 4.6)
+- `"invalid variable: conversationMessageType"` → This variable doesn't exist in Bird (use `mediaType` instead)
+- `"type: Required, mediaUrl: Required"` → AI Employee didn't populate task arguments before calling Action
 
 ### 4.4 Http Request Configuration
 
@@ -216,31 +234,35 @@ Click "switch to JSON editor" and paste:
 
 ```json
 {
-  "type": "{{conversationMessageType}}",
-  "mediaUrl": "{{messageImage}}",
+  "type": "{{mediaType}}",
+  "mediaUrl": "{{mediaUrl}}",
   "context": {
     "conversationId": "{{conversationId}}",
-    "contactName": "{{name}}"
+    "contactName": "{{contactName}}"
   }
 }
 ```
 
 **IMPORTANT - Variable Insertion:**
-- Do NOT manually type variable names like `{{conversationMessageType}}`
+- Do NOT manually type variable names like `{{mediaType}}`
 - Instead: Click in field > type `{{` > SELECT variable from dropdown that appears
 - Variables from Arguments step should appear in "Available variables" dropdown
+- If dropdown shows `Arguments.mediaType`, use that full path
 - If you manually type variables, you may get `"invalid variable"` errors
 
-**Field Mapping:**
-- `conversationMessageType` → `type` (API expects "type", not "conversationMessageType")
-- `messageImage` → `mediaUrl` (API expects "mediaUrl", not "messageImage")
+**What These Variables Are:**
+- `{{mediaType}}` → Task Argument populated by AI Employee ("image", "document", or "audio")
+- `{{mediaUrl}}` → Task Argument populated by AI Employee (extracted from Bird native variables)
+- `{{conversationId}}` → Task Argument from Bird conversation context
+- `{{contactName}}` → Task Argument from Bird contact info
 
-**For Multiple Media Types:**
-Either create separate actions per type OR concatenate URLs:
-```json
-"mediaUrl": "{{messageImage}}{{messageAudio}}{{messageFile}}"
-```
-(Only one will have a value per message, others will be empty strings)
+**How It Works:**
+1. User sends media to AI Employee via WhatsApp
+2. Bird provides native variables: `messageImage`, `messageFile`, `messageAudio`
+3. AI Employee determines media type and extracts appropriate URL
+4. AI Employee sets task arguments: `mediaType` and `mediaUrl`
+5. AI Employee calls this Action with populated arguments
+6. HTTP Request uses task arguments to call api-neero
 
 ### 4.5 Validate and Save
 
@@ -248,7 +270,55 @@ Either create separate actions per type OR concatenate URLs:
 - Click "Save" to persist action
 - Return to AI Employee main page
 
-### 4.6 Alternative: Custom Function (If HTTP Request Fails)
+### 4.6 AI Employee Configuration for Task Arguments
+
+**Purpose:** Configure the AI Employee to populate task arguments before calling the Action.
+
+#### Update Custom Instructions (Step 2.5)
+
+Add this section to the AI Employee's Custom Instructions:
+
+```
+BEFORE CALLING process_media ACTION:
+1. Determine media type from message:
+   - If user sent image → Set mediaType = "image"
+   - If user sent document/PDF → Set mediaType = "document"
+   - If user sent audio/voice note → Set mediaType = "audio"
+
+2. Extract media URL:
+   - For images: Use {{messageImage}} value
+   - For documents: Use {{messageFile}} value
+   - For audio: Use {{messageAudio}} value
+
+3. Set task arguments:
+   - mediaType: The determined type ("image", "document", or "audio")
+   - mediaUrl: The extracted URL
+   - conversationId: {{conversationId}}
+   - contactName: {{contact.name}}
+
+4. Call process_media Action with these arguments
+
+CRITICAL: Never call the Action without setting ALL 4 task arguments first.
+```
+
+#### How Bird AI Employees Handle This
+
+Bird AI Employees can:
+- Access Bird native variables (`{{messageImage}}`, etc.)
+- Determine context from conversation
+- Set task argument values programmatically
+- Call Actions with populated arguments
+
+**Example Flow:**
+1. User sends image via WhatsApp
+2. AI Employee detects `{{messageImage}}` has a value
+3. AI Employee sets: `mediaType = "image"`, `mediaUrl = {{messageImage}}`
+4. AI Employee calls `process_media` Action
+5. Action receives task arguments and calls api-neero
+6. API processes image and returns results
+7. AI Employee formats response for user
+
+### 4.7 Alternative: Custom Function (If HTTP Request Fails)
 
 **Use this if:** Variables arrive empty at API despite correct configuration.
 
@@ -329,20 +399,44 @@ exports.handler = async function (context, variables) {
 
 ---
 
-## Available Bird Variables Reference
+## Bird Variables vs Task Arguments Reference
 
-| Variable | Description | Example Value |
-|----------|-------------|---------------|
-| `{{messageImage}}` | Image URL from WhatsApp | `https://media.nest.messagebird.com/.../img.jpg` |
-| `{{messageAudio}}` | Audio URL from WhatsApp | `https://media.nest.messagebird.com/.../audio.ogg` |
-| `{{messageVideo}}` | Video URL from WhatsApp | `https://media.nest.messagebird.com/.../video.mp4` |
-| `{{messageFile}}` | Document/PDF URL | `https://media.nest.messagebird.com/.../doc.pdf` |
-| `{{conversationMessageType}}` | Message type | `"image"`, `"audio"`, `"file"`, `"text"` |
-| `{{conversationMessageContent}}` | Text message content | "Hola, necesito ayuda" |
-| `{{contact.name}}` | Contact name | "Juan Perez" |
-| `{{conversationId}}` | Conversation UUID | "550e8400-e29b-41d4-a716-446655440000" |
-| `{{currentTime}}` | Current timestamp | ISO 8601 format |
-| `{{env.VARIABLE}}` | Environment variable | Secure secret value |
+### Bird Native Variables (Flow Builder Context ONLY)
+
+**IMPORTANT:** These variables are available in Flow Builder triggers but NOT automatically in AI Employee Actions.
+
+| Variable | Description | Availability |
+|----------|-------------|--------------|
+| `{{messageImage}}` | Image URL from WhatsApp | Flow Builder triggers, AI Employee can access |
+| `{{messageAudio}}` | Audio URL from WhatsApp | Flow Builder triggers, AI Employee can access |
+| `{{messageVideo}}` | Video URL from WhatsApp | Flow Builder triggers, AI Employee can access |
+| `{{messageFile}}` | Document/PDF URL | Flow Builder triggers, AI Employee can access |
+| `{{conversationMessageContent}}` | Text message content | Flow Builder triggers, AI Employee can access |
+| `{{contact.name}}` | Contact name | Flow Builder triggers, AI Employee can access |
+| `{{conversationId}}` | Conversation UUID | Flow Builder triggers, AI Employee can access |
+| `{{currentTime}}` | Current timestamp | Universal |
+| `{{env.VARIABLE}}` | Environment variable | Universal |
+
+**NOT a Bird variable:**
+- `{{conversationMessageType}}` - This does NOT exist in Bird's documentation
+
+### Task Arguments (Manually Defined in Actions)
+
+These must be defined in Arguments Configuration and populated by AI Employee:
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `mediaType` | string | Set by AI Employee: "image", "document", or "audio" |
+| `mediaUrl` | string | Set by AI Employee: extracted from Bird native variables |
+| `conversationId` | string | Set by AI Employee: from `{{conversationId}}` |
+| `contactName` | string | Set by AI Employee: from `{{contact.name}}` |
+
+**How It Works:**
+1. Bird provides native variables (`messageImage`, etc.) to AI Employee
+2. AI Employee accesses these and determines media type
+3. AI Employee sets Task Arguments (`mediaType`, `mediaUrl`)
+4. AI Employee calls Action with Task Arguments
+5. Action uses Task Arguments in HTTP Request
 
 **Usage:** Type `{{` in any field to see available variables dropdown.
 
@@ -417,8 +511,9 @@ curl -X POST https://api.neero.ai/api/bird \
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `invalid variable: messageImage` | Argument not defined in Configuration | **Add ALL 6 arguments** in section 4.3 |
-| `type: Required, mediaUrl: Required` | Variable scope issue with AI Employee Actions | **Use Custom Function** instead of HTTP Request (section 4.6) |
+| `invalid variable: conversationMessageType` | Variable doesn't exist in Bird | Use `mediaType` Task Argument instead (section 4.3) |
+| `invalid variable: mediaType` | Task Argument not defined | Add ALL 4 task arguments in section 4.3 |
+| `type: Required, mediaUrl: Required` | AI Employee didn't populate arguments | Configure AI Employee (section 4.6) |
 | `401 Unauthorized` | Missing/invalid X-API-Key | Verify `NEERO_API_KEY` in Bird env vars |
 | `403 Forbidden` | CDN auth failed | Add `BIRD_ACCESS_KEY` env variable |
 | `408 Timeout` | Processing >9s | Reduce image size, optimize |
@@ -428,13 +523,13 @@ curl -X POST https://api.neero.ai/api/bird \
 
 ### Common Issues
 
-**Issue:** `"invalid variable: messageImage"` error
-- **Cause:** Arguments not defined in Configuration section
-- **Solution 1:** Go to Arguments step > Configuration section
-- **Solution 2:** Click "+" and add ALL 6 arguments from section 4.3
-- **Solution 3:** Use EXACT names: `messageImage`, `messageAudio`, `messageFile`, `conversationMessageType`, `name`, `conversationId`
-- **Solution 4:** Set Type = "string" for all arguments
-- **CRITICAL:** This is the #1 most common error when setting up Actions
+**Issue:** `"invalid variable: conversationMessageType"` error
+- **Cause:** This variable does NOT exist in Bird's documented variables
+- **Root Cause:** Confusion between Bird native variables and Task Arguments
+- **Solution 1:** Use `mediaType` instead (defined as Task Argument in section 4.3)
+- **Solution 2:** Ensure AI Employee populates `mediaType` before calling Action (section 4.6)
+- **Solution 3:** Update HTTP Request body to use `{{mediaType}}` not `{{conversationMessageType}}`
+- **CRITICAL:** `conversationMessageType` is NOT a Bird variable - it was a documentation error
 
 **Issue:** `"invalid variable"` error DESPITE arguments being defined
 - **Cause:** Variables must be selected from dropdown, NOT manually typed
@@ -447,16 +542,14 @@ curl -X POST https://api.neero.ai/api/bird \
 - **Reference:** [Fetching Variables Documentation](https://docs.bird.com/connectivity-platform/steps-catalogue/fetching-variable-steps-in-flow-builder)
 
 **Issue:** `"type: Required, mediaUrl: Required"` - Fields arriving empty at API
-- **Cause:** Field name mapping issue - Bird sends `conversationMessageType`/`messageImage`, API expects `type`/`mediaUrl`
-- **Solution 1 (PRIMARY):** Configure HTTP Request body to map field names:
-  ```json
-  {
-    "type": "{{conversationMessageType}}",
-    "mediaUrl": "{{messageImage}}"
-  }
-  ```
-- **Solution 2:** If HTTP Request still fails, use **Custom Function** instead (see section 4.6)
-- **Solution 3:** Verify variables are selected from dropdown, NOT typed manually
+- **Cause:** AI Employee didn't populate task arguments before calling Action
+- **Solution 1 (PRIMARY):** Configure AI Employee to set task arguments (section 4.6)
+  - AI Employee must set `mediaType` and `mediaUrl` before calling Action
+  - Update Custom Instructions to include argument population logic
+- **Solution 2:** Verify task arguments are defined in Arguments Configuration (section 4.3)
+  - Must have: `mediaType`, `mediaUrl`, `conversationId`, `contactName`
+- **Solution 3:** If HTTP Request still fails, use **Custom Function** instead (see section 4.7)
+- **Solution 4:** Verify variables are selected from dropdown, NOT typed manually
 - **Reference:** See `/plan/bugs.md` for BUG-001 resolution details
 
 **Issue:** AI Employee not responding to media

@@ -1,13 +1,13 @@
 # plan.md - Cost-Optimized Multimodal API
 
-**Project:** api-neero | **Version:** 2.2.2 | **Updated:** 2025-12-11
+**Project:** api-neero | **Version:** 2.2.3 | **Updated:** 2025-12-11
 
 ---
 
 ## Current Status: Phase 5 DEPLOYED ✓
 
 **Build:** PASSING | **Lint:** PASSING (1 warning) | **Deploy:** LIVE
-**Production:** https://api-neero.vercel.app
+**Production:** https://api.neero.ai
 
 All sub-phases complete:
 - 5.1: Critical Fixes (Groq timeout + audio budget)
@@ -48,6 +48,7 @@ All sub-phases complete:
 
 **Maintenance (2025-12-11):**
 - [x] **Safety:** Added 25MB limit to `lib/bird/media.ts` to prevent Edge Runtime OOM
+- [x] **Fix:** Increased unknown type timeout to 5.5s (Gemini 2.5 Flash) for complex invoices
 - [x] **Version:** Bumped to v2.2.2
 
 ---

@@ -1,6 +1,6 @@
 # PRD - Cost-Optimized Multimodal API for Bird.com
 
-**Version:** 2.2.1 | **Updated:** 2025-12-04
+**Version:** 2.2.3 | **Updated:** 2025-12-11
 
 ---
 
@@ -69,7 +69,7 @@ Cost-optimized multimodal API for Bird.com AI employees with intelligent image r
 | photo | google/gemini-2.0-flash | 4s | People, objects, scenes |
 | invoice | google/gemini-2.0-flash | 5s | Invoices, receipts |
 | document | google/gemini-2.5-flash | 5.5s | Cedulas, contracts |
-| unknown | google/gemini-2.0-flash | 4s | Fallback |
+| unknown | google/gemini-2.5-flash | 5.5s | Fallback (complex) |
 
 **Two-Stage Pipeline:**
 1. Stage 1: Classify image type (~1-2s)

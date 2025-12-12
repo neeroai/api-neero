@@ -96,8 +96,8 @@ const ROUTE_TABLE: Record<Classification['type'], RouteConfig> = {
     prompt: 'document'
   },
   unknown: {
-    model: GEMINI_FAST,
-    timeout: 4000,
+    model: GEMINI_PRO,
+    timeout: 5500,
     prompt: 'photo'
   }
 };
@@ -296,9 +296,9 @@ export async function processImage(
 
 | Case | Handling |
 |------|----------|
-| Classification timeout | Default to 'unknown', use Gemini 2.0 Flash |
+| Classification timeout | Default to 'unknown', use Gemini 2.5 Flash (assumes complex) |
 | Low confidence (<0.5) | Log warning, proceed |
-| Remaining time <3s | Force 'unknown' fast path |
+| Remaining time <3s | Force 'unknown' fallback (5.5s timeout) |
 | Download timeout | Return immediate error |
 | Empty/corrupt image | Return 'INVALID_IMAGE' error |
 

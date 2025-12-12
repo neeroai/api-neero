@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Scope:** Cost-optimized multimodal API for Bird.com AI employees
 **Type:** Production API - 89% cheaper than Claude-based alternatives
-**Last Updated:** 2025-12-04
+**Last Updated:** 2025-12-11
 
 ---
 
@@ -105,7 +105,7 @@ Image → Classify (2s) → Route (<10ms) → Process (4-5.5s) → Response
 | photo | Gemini 2.0 Flash | 4s | People, objects, scenes |
 | invoice | Gemini 2.0 Flash | 5s | Invoices, receipts, OCR |
 | document | Gemini 2.5 Flash | 5.5s | Cedulas, contracts, policies |
-| unknown | Gemini 2.0 Flash | 4s | Fallback |
+| unknown | Gemini 2.5 Flash | 5.5s | Fallback (complex) |
 
 **Key Features:**
 - Dynamic timeout adjustment if classification is slow
@@ -226,9 +226,59 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 ---
 
+## Bird AI Employee Configuration
+
+**Setup Guide:** See `/docs/bird/bird-ai-employees-setup-guide.md` for complete step-by-step setup (45-60 minutes)
+
+**Quick Reference:**
+
+### Task Arguments (Define in Bird Actions)
+
+| Argument | Type | Description |
+|----------|------|-------------|
+| `mediaType` | string | AI Employee sets: "image", "document", or "audio" |
+| `mediaUrl` | string | AI Employee extracts from Bird native variables |
+| `conversationId` | string | Conversation UUID |
+| `contactName` | string | Contact display name |
+
+### HTTP Request Configuration
+
+**URL:** `https://api.neero.ai/api/bird`
+**Method:** POST
+**Content-Type:** application/json
+**Headers:** `X-API-Key: {{env.NEERO_API_KEY}}` (optional)
+
+**Request Body:**
+```json
+{
+  "type": "{{mediaType}}",
+  "mediaUrl": "{{mediaUrl}}",
+  "context": {
+    "conversationId": "{{conversationId}}",
+    "contactName": "{{contactName}}"
+  }
+}
+```
+
+**AI Employee Instructions:**
+
+The AI Employee must populate task arguments before calling the Action:
+- Detect media type from message (image/document/audio)
+- Extract appropriate URL from `{{messageImage}}`, `{{messageFile}}`, or `{{messageAudio}}`
+- Set `mediaType` and `mediaUrl` task arguments
+- Call Action with populated arguments
+
+**Critical Notes:**
+- Bird native variables (`{{messageImage}}`, etc.) are NOT automatically passed to Actions
+- Task Arguments must be manually defined in Arguments Configuration
+- Use variable picker (type `{{`) in Bird UI - don't manually type variable names
+- See `/docs/bird/bird-variables-reference.md` for complete variable reference
+
+---
+
 ## Versioning Workflow
 
-**Current Version:** 2.2.1 (Semantic Versioning)
+**Current Version:** 2.2.3 (Semantic Versioning)
 
 **Version Sources (keep synchronized):**
 - `/package.json` - version field

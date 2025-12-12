@@ -4,7 +4,7 @@ This guide explains how to test the API endpoints using Postman.
 
 ## Pre-requisites
 
-1.  **Base URL**: Determine your deployment URL (e.g., `https://api-neero.vercel.app` or `http://localhost:3000`).
+1.  **Base URL**: Determine your deployment URL (e.g., `https://api.neero.ai` or `http://localhost:3000`).
 2.  **API Key**: If you have `NEERO_API_KEY` set in your environment, you must send it as a header `x-api-key`.
 
 ## Endpoints
@@ -160,7 +160,7 @@ Copy the JSON below and save it as `neero-collection.json`, then import it into 
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "https://api-neero.vercel.app",
+			"value": "https://api.neero.ai",
 			"type": "string"
 		},
 		{

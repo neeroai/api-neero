@@ -5,12 +5,39 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com)
 Versioning: [Semantic Versioning](https://semver.org)
 
+## [2.2.3] - 2025-12-11
+
+### Documentation
+- Fixed Bird Actions configuration error documentation (BUG-001)
+- Replaced invalid `conversationMessageType` variable with Task Arguments pattern
+- Added comprehensive Bird Variables Reference (`docs/bird/bird-variables-reference.md`)
+- Updated `docs/bird/bird-ai-employees-setup-guide.md`:
+  - Section 4.3: Task Arguments Configuration (mediaType, mediaUrl, conversationId, contactName)
+  - Section 4.6: AI Employee configuration for argument population
+  - Updated troubleshooting for invalid variable errors
+  - Clarified Bird native variables vs Task Arguments distinction
+- Updated `docs/bird/bird-actions-architecture.md`:
+  - Task Arguments pattern with AI Employee population logic
+  - Clarified media handling and variable availability
+- Updated `plan/bugs.md`:
+  - BUG-001 updated with root cause analysis
+  - Added lessons learned about variable verification
+  - Custom Function alternative with auto-detection logic
+
+### Fixed
+- Documentation error: `{{conversationMessageType}}` does NOT exist in Bird (use `mediaType` Task Argument instead)
+- Clarified that Bird native variables (`{{messageImage}}`, etc.) are NOT automatically passed to Actions
+- Explained AI Employee role in populating Task Arguments
+
 ## [2.2.2] - 2025-12-11
 
 ### Fixed
 - Added safety check for media downloads (25MB limit) to prevent Edge Runtime OOM errors
 - Validates `Content-Length` header before download
 - Validates final buffer size after download
+- Increased unknown type timeout from 4s to 5.5s to handle complex invoices
+- Upgraded unknown type from Gemini 2.0 Flash to 2.5 Flash for better quality
+- Fixed timeout errors when classification fails on complex invoices
 
 ## [2.2.1] - 2025-12-04
 
@@ -21,7 +48,7 @@ Versioning: [Semantic Versioning](https://semver.org)
 
 ### Deployment
 - Successfully deployed to Vercel Production
-- Production URL: https://api-neero.vercel.app
+- Production URL: https://api.neero.ai
 - Edge Runtime confirmed working
 - Environment variables configured via Vercel dashboard
 
