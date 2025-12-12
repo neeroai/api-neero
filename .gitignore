@@ -30,6 +30,7 @@ pnpm-debug.log*
 # Environment variables
 .env
 .env*.local
+.env.example
 
 # Vercel
 .vercel
@@ -38,13 +39,14 @@ pnpm-debug.log*
 *.tsbuildinfo
 
 # Claude Code (no necesario en GitHub/Vercel)
-
+.Claude
 
 # Plan files (local only)
-
+plan
 
 # Symlinks
 docs-global
+/docs-global
 
 # Archive folders
 .archive
