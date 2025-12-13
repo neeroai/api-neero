@@ -20,7 +20,7 @@ Flow Name: "Verify Customer ID"
 
 # Step 1: Check Message Type
 Action: Branch
-Condition: {{conversationMessageType}} == "image"
+Condition: {{mediaType}} == "image"  # ⚠️ Use Task Argument mediaType, NOT {{conversationMessageType}} (doesn't exist)
 - If false → send "Please send a photo of your ID"
 
 # Step 2: Extract Media URL
@@ -102,7 +102,7 @@ Flow Name: "Analyze Bank Statement"
 
 # Step 1: Check Message Type
 Action: Branch
-Condition: {{conversationMessageType}} == "file" AND contains({{messageFile}}, ".pdf")
+Condition: {{mediaType}} == "file" AND contains({{messageFile}}, ".pdf")  # ⚠️ Use Task Argument mediaType, NOT {{conversationMessageType}}
 - If false → send "Please send a PDF of your bank statement"
 
 # Step 2: Immediate Response
@@ -242,7 +242,7 @@ Flow Name: "Process Voice Loan Request"
 
 # Step 1: Check Media Type
 Action: Branch
-Condition: {{conversationMessageType}} == "audio"
+Condition: {{mediaType}} == "audio"  # ⚠️ Use Task Argument mediaType, NOT {{conversationMessageType}} (doesn't exist)
 
 # Step 2: Acknowledge Receipt
 Action: Send Message
@@ -329,10 +329,12 @@ exports.handler = async function (context, variables) {
 
 ### Test Data
 
+> ⚠️ **DEPRECATED:** These test patterns use old Bird variable names. See `/docs/bird/bird-variables-reference.md` for current variable reference.
+
 ```javascript
-// Test ID Photo
+// Test ID Photo (v2.x pattern - for reference only)
 {
-  conversationMessageType: "image",
+  mediaType: "image",  // Use Task Argument instead
   messageImage: "https://media.nest.messagebird.com/test/cedula.jpg"
 }
 

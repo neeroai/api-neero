@@ -56,181 +56,25 @@ Bird AI Employees can call external APIs via **Actions** (HTTP requests) to exte
 
 ---
 
-## Bird Actions Configuration
+## Configuration
 
-### 1. Task Arguments (Input Parameters)
+**See:** `/docs/bird/bird-ai-employees-setup-guide.md` for step-by-step Bird dashboard configuration
 
-**IMPORTANT:** Task Arguments are manually defined parameters that the AI Employee must populate before calling the Action.
-
-**Critical Distinction:**
-- **Bird Native Variables** (`{{messageImage}}`, `{{messageFile}}`, `{{messageAudio}}`) are available to the AI Employee but NOT automatically passed to Actions
-- **Task Arguments** must be explicitly defined in Arguments Configuration and populated by the AI Employee
-
-**Required Task Arguments:**
-
-```
-Name: mediaType        Type: string  # AI Employee sets: "image", "document", or "audio"
-Name: mediaUrl         Type: string  # AI Employee extracts from Bird native variables
-Name: conversationId   Type: string  # From Bird conversation context
-Name: contactName      Type: string  # From Bird contact info
-```
-
-**Optional Context Arguments:**
-
-```
-Name: email        Type: string
-Name: pais         Type: string
-Name: telefono     Type: string
-```
-
-**How AI Employee Populates These:**
-
-The AI Employee accesses Bird native variables and sets task arguments:
-
-```
-If user sends image:
-  - Detect {{messageImage}} has value
-  - Set mediaType = "image"
-  - Set mediaUrl = {{messageImage}}
-
-If user sends document:
-  - Detect {{messageFile}} has value
-  - Set mediaType = "document"
-  - Set mediaUrl = {{messageFile}}
-
-If user sends audio:
-  - Detect {{messageAudio}} has value
-  - Set mediaType = "audio"
-  - Set mediaUrl = {{messageAudio}}
-```
-
-### 2. HTTP Request Step
-
-```yaml
-Operation: POST
-URL: https://api.neero.ai/api/bird
-
-Content-Type: application/json
-
-Headers:
-  X-API-Key: {{env.NEERO_API_KEY}}  # Optional authentication
-
-Request Body:
-{
-  "type": "{{mediaType}}",           # Task Argument (not {{messageType}})
-  "mediaUrl": "{{mediaUrl}}",        # Task Argument (not {{messageImage}})
-  "context": {
-    "conversationId": "{{conversationId}}",
-    "contactName": "{{contactName}}",
-    "email": "{{email}}",
-    "pais": "{{pais}}"
-  }
-}
-```
-
-**Variable Selection:**
-- Use Bird UI dropdown (type `{{`) to select variables
-- If dropdown shows `Arguments.mediaType`, use that full path
-- DO NOT manually type variable names
+**Summary:**
+- Define 4 Task Arguments: `mediaType`, `mediaUrl`, `conversationId`, `contactName`
+- Configure HTTP Request to POST to `https://api.neero.ai/api/bird`
+- Use dropdown selector (type `{{`) for all variables—don't manually type
+- Optional: Add `email`, `pais`, `telefono` context fields
 
 ---
 
-## Media Handling
+## Authentication
 
-### Bird Native Variables vs Task Arguments
-
-**CRITICAL UNDERSTANDING:**
-
-Bird provides native variables in Flow Builder context, but these are NOT automatically available in AI Employee Actions. The AI Employee can access these variables and use them to populate Task Arguments.
-
-**Bird Native Variables (AI Employee can access):**
-
-| Variable | Type | Availability | Example |
-|----------|------|--------------|---------|
-| `{{messageImage}}` | Image URL | Flow Builder, AI Employee | `https://media.nest.messagebird.com/.../photo.jpg` |
-| `{{messageFile}}` | File URL | Flow Builder, AI Employee | `https://media.nest.messagebird.com/.../doc.pdf` |
-| `{{messageFileName}}` | String | Flow Builder, AI Employee | `"cedula-123.pdf"` |
-| `{{messageAudio}}` | Audio URL | Flow Builder, AI Employee | `https://media.nest.messagebird.com/.../voice.ogg` |
-| `{{conversationId}}` | UUID | Flow Builder, AI Employee | `"550e8400-e29b-41d4-a716-446655440000"` |
-| `{{contact.name}}` | String | Flow Builder, AI Employee | `"Juan Perez"` |
-
-**NOT Bird Variables (Documentation Error):**
-- `{{conversationMessageType}}` - This does NOT exist in Bird
-
-**Task Arguments (Manually defined, AI Employee populates):**
-
-| Argument | Populated From | Example Value |
-|----------|----------------|---------------|
-| `mediaType` | AI Employee logic | `"image"`, `"document"`, `"audio"` |
-| `mediaUrl` | `{{messageImage}}` or `{{messageFile}}` or `{{messageAudio}}` | `https://media.nest.messagebird.com/...` |
-| `conversationId` | `{{conversationId}}` | `"550e8400..."` |
-| `contactName` | `{{contact.name}}` | `"Juan Perez"` |
-
-### Media URL Authentication (TBD - Test Required)
-
-**Two possibilities:**
-
-1. **Public/Signed URLs:** Bird CDN URLs are temporarily accessible without authentication
-   - Your API can fetch directly: `fetch(mediaUrl)`
-   - `BIRD_ACCESS_KEY` NOT NEEDED
-
-2. **Authenticated URLs:** Bird CDN requires AccessKey header
-   - Your API needs: `fetch(mediaUrl, { headers: { Authorization: 'AccessKey {BIRD_ACCESS_KEY}' } })`
-   - `BIRD_ACCESS_KEY` REQUIRED
-
-**Test this by:**
-```bash
-# Without auth
-curl https://media.nest.messagebird.com/.../test.jpg
-
-# With auth
-curl -H "Authorization: AccessKey YOUR_KEY" \
-  https://media.nest.messagebird.com/.../test.jpg
-```
-
----
-
-## Authentication Options
-
-### Option 1: API Key Header (Recommended)
-
-Configure in Bird Environment Variables:
-```
-NEERO_API_KEY=your-secret-key-here
-```
-
-Use in HTTP Request headers:
-```yaml
-Headers:
-  X-API-Key: {{env.NEERO_API_KEY}}
-```
-
-Validate in your API:
-```typescript
-export async function POST(req: Request) {
-  const apiKey = req.headers.get('X-API-Key');
-
-  if (apiKey !== process.env.NEERO_API_KEY) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  // Process request...
-}
-```
-
-### Option 2: Bearer Token
-
-```yaml
-Headers:
-  Authorization: Bearer {{env.NEERO_API_TOKEN}}
-```
-
-### Option 3: No Authentication
-
-Trust Bird's network security. Only viable if:
-- API endpoint is not publicly documented
-- Bird IP ranges are whitelisted
-- Non-sensitive data processing
+| Option | Config | Best For |
+|--------|--------|----------|
+| **API Key** (Recommended) | Header: `X-API-Key: {{env.NEERO_API_KEY}}` | Sensitive data, production |
+| **Bearer Token** | Header: `Authorization: Bearer {{env.TOKEN}}` | OAuth flows |
+| **None** | Trust network security | Public, non-sensitive only |
 
 ---
 
@@ -324,56 +168,22 @@ BIRD_CHANNEL_ID=xxx                # Not used in Actions
 
 ---
 
-## Testing Guide
+## Testing
 
-### 1. Configure Bird Action
+**Step 1:** Configure HTTP Request in Bird Action (see Configuration above)
 
-In Bird dashboard:
-1. Create new AI Employee
-2. Add Action → HTTP Request
-3. Configure:
-   - Method: POST
-   - URL: `https://api.neero.ai/api/bird`
-   - Headers: `X-API-Key: {{env.NEERO_API_KEY}}`
-   - Body: See example above
-
-### 2. Test Media URL Access
-
-```bash
-# Get a test media URL from Bird
-TEST_URL="https://media.nest.messagebird.com/.../test.jpg"
-
-# Test without auth
-curl -I $TEST_URL
-
-# Test with auth
-curl -I -H "Authorization: AccessKey $BIRD_ACCESS_KEY" $TEST_URL
-```
-
-### 3. Test API Call from Bird
-
-Send test message to AI Employee:
-1. User sends image via WhatsApp
-2. AI Employee triggers Action
-3. Check API logs for request
-4. Verify response format
-5. Test timeout handling (>9 seconds)
-
-### 4. Validate Response
-
-Bird expects JSON response. Test:
+**Step 2:** Test API directly
 ```bash
 curl -X POST https://api.neero.ai/api/bird \
   -H "Content-Type: application/json" \
   -H "X-API-Key: YOUR_KEY" \
-  -d '{
-    "type": "image",
-    "mediaUrl": "https://example.com/test.jpg",
-    "context": {
-      "email": "test@example.com"
-    }
-  }'
+  -d '{"type":"image","mediaUrl":"https://example.com/photo.jpg","context":{}}'
 ```
+
+**Step 3:** Test with real WhatsApp media
+- Send image to AI Employee
+- Verify response in 3-9 seconds
+- Check Bird logs for request/response details
 
 ---
 

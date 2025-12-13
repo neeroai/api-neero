@@ -5,6 +5,61 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com)
 Versioning: [Semantic Versioning](https://semver.org)
 
+## [3.0.0] - 2025-12-13
+
+### BREAKING CHANGES
+
+**API Redesign:** Complete redesign of `/api/bird` endpoint to eliminate unreliable `mediaUrl` extraction
+
+#### Changed
+- **Request Schema Breaking Changes:**
+  - Renamed `type` → `mediaType` (more descriptive, avoids TypeScript keyword conflict)
+  - **REMOVED** `mediaUrl` field (AI Employee cannot obtain it reliably)
+  - Made `context` object REQUIRED (was optional)
+  - Made `context.conversationId` REQUIRED (was optional)
+
+- **Bird Actions Configuration (REQUIRED UPDATE):**
+  ```json
+  // OLD (v2.x)
+  {
+    "type": "{{Arguments.type}}",
+    "mediaUrl": "{{messageImage}}",
+    "context": { "conversationId": "{{conversationId}}" }
+  }
+
+  // NEW (v3.0)
+  {
+    "mediaType": "{{Arguments.mediaType}}",
+    "context": { "conversationId": "{{conversationId}}" }
+  }
+  ```
+
+#### Added
+- `/lib/bird/fetch-latest-media.ts` - PRIMARY flow to extract media from Bird Conversations API
+- Bird Conversations API integration for reliable media URL extraction
+- Error code `MEDIA_EXTRACTION_ERROR` for media extraction failures
+- Environment variables:
+  - `BIRD_ACCESS_KEY` (REQUIRED) - Bird API access key for Conversations API
+  - `BIRD_WORKSPACE_ID` (REQUIRED) - Bird workspace UUID
+- Auto-detection of media type from conversation message structure (more reliable than AI Employee hint)
+
+#### Fixed
+- **Root Cause:** AI Employee inconsistently extracts Bird variables (`{{messageImage}}`, `{{messageFile}}`, `{{messageAudio}}`)
+- **Solution:** API now ALWAYS fetches latest media message from conversation via Bird Conversations API
+- Eliminates dependency on unreliable Bird variable extraction
+- 100% reliable media URL extraction (single source of truth: Conversations API)
+
+#### Migration Guide
+1. Update Bird Action configuration in Bird dashboard (see "Changed" section above)
+2. Remove `mediaUrl` from Task Arguments
+3. Add `BIRD_ACCESS_KEY` and `BIRD_WORKSPACE_ID` to environment variables
+4. Deploy new version
+5. Test with real WhatsApp conversations
+
+#### Documentation
+- Created `/docs/bird/bird-conversations-api-capabilities.md` - Complete API testing results
+- Updated architecture docs with v3.0 changes
+
 ## [2.2.3] - 2025-12-11
 
 ### Documentation

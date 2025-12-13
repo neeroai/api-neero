@@ -12,10 +12,12 @@ export const MediaTypeSchema = z.enum(['image', 'document', 'audio']);
 export type MediaType = z.infer<typeof MediaTypeSchema>;
 
 /**
- * Bird Action Request Context (optional metadata from conversation)
+ * Bird Action Request Context
+ * v3.0: conversationId is now REQUIRED for media extraction from conversation
  */
 export const BirdActionContextSchema = z
   .object({
+    conversationId: z.string().uuid(),
     email: z.string().email().optional(),
     name: z.string().optional(),
     pais: z.string().optional(),
@@ -27,11 +29,14 @@ export type BirdActionContext = z.infer<typeof BirdActionContextSchema>;
 
 /**
  * Bird Action Request (POST body from Bird AI Employee)
+ * v3.0 BREAKING CHANGE:
+ * - Renamed 'type' to 'mediaType'
+ * - Removed 'mediaUrl' (AI Employee cannot obtain it reliably)
+ * - Made 'context' required (need conversationId for media extraction)
  */
 export const BirdActionRequestSchema = z.object({
-  type: MediaTypeSchema,
-  mediaUrl: z.string().url(),
-  context: BirdActionContextSchema.optional(),
+  mediaType: MediaTypeSchema,
+  context: BirdActionContextSchema,
 });
 
 export type BirdActionRequest = z.infer<typeof BirdActionRequestSchema>;
@@ -100,6 +105,7 @@ export const ErrorCodeSchema = z.enum([
   'PROCESSING_ERROR',
   'DOWNLOAD_ERROR',
   'MEDIA_DOWNLOAD_ERROR',
+  'MEDIA_EXTRACTION_ERROR',
   'UNAUTHORIZED',
   'AUTHENTICATION_ERROR',
   'VALIDATION_ERROR',

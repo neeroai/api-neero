@@ -28,7 +28,9 @@ Bird (formerly MessageBird)
 | Video | `{{messageVideo}}` | `https://media.nest.messagebird.com/.../video.mp4` |
 | Audio | `{{messageAudio}}` | `https://media.nest.messagebird.com/.../audio.ogg` |
 | Document | `{{messageFile}}` | `https://media.nest.messagebird.com/.../doc.pdf` |
-| Message Type | `{{conversationMessageType}}` | `"image"`, `"file"`, `"audio"`, `"text"` |
+| Message Type | ⚠️ **Deprecated** | Use Task Argument `mediaType` instead |
+
+> ⚠️ **NOTE:** `{{conversationMessageType}}` does NOT exist in Bird's official documentation. Use Task Argument `mediaType` (manually defined, populated by AI Employee) to identify message type.
 
 ---
 

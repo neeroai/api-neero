@@ -1,7 +1,9 @@
 /**
- * Bird Actions API Endpoint
+ * Bird Actions API Endpoint v3.0
  * Main endpoint for multimodal processing: image, audio, document
  * Edge Runtime optimized with 9-second timeout enforcement
+ *
+ * v3.0 BREAKING CHANGE: mediaUrl is now extracted from conversation via Bird API
  */
 
 import { NextResponse } from 'next/server';
@@ -13,6 +15,7 @@ import type { PhotoAnalysis } from '@/lib/ai/schemas/photo';
 import { TimeBudget, TimeoutBudgetError, type TimeTracker } from '@/lib/ai/timeout';
 import { transcribeWithFallback } from '@/lib/ai/transcribe';
 import { createUnauthorizedResponse, validateApiKey } from '@/lib/auth/api-key';
+import { fetchLatestMediaFromConversation } from '@/lib/bird/fetch-latest-media';
 import { downloadMedia } from '@/lib/bird/media';
 import type {
   BirdActionErrorResponse,
@@ -245,8 +248,13 @@ async function handleDocumentProcessing(
 }
 
 /**
- * POST /api/bird
+ * POST /api/bird v3.0
  * Process media (image, audio, document) for Bird AI Employees
+ *
+ * v3.0 BREAKING CHANGE:
+ * - Removed mediaUrl from request (AI Employee cannot obtain it reliably)
+ * - ALWAYS extracts mediaUrl from conversation via Bird Conversations API
+ * - Uses detected mediaType from conversation (more reliable than AI Employee hint)
  */
 export async function POST(request: Request): Promise<Response> {
   const startTime = Date.now();
@@ -258,7 +266,7 @@ export async function POST(request: Request): Promise<Response> {
       return createUnauthorizedResponse();
     }
 
-    // 2. Parse request body
+    // 2. Parse request body (v3.0 schema: no mediaUrl, required context.conversationId)
     const bodyOrError = await parseRequestBody(request, startTime);
     if (bodyOrError instanceof Response) {
       return bodyOrError;
@@ -267,8 +275,32 @@ export async function POST(request: Request): Promise<Response> {
 
     budget.checkBudget();
 
-    // 3. Download media
-    const bufferOrError = await downloadMediaSafe(body.mediaUrl, startTime);
+    // 3. ALWAYS extract mediaUrl from conversation (PRIMARY flow, not fallback)
+    console.log(`[Bird API] Fetching media from conversation ${body.context.conversationId}...`);
+
+    let mediaUrl: string;
+    let mediaType: 'image' | 'document' | 'audio';
+
+    try {
+      const extracted = await fetchLatestMediaFromConversation(body.context.conversationId);
+      mediaUrl = extracted.mediaUrl;
+      // Use detected type from conversation (more reliable than body.mediaType)
+      mediaType = extracted.mediaType;
+
+      console.log(`[Bird API] Extracted: type=${mediaType}, url=${mediaUrl.substring(0, 50)}...`);
+    } catch (error) {
+      return createErrorResponse(
+        'MEDIA_EXTRACTION_ERROR',
+        error instanceof Error ? error.message : 'Could not extract media from conversation',
+        500,
+        startTime
+      );
+    }
+
+    budget.checkBudget();
+
+    // 4. Download media
+    const bufferOrError = await downloadMediaSafe(mediaUrl, startTime);
     if (bufferOrError instanceof Response) {
       return bufferOrError;
     }
@@ -276,17 +308,17 @@ export async function POST(request: Request): Promise<Response> {
 
     budget.checkBudget();
 
-    // 4. Process based on media type
+    // 5. Process based on DETECTED media type (not body.mediaType)
     try {
-      switch (body.type) {
+      switch (mediaType) {
         case 'image':
-          return await handleImageProcessing(body.mediaUrl, budget, startTime);
+          return await handleImageProcessing(mediaUrl, budget, startTime);
         case 'audio':
           return await handleAudioProcessing(mediaBuffer, budget, startTime);
         case 'document':
-          return await handleDocumentProcessing(body.mediaUrl, budget, startTime);
+          return await handleDocumentProcessing(mediaUrl, budget, startTime);
         default: {
-          const _exhaustive: never = body.type;
+          const _exhaustive: never = mediaType;
           return createErrorResponse(
             'UNSUPPORTED_MEDIA_TYPE',
             `Unsupported media type: ${_exhaustive}`,

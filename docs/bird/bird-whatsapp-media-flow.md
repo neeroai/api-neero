@@ -76,9 +76,11 @@ After Bird's conversion, these variables contain **full CDN URLs**:
 | `{{messageImage}}` | string | `https://media.nest.messagebird.com/...` | Image URL (JPEG, PNG, WEBP) |
 | `{{messageAudio}}` | string | `https://media.nest.messagebird.com/...` | Audio URL (OGG, MP3, M4A) |
 | `{{messageFile}}` | string | `https://media.nest.messagebird.com/...` | Document URL (PDF, DOCX) |
-| `{{conversationMessageType}}` | string | `"image"`, `"audio"`, `"file"`, `"text"` | Message type identifier |
+| `mediaType` (Task Arg) | string | `"image"`, `"audio"`, `"file"`, `"text"` | ⚠️ Use Task Argument, not variable |
 | `{{conversationId}}` | string | UUID format | Conversation identifier |
 | `{{contact.name}}` | string | Text | Contact display name |
+
+> ⚠️ **IMPORTANT:** `{{conversationMessageType}}` does NOT exist in Bird. Instead, define a Task Argument `mediaType` and have your AI Employee populate it based on the detected message type.
 
 **Usage Pattern:**
 ```javascript
