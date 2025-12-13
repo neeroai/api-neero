@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Scope:** Cost-optimized multimodal API for Bird.com AI employees
 **Type:** Production API - 89% cheaper than Claude-based alternatives
-**Last Updated:** 2025-12-11
+**Last Updated:** 2025-12-13
 
 ---
 
@@ -78,16 +78,22 @@ None. Template follows Neero standards exactly.
 
 ### Bird Actions Pattern (HTTP Requests)
 Bird AI Employees call our API directly via HTTP Actions (not webhooks). Implementation:
-1. Bird AI Employee triggers Action → HTTP POST to `/api/bird`
-2. Optional API key validation (`X-API-Key` header)
-3. Download media from Bird CDN (conditional `BIRD_ACCESS_KEY`)
-4. Process with AI (Gemini/Groq/OpenAI) - synchronous, < 9 seconds
-5. Return JSON response to Bird AI Employee
-6. Bird AI Employee continues conversation with data
+1. Bird AI Employee triggers Action → HTTP POST to `/api/bird` with conversationId
+2. API fetches latest message from conversation via Bird Conversations API (limit=1)
+3. Auto-detects media type from message structure and contentType
+4. Downloads media from Bird CDN (conditional `BIRD_ACCESS_KEY`)
+5. Processes with AI (Gemini/Groq/OpenAI) - synchronous, < 9 seconds
+6. Returns JSON response to Bird AI Employee
+7. Bird AI Employee continues conversation with data
 
 **Critical:** Must return JSON response in < 9 seconds or immediate error.
 
 **No HMAC validation needed** - Actions don't use webhook signatures.
+
+**v3.0 Architecture:**
+- Media URL extraction via Bird Conversations API (not from webhook variables)
+- Auto-detection of media type from WhatsApp message structure
+- Processes ONLY the most recent message (efficient limit=1 query)
 
 ### Intelligent Image Routing
 Two-stage pipeline for optimal model selection based on image type:
@@ -234,13 +240,13 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 ### Task Arguments (Define in Bird Actions)
 
-**v3.0 - Only 3 arguments needed (mediaUrl removed):**
+**v3.0 - Only 2 REQUIRED arguments (mediaUrl and mediaType removed):**
 
-| Argument | Type | Description |
-|----------|------|-------------|
-| `mediaType` | string | AI Employee sets: "image", "document", or "audio" |
-| `conversationId` | string | Conversation UUID |
-| `contactName` | string | Contact display name |
+| Argument | Type | Description | Required |
+|----------|------|-------------|----------|
+| `conversationId` | string | Conversation UUID | ✓ Required |
+| `contactName` | string | Contact display name | ✓ Required |
+| `mediaType` | string | "image", "document", or "audio" | ✗ Optional - API auto-detects |
 
 ### HTTP Request Configuration
 
@@ -249,10 +255,9 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 **Content-Type:** application/json
 **Headers:** `X-API-Key: {{env.NEERO_API_KEY}}` (optional)
 
-**Request Body:**
+**Request Body (v3.0 - mediaType optional):**
 ```json
 {
-  "mediaType": "{{mediaType}}",
   "context": {
     "conversationId": "{{conversationId}}",
     "contactName": "{{contactName}}"
@@ -263,12 +268,14 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 **AI Employee Instructions:**
 
 The AI Employee must populate task arguments before calling the Action:
-- Detect media type from message (image/document/audio)
-- Set `mediaType` task argument ("image", "document", or "audio")
 - Ensure `conversationId` and `contactName` are available from conversation context
-- Call Action with all 3 populated arguments
+- Call Action with both required arguments
+- API will auto-detect media type from latest message
 
-**v3.0 Change:** API now extracts media URL automatically from conversation via Bird Conversations API (no need to extract `{{messageImage}}`, etc.)
+**v3.0 Changes:**
+- Media URL: API extracts automatically from conversation via Bird Conversations API (no need for `{{messageImage}}`, etc.)
+- Media Type: API auto-detects from message structure and contentType (no need for AI Employee to guess)
+- Only processes MOST RECENT message in conversation (efficient)
 
 **Critical Notes:**
 - Bird native variables (`{{messageImage}}`, etc.) are NOT automatically passed to Actions

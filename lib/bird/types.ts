@@ -33,9 +33,10 @@ export type BirdActionContext = z.infer<typeof BirdActionContextSchema>;
  * - Renamed 'type' to 'mediaType'
  * - Removed 'mediaUrl' (AI Employee cannot obtain it reliably)
  * - Made 'context' required (need conversationId for media extraction)
+ * - Made 'mediaType' optional (API auto-detects from latest message)
  */
 export const BirdActionRequestSchema = z.object({
-  mediaType: MediaTypeSchema,
+  mediaType: MediaTypeSchema.optional(),
   context: BirdActionContextSchema,
 });
 

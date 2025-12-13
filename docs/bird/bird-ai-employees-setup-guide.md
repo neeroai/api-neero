@@ -137,17 +137,19 @@ LIMITACIONES:
 
 ### 4.2 Task Arguments (CRITICAL)
 
-Add ALL 3 in Configuration section (v3.0 - mediaUrl removed):
+Add 2 REQUIRED arguments in Configuration section (v3.0):
 
-| Name | Type | Value |
-|------|------|-------|
-| `mediaType` | string | AI Employee determines: "image", "document", "audio" |
-| `conversationId` | string | From Bird conversation context |
-| `contactName` | string | From Bird contact info |
+| Name | Type | Value | Required |
+|------|------|-------|----------|
+| `conversationId` | string | From Bird conversation context | ✓ Required |
+| `contactName` | string | From Bird contact info | ✓ Required |
+| `mediaType` | string | AI Employee determines: "image", "document", "audio" | ✗ Optional - API auto-detects |
 
 **Key:** Don't manually type variables—use `{{` dropdown selector.
 
-**v3.0 Change:** `mediaUrl` removed. API now extracts media URL automatically from conversation via Bird Conversations API.
+**v3.0 Changes:**
+- `mediaUrl` removed - API extracts automatically from conversation via Bird Conversations API
+- `mediaType` now optional - API auto-detects from latest message structure and contentType
 
 ### 4.3 HTTP Request Step
 
@@ -164,7 +166,6 @@ X-API-Key: {{env.NEERO_API_KEY}}
 **Body (JSON editor):**
 ```json
 {
-  "mediaType": "{{mediaType}}",
   "context": {
     "conversationId": "{{conversationId}}",
     "contactName": "{{contactName}}"
@@ -172,25 +173,22 @@ X-API-Key: {{env.NEERO_API_KEY}}
 }
 ```
 
+**Note:** `mediaType` can be omitted - API will auto-detect from latest message in conversation.
+
 ### 4.4 Configure AI Employee to Populate Arguments
 
 Add to Custom Instructions (Step 2.5):
 
 ```
 BEFORE process_media:
-1. Detect media type:
-   image → Set mediaType="image"
-   document/PDF → Set mediaType="document"
-   audio/voice → Set mediaType="audio"
-
-2. Set task arguments:
-   - mediaType (from detection above)
+1. Set task arguments:
    - conversationId (from conversation context)
    - contactName (from contact info)
 
-3. Call process_media Action
+2. Call process_media Action
 
-CRITICAL: All 3 task arguments required before Action call
+CRITICAL: Both task arguments required before Action call.
+API will auto-detect media type from latest message.
 ```
 
 ### 4.5 v3.0 Breaking Changes (Migration Guide)
@@ -202,10 +200,11 @@ CRITICAL: All 3 task arguments required before Action call
 - **New (v3.0):** API extracts media URL from conversation automatically via Bird Conversations API
 - **Action:** Delete `mediaUrl` from Task Arguments configuration
 
-**2. Rename type → mediaType in request body:**
-- **Old (v2.x):** `"type": "{{mediaType}}"`
-- **New (v3.0):** `"mediaType": "{{mediaType}}"`
-- **Action:** Update JSON body in HTTP Request step
+**2. Make mediaType optional (recommended):**
+- **Old (v2.x):** `"type": "{{mediaType}}"` (required, AI Employee guesses)
+- **New (v3.0):** Omit `mediaType` field entirely (API auto-detects from message)
+- **Action:** Remove mediaType from JSON body in HTTP Request step
+- **Alternative:** Keep `"mediaType": "{{mediaType}}"` if you prefer AI Employee detection
 
 **3. Ensure conversationId is available:**
 - **Requirement:** Required for media extraction via Bird Conversations API
@@ -227,9 +226,8 @@ Replace HTTP Request step with Custom Function:
 exports.handler = async function (context, variables) {
   const axios = require('axios');
 
-  // v3.0: Use mediaType from task arguments, API extracts mediaUrl automatically
+  // v3.0: API extracts mediaUrl and auto-detects mediaType from conversation
   const response = await axios.post('https://api.neero.ai/api/bird', {
-    mediaType: variables.mediaType,
     context: {
       conversationId: variables.conversationId,
       contactName: variables.contactName
@@ -307,14 +305,14 @@ curl -X POST https://api.neero.ai/api/bird \
 
 | Error | Cause | Solution |
 |-------|-------|----------|
-| `invalid variable: conversationMessageType` | Variable doesn't exist in Bird | Use `mediaType` Task Argument |
-| `invalid variable: mediaType` | Task Argument not defined | Add all 4 task arguments (Step 4.2) |
-| `type: Required, mediaUrl: Required` | AI Employee didn't set arguments | Configure AI Employee (Step 4.4) |
+| `context: Required` | Missing conversationId or contactName | Add both task arguments (Step 4.2) |
 | `invalid variable` despite defined | Variables manually typed, not selected | Use `{{` dropdown selector |
+| `Latest message is text, not media` | AI Employee called on text message | Only call process_media for media |
+| `Location messages are not supported` | User sent location | Inform user location not processable |
+| `Latest message is not from contact` | Bot message is most recent | Wait for user to send media |
 | `401 Unauthorized` | Invalid X-API-Key | Verify `NEERO_API_KEY` in env vars |
 | `403 Forbidden` | CDN auth failed | Add `BIRD_ACCESS_KEY` env variable |
-| `408 Timeout` | Processing >9s | Reduce image size, try again |
-| `404 Not Found` | CDN URL expired (>30 days) | Process media immediately |
+| `408 Timeout` | Processing >9s | Reduce media size, try again |
 | `500 Internal Error` | API failure | Check Vercel logs |
 
 **Debug Quick Steps:**
