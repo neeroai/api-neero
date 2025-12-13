@@ -17,23 +17,25 @@ const BirdMessageSchema = z.object({
     type: z.enum(['text', 'image', 'file', 'audio', 'video']),
     image: z
       .object({
-        url: z.string(),
+        url: z.string().optional(), // Optional - validated in extraction logic
       })
       .optional(),
     file: z
       .object({
-        files: z.array(
-          z.object({
-            mediaUrl: z.string(),
-            contentType: z.string(),
-            filename: z.string().optional(),
-          })
-        ),
+        files: z
+          .array(
+            z.object({
+              mediaUrl: z.string().optional(), // Optional - validated in extraction logic
+              contentType: z.string().optional(),
+              filename: z.string().optional(),
+            })
+          )
+          .optional(), // Array itself can be missing
       })
       .optional(),
     audio: z
       .object({
-        url: z.string(),
+        url: z.string().optional(), // Optional - validated in extraction logic
       })
       .optional(),
   }),
