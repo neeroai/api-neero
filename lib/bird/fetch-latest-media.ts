@@ -141,8 +141,8 @@ export async function fetchLatestMediaFromConversation(
     throw new Error('Missing BIRD_ACCESS_KEY or BIRD_WORKSPACE_ID');
   }
 
-  // Fetch most recent message only (limit=1 for efficiency)
-  const url = `https://api.bird.com/workspaces/${workspaceId}/conversations/${conversationId}/messages?limit=1`;
+  // Fetch recent messages (limit=5 to handle bot responses between user media and action call)
+  const url = `https://api.bird.com/workspaces/${workspaceId}/conversations/${conversationId}/messages?limit=5`;
 
   const response = await fetch(url, {
     headers: {
@@ -158,32 +158,33 @@ export async function fetchLatestMediaFromConversation(
   const data = await response.json();
   const parsed = MessagesResponseSchema.parse(data);
 
-  // With limit=1, we only get the most recent message
-  if (parsed.results.length === 0) {
-    throw new Error('No messages found in conversation');
+  // Filter for contact messages with media (exclude bot responses)
+  // Bird AI Employee may send acknowledgment messages BEFORE calling action,
+  // so we need to filter past bot messages to find the actual user media
+  const contactMediaMessages = parsed.results
+    .filter((msg) => msg.sender.type === 'contact')
+    .filter((msg) => {
+      const type = msg.body.type;
+      // Exclude text and location (keep image and file types)
+      return type !== 'text' && type !== 'location';
+    })
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+  if (contactMediaMessages.length === 0) {
+    throw new Error('No media messages from contact found in recent conversation');
   }
 
-  const latestMessage = parsed.results[0]!;
-
-  // Validate message is from contact (not bot)
-  if (latestMessage.sender.type !== 'contact') {
-    throw new Error('Latest message is not from contact (sent by bot)');
-  }
-
-  // Validate message type (reject text and location)
-  if (latestMessage.body.type === 'text') {
-    throw new Error('Latest message is text, not media');
-  }
-
-  if (latestMessage.body.type === 'location') {
-    throw new Error('Location messages are not supported');
+  // Get most recent contact media message (guaranteed to exist by length check above)
+  const latestContactMedia = contactMediaMessages[0];
+  if (!latestContactMedia) {
+    throw new Error('Unexpected error: contact media message is undefined');
   }
 
   // Extract media with auto-detected type
-  const extracted = extractMediaFromMessage(latestMessage);
+  const extracted = extractMediaFromMessage(latestContactMedia);
 
   if (!extracted) {
-    throw new Error('Could not extract media URL from latest message');
+    throw new Error('Could not extract media URL from latest contact message');
   }
 
   return extracted;
