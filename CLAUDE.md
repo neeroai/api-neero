@@ -234,10 +234,11 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 ### Task Arguments (Define in Bird Actions)
 
+**v3.0 - Only 3 arguments needed (mediaUrl removed):**
+
 | Argument | Type | Description |
 |----------|------|-------------|
 | `mediaType` | string | AI Employee sets: "image", "document", or "audio" |
-| `mediaUrl` | string | AI Employee extracts from Bird native variables |
 | `conversationId` | string | Conversation UUID |
 | `contactName` | string | Contact display name |
 
@@ -251,8 +252,7 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 **Request Body:**
 ```json
 {
-  "type": "{{mediaType}}",
-  "mediaUrl": "{{mediaUrl}}",
+  "mediaType": "{{mediaType}}",
   "context": {
     "conversationId": "{{conversationId}}",
     "contactName": "{{contactName}}"
@@ -264,9 +264,11 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 The AI Employee must populate task arguments before calling the Action:
 - Detect media type from message (image/document/audio)
-- Extract appropriate URL from `{{messageImage}}`, `{{messageFile}}`, or `{{messageAudio}}`
-- Set `mediaType` and `mediaUrl` task arguments
-- Call Action with populated arguments
+- Set `mediaType` task argument ("image", "document", or "audio")
+- Ensure `conversationId` and `contactName` are available from conversation context
+- Call Action with all 3 populated arguments
+
+**v3.0 Change:** API now extracts media URL automatically from conversation via Bird Conversations API (no need to extract `{{messageImage}}`, etc.)
 
 **Critical Notes:**
 - Bird native variables (`{{messageImage}}`, etc.) are NOT automatically passed to Actions

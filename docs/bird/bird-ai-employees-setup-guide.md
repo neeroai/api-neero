@@ -137,16 +137,17 @@ LIMITACIONES:
 
 ### 4.2 Task Arguments (CRITICAL)
 
-Add ALL 4 in Configuration section:
+Add ALL 3 in Configuration section (v3.0 - mediaUrl removed):
 
 | Name | Type | Value |
 |------|------|-------|
 | `mediaType` | string | AI Employee determines: "image", "document", "audio" |
-| `mediaUrl` | string | AI Employee extracts from native variables |
 | `conversationId` | string | From Bird conversation context |
 | `contactName` | string | From Bird contact info |
 
 **Key:** Don't manually type variables—use `{{` dropdown selector.
+
+**v3.0 Change:** `mediaUrl` removed. API now extracts media URL automatically from conversation via Bird Conversations API.
 
 ### 4.3 HTTP Request Step
 
@@ -163,8 +164,7 @@ X-API-Key: {{env.NEERO_API_KEY}}
 **Body (JSON editor):**
 ```json
 {
-  "type": "{{mediaType}}",
-  "mediaUrl": "{{mediaUrl}}",
+  "mediaType": "{{mediaType}}",
   "context": {
     "conversationId": "{{conversationId}}",
     "contactName": "{{contactName}}"
@@ -178,36 +178,61 @@ Add to Custom Instructions (Step 2.5):
 
 ```
 BEFORE process_media:
-1. Detect media type: image → Set mediaType="image"
+1. Detect media type:
+   image → Set mediaType="image"
    document/PDF → Set mediaType="document"
    audio/voice → Set mediaType="audio"
 
-2. Extract URL from native variables:
-   Image: {{messageImage}}
-   Document: {{messageFile}}
-   Audio: {{messageAudio}}
+2. Set task arguments:
+   - mediaType (from detection above)
+   - conversationId (from conversation context)
+   - contactName (from contact info)
 
-3. Set task arguments (all 4 REQUIRED)
-4. Call process_media Action
+3. Call process_media Action
 
-CRITICAL: All 4 task arguments required before Action call
+CRITICAL: All 3 task arguments required before Action call
 ```
 
-### 4.5 Alternative: Custom Function (if HTTP fails)
+### 4.5 v3.0 Breaking Changes (Migration Guide)
+
+**If upgrading from v2.x:**
+
+**1. Remove mediaUrl argument:**
+- **Old (v2.x):** Task argument `mediaUrl` extracted from `{{messageImage}}`, `{{messageFile}}`, or `{{messageAudio}}`
+- **New (v3.0):** API extracts media URL from conversation automatically via Bird Conversations API
+- **Action:** Delete `mediaUrl` from Task Arguments configuration
+
+**2. Rename type → mediaType in request body:**
+- **Old (v2.x):** `"type": "{{mediaType}}"`
+- **New (v3.0):** `"mediaType": "{{mediaType}}"`
+- **Action:** Update JSON body in HTTP Request step
+
+**3. Ensure conversationId is available:**
+- **Requirement:** Required for media extraction via Bird Conversations API
+- **Use:** Bird native variable `{{conversationId}}` (available in all conversations)
+- **Action:** Verify conversationId is in Task Arguments and request body context
+
+**Environment variables required (v3.0):**
+```bash
+BIRD_ACCESS_KEY=xxx        # Required for Conversations API
+BIRD_WORKSPACE_ID=xxx      # Required for Conversations API
+NEERO_API_KEY=xxx          # Optional API authentication
+```
+
+### 4.6 Alternative: Custom Function (if HTTP fails)
 
 Replace HTTP Request step with Custom Function:
 
 ```javascript
 exports.handler = async function (context, variables) {
   const axios = require('axios');
-  const mediaUrl = variables.messageImage || variables.messageAudio || variables.messageFile;
-  const type = variables.conversationMessageType || "unknown";
 
+  // v3.0: Use mediaType from task arguments, API extracts mediaUrl automatically
   const response = await axios.post('https://api.neero.ai/api/bird', {
-    type, mediaUrl,
+    mediaType: variables.mediaType,
     context: {
       conversationId: variables.conversationId,
-      contactName: variables.contact?.name
+      contactName: variables.contactName
     }
   }, {
     headers: {
