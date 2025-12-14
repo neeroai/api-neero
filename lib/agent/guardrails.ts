@@ -1,4 +1,4 @@
-import type { GuardrailsValidation } from './types';
+import type { GuardrailsValidation, MessageMetadata } from './types';
 
 /**
  * Medical Advice Keywords (Spanish)
@@ -210,4 +210,178 @@ export function getSafeFallback(severity: GuardrailsValidation['severity']): str
     'Para asegurarme de darte la mejor información, prefiero que hables directamente ' +
     'con uno de nuestros especialistas. ¿Te conecto con un asesor?'
   );
+}
+
+/**
+ * Extract structured metadata from AI response (Hybrid Approach)
+ *
+ * Converts natural language validation into structured metadata for:
+ * - Compliance auditing (Ley 1581/2012)
+ * - Performance monitoring (urgency distribution, handover rates)
+ * - Quality control (violation detection, risk assessment)
+ *
+ * @param response - AI generated response text
+ * @param validation - Guardrails validation result
+ * @returns Structured metadata for message_logs table
+ *
+ * Reference: /docs/ai-agentic/VALIDATED_RECOMMENDATIONS.md (P0-2)
+ */
+export function extractMetadata(
+  response: string,
+  validation: GuardrailsValidation
+): MessageMetadata {
+  const lowerResponse = response.toLowerCase();
+
+  // 1. Determine urgency level
+  let urgency: MessageMetadata['urgency'] = 'routine';
+
+  // Emergency symptoms (chest pain, breathing issues, high fever)
+  const emergencyKeywords = [
+    'dolor en el pecho',
+    'dolor de pecho',
+    'dificultad para respirar',
+    'falta de aire',
+    'fiebre alta',
+    'temperatura alta',
+    'pus',
+    'mal olor',
+    'herida infectada',
+    'sangrado abundante',
+  ];
+
+  for (const keyword of emergencyKeywords) {
+    if (lowerResponse.includes(keyword)) {
+      urgency = 'emergency';
+      break;
+    }
+  }
+
+  // Urgent symptoms (moderate pain, wound issues, anxiety)
+  if (urgency === 'routine') {
+    const urgentKeywords = [
+      'dolor moderado',
+      'molestia',
+      'inflamación',
+      'inflamacion',
+      'hinchazón',
+      'hinchazon',
+      'enrojecimiento',
+      'preocupación',
+      'preocupacion',
+      'ansiedad',
+      'miedo',
+    ];
+
+    for (const keyword of urgentKeywords) {
+      if (lowerResponse.includes(keyword)) {
+        urgency = 'urgent';
+        break;
+      }
+    }
+  }
+
+  // 2. Map violations to reason_code
+  let reason_code: MessageMetadata['reason_code'] = null;
+
+  if (validation.violations.length > 0) {
+    const violationText = validation.violations.join(' ').toLowerCase();
+
+    if (urgency === 'emergency') {
+      reason_code = 'EMERGENCY_SYMPTOMS';
+    } else if (urgency === 'urgent') {
+      reason_code = 'URGENT_SYMPTOMS';
+    } else if (violationText.includes('medical advice')) {
+      reason_code = 'MEDICAL_ADVICE_REQUEST';
+    } else if (violationText.includes('pricing commitment')) {
+      reason_code = 'PRICING_QUOTE_REQUEST';
+    } else if (violationText.includes('consent')) {
+      reason_code = 'SENSITIVE_DATA_CONSENT_MISSING';
+    }
+  }
+
+  // 3. Extract risk_flags
+  const risk_flags: MessageMetadata['risk_flags'] = [];
+
+  // Emergency symptoms
+  if (lowerResponse.includes('dolor en el pecho') || lowerResponse.includes('dolor de pecho')) {
+    risk_flags.push('CHEST_PAIN');
+  }
+  if (lowerResponse.includes('dificultad para respirar') || lowerResponse.includes('falta de aire')) {
+    risk_flags.push('SHORTNESS_OF_BREATH');
+  }
+  if (lowerResponse.includes('fiebre alta') || lowerResponse.includes('temperatura alta')) {
+    risk_flags.push('FEVER_HIGH');
+  }
+  if (
+    (lowerResponse.includes('pus') && lowerResponse.includes('herida')) ||
+    lowerResponse.includes('mal olor')
+  ) {
+    risk_flags.push('WOUND_PUS_ODOR');
+  }
+
+  // Medical advice violations
+  if (validation.violations.some((v) => v.includes('Medical advice'))) {
+    if (
+      lowerResponse.includes('diagnóstico') ||
+      lowerResponse.includes('diagnostico') ||
+      lowerResponse.includes('tienes') ||
+      lowerResponse.includes('padeces')
+    ) {
+      risk_flags.push('MEDICAL_DIAGNOSIS');
+    }
+    if (
+      lowerResponse.includes('toma') ||
+      lowerResponse.includes('debes tomar') ||
+      lowerResponse.includes('prescripción') ||
+      lowerResponse.includes('prescripcion')
+    ) {
+      risk_flags.push('TREATMENT_INSTRUCTIONS');
+    }
+  }
+
+  // Pricing violations
+  if (validation.violations.some((v) => v.includes('Pricing commitment'))) {
+    risk_flags.push('PRICE_COMMITMENT');
+  }
+
+  // Consent violations
+  if (
+    lowerResponse.includes('necesito tu consentimiento') ||
+    lowerResponse.includes('autorización') ||
+    lowerResponse.includes('autorizacion')
+  ) {
+    risk_flags.push('MISSING_CONSENT');
+  }
+
+  // 4. Determine handover
+  const handover = validation.severity === 'critical' || urgency === 'emergency';
+
+  // 5. Generate notes_for_human (optional)
+  let notes_for_human: string | undefined;
+
+  if (handover) {
+    const reasons: string[] = [];
+
+    if (urgency === 'emergency') {
+      reasons.push(`Emergency symptoms detected (${risk_flags.filter((f) =>
+        ['CHEST_PAIN', 'SHORTNESS_OF_BREATH', 'FEVER_HIGH', 'WOUND_PUS_ODOR'].includes(f)
+      ).join(', ')})`);
+    }
+
+    if (validation.severity === 'critical') {
+      reasons.push(`Critical guardrails violation: ${validation.violations.join(', ')}`);
+    }
+
+    if (reasons.length > 0) {
+      notes_for_human = reasons.join(' | ');
+    }
+  }
+
+  return {
+    urgency,
+    reason_code,
+    risk_flags,
+    handover,
+    notes_for_human,
+  };
 }

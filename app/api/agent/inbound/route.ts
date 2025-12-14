@@ -3,7 +3,7 @@ import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
 import { AgentInboundRequestSchema, type AgentInboundResponse } from '@/lib/agent/types';
 import { reconstructContext, saveMessage, updateConversationState } from '@/lib/agent/conversation';
-import { validateResponse, getSafeFallback } from '@/lib/agent/guardrails';
+import { validateResponse, getSafeFallback, extractMetadata } from '@/lib/agent/guardrails';
 import {
   analyzePhotoTool,
   transcribeAudioTool,
@@ -123,6 +123,9 @@ export async function POST(request: Request) {
     // 7. Validate response with guardrails
     const guardrailsValidation = validateResponse(aiText);
 
+    // 7.1 Extract structured metadata (Hybrid Approach)
+    const structuredMetadata = extractMetadata(aiText, guardrailsValidation);
+
     let finalResponse: string;
     let status: AgentInboundResponse['status'] = 'continued';
     let handoverReason: string | undefined;
@@ -188,12 +191,13 @@ export async function POST(request: Request) {
         attachmentsMeta: message?.attachments || undefined,
       });
 
-      // Save AI response
+      // Save AI response with structured metadata
       await saveMessage(conversationId, 'outgoing', finalResponse, {
         model: 'gemini-2.0-flash-exp',
         tokensUsed: aiResponse.usage,
         processingTimeMs: Date.now() - startTime,
         toolCalls: aiResponse.toolCalls,
+        metadata: structuredMetadata,
       });
     } catch (error) {
       console.error('[inbound] Failed to save messages:', error);

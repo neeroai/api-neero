@@ -1,7 +1,7 @@
 import { db } from '@/lib/db/client';
 import { messageLogs, leads, conversationState } from '@/lib/db/schema';
 import { eq, desc } from 'drizzle-orm';
-import type { ConversationContext } from './types';
+import type { ConversationContext, MessageMetadata } from './types';
 
 /**
  * Reconstructs conversation context from database
@@ -58,29 +58,31 @@ export async function reconstructContext(conversationId: string): Promise<Conver
  * @param conversationId - UUID of the conversation
  * @param direction - 'incoming' (user) or 'outgoing' (assistant)
  * @param text - Message text content
- * @param metadata - Optional metadata (attachments, tool calls, model info)
+ * @param extraMetadata - Optional metadata (attachments, tool calls, model info, structured metadata)
  */
 export async function saveMessage(
   conversationId: string,
   direction: 'incoming' | 'outgoing',
   text: string,
-  metadata?: {
+  extraMetadata?: {
     attachmentsMeta?: unknown;
     toolCalls?: unknown;
     model?: string;
     tokensUsed?: unknown;
     processingTimeMs?: unknown;
+    metadata?: MessageMetadata;
   }
 ): Promise<void> {
   await db.insert(messageLogs).values({
     conversationId,
     direction,
     text,
-    attachmentsMeta: metadata?.attachmentsMeta,
-    toolCalls: metadata?.toolCalls,
-    model: metadata?.model,
-    tokensUsed: metadata?.tokensUsed,
-    processingTimeMs: metadata?.processingTimeMs
+    attachmentsMeta: extraMetadata?.attachmentsMeta,
+    toolCalls: extraMetadata?.toolCalls,
+    model: extraMetadata?.model,
+    tokensUsed: extraMetadata?.tokensUsed,
+    processingTimeMs: extraMetadata?.processingTimeMs,
+    metadata: extraMetadata?.metadata
   });
 }
 

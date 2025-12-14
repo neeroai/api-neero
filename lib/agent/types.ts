@@ -130,6 +130,43 @@ export const GuardrailsValidationSchema = z.object({
 export type GuardrailsValidation = z.infer<typeof GuardrailsValidationSchema>;
 
 /**
+ * Message Metadata Schema (Hybrid Approach)
+ * Structured metadata extracted from natural language responses
+ *
+ * Used for:
+ * - Compliance auditing (Ley 1581/2012, WhatsApp policies)
+ * - Performance monitoring (urgency distribution, handover rates)
+ * - Quality control (violation detection, risk assessment)
+ *
+ * Reference: /docs/ai-agentic/VALIDATED_RECOMMENDATIONS.md (P0-2)
+ */
+export const MessageMetadataSchema = z.object({
+  urgency: z.enum(['emergency', 'urgent', 'routine']),
+  reason_code: z.enum([
+    'EMERGENCY_SYMPTOMS',
+    'URGENT_SYMPTOMS',
+    'MEDICAL_ADVICE_REQUEST',
+    'PRICING_QUOTE_REQUEST',
+    'SENSITIVE_DATA_CONSENT_MISSING',
+    'TOOL_FAILURE'
+  ]).nullable(),
+  risk_flags: z.array(z.enum([
+    'CHEST_PAIN',
+    'SHORTNESS_OF_BREATH',
+    'FEVER_HIGH',
+    'WOUND_PUS_ODOR',
+    'MEDICAL_DIAGNOSIS',
+    'TREATMENT_INSTRUCTIONS',
+    'PRICE_COMMITMENT',
+    'MISSING_CONSENT'
+  ])),
+  handover: z.boolean(),
+  notes_for_human: z.string().optional()
+});
+
+export type MessageMetadata = z.infer<typeof MessageMetadataSchema>;
+
+/**
  * Service Window Status
  */
 export const ServiceWindowStatusSchema = z.object({

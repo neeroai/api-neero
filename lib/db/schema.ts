@@ -65,6 +65,7 @@ export const messageLogs = pgTable('message_logs', {
   model: varchar('model', { length: 100 }),
   tokensUsed: jsonb('tokens_used'),
   processingTimeMs: jsonb('processing_time_ms'),
+  metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').notNull().defaultNow()
 });
 
