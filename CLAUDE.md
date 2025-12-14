@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Scope:** Cost-optimized multimodal API for Bird.com AI employees
 **Type:** Production API - 89% cheaper than Claude-based alternatives
-**Last Updated:** 2025-12-13
+**Last Updated:** 2025-12-14 10:07
 
 ---
 
@@ -29,6 +29,20 @@ Cost-optimized multimodal API for Bird.com AI employees (corporate clients):
 - **Constraint:** MAX 9 seconds response or immediate error
 
 Processes multimedia from WhatsApp via Bird AI Employees Actions using Vercel AI SDK.
+
+---
+
+## TRACKING FILES (Update EVERY interaction)
+| File | Purpose | Format | Max |
+|------|---------|--------|-----|
+| plan.md | Architecture, stack, phase | Markdown | 50 lines |
+| todo.md | [TODO\|DOING\|DONE] tasks | Markdown | 50 lines |
+| prd.md | Requirements, features | Markdown | 100 lines |
+| feature_list.json | Feature tracking (Anthropic) | JSON | No limit |
+| claude-progress.md | Session handoff (Anthropic) | Markdown | Rolling |
+
+**Frequency**: Update EVERY interaction
+**Templates**: `/Users/mercadeo/neero/docs-global/templates/tracking/`
 
 ---
 

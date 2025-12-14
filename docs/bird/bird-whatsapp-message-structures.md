@@ -8,7 +8,7 @@
 
 ## Overview
 
-WhatsApp sends different message structures depending on media type. All structures documented here are from actual Bird API responses (`/docs/api-bird/receiving-messages.md`).
+WhatsApp sends different message structures depending on media type. All structures documented here are from actual Bird API responses (see `/docs/api-bird/channels-receiving.md`).
 
 **Key Finding:** Audio, video, stickers, and documents all use `type: "file"` with different `contentType` values.
 
@@ -30,7 +30,7 @@ WhatsApp sends different message structures depending on media type. All structu
 
 ## Image Messages
 
-**Structure** (from `docs/api-bird/receiving-messages.md` lines 70-79):
+**Structure** (from Bird API):
 
 ```json
 {

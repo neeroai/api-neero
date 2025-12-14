@@ -51,3 +51,9 @@ docs-global
 # Archive folders
 .archive
 _archive
+
+# Conversation data (sensitive)
+convers/
+/convers
+conversations/
+/conversations
