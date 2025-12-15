@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com)
 Versioning: [Semantic Versioning](https://semver.org)
 
+## [Unreleased]
+
+### Added
+- Automated validation scripts for v1.0 features (F001-F006) - 1,130 lines total
+  - `scripts/validate-f001.ts` - Data Collection validation (165 lines)
+  - `scripts/validate-f002.ts` - Price Inquiry Handover validation (210 lines)
+  - `scripts/validate-f004.ts` - Photo Quality Analysis validation (160 lines)
+  - `scripts/validate-f005.ts` - Audio Transcription validation (235 lines)
+  - `scripts/validate-f006.ts` - Guardrails Compliance validation (360 lines)
+- Comprehensive validation reports in `validation-reports/`
+  - Individual feature reports (f001-f006)
+  - Executive summary: `v1.0-validation-summary.md` (380 lines)
+- Vercel staging deployment plan (ready for execution)
+- Added `.claude/` (lowercase) to `.gitignore` for proper exclusion
+
+### Fixed
+- Git push issue with sensitive patient data in `conversations/` directory
+  - Removed 3.2MB file with patient data before push
+  - Added `conversations/` to `.gitignore` permanently
+- Consent schema validation in F005 tests (added missing required fields)
+- Pricing pattern detection in F006 tests (adjusted to match keyword patterns)
+
+### Changed
+- Updated `todo.md` to reflect v1.0 validation completion and staging deployment plan
+- Branch `docs/optimize-llm-format` merged into `main`
+
+### Validated
+- F001 (Data Collection): ✅ PASSED - All database, schema, and tool tests passing
+- F002 (Price Inquiry Handover): ✅ PASSED - Two-layer architecture validated
+- F003 (Location Triage): ⚠️ NOT IMPLEMENTED - Marked DONE but no code exists (28% impact)
+- F004 (Photo Quality Analysis): ✅ PASSED - 3103ms processing time (within 6s budget)
+- F005 (Audio Transcription): ✅ PASSED - Groq + OpenAI fallback configuration confirmed
+- F006 (Guardrails Compliance): ✅ PASSED - 66 keywords across 3 severity levels working
+
+**Overall Status:** 5/6 features CODE COMPLETE (83%)
+**Blocking Issue:** F003 implementation required before production deployment
+
 ## [3.0.0] - 2025-12-13
 
 ### BREAKING CHANGES

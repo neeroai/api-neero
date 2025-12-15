@@ -1,67 +1,68 @@
-# todo.md - Cost-Optimized Multimodal API
+# todo.md - EVA AI Employee (Cirugía Plástica)
 
-**Updated:** 2025-12-05
+**Version:** 1.0 | **Date:** 2025-12-15 15:00 | **Status:** Active
 
 ---
 
 ## TODO
 
-### Phase 4: Integration & Monitoring [NEXT]
-- [ ] Implement `/api/bird/health` health check
-- [ ] Add per-route metrics and cost tracking
-- [ ] Add structured logging with telemetry
+### Phase 1: Staging Deployment [NEXT]
+- [ ] Create Vercel staging project (`api-neero-staging`)
+- [ ] Create Neon PostgreSQL staging database
+- [ ] Run database migrations on staging
+- [ ] Configure environment variables in Vercel
+- [ ] Verify staging domain configuration
+- [ ] Deploy to staging and verify build
+- [ ] Run validation scripts against staging
+- [ ] Manual E2E tests with Bird AI Employee
+
+### Phase 2: F003 Implementation [BLOCKED - After Staging]
+- [ ] Decide implementation approach (prompt-based or code-based)
+- [ ] Implement location triage for Bogotá
+- [ ] Test with location inquiries (Bogotá, Medellín, Cali)
+- [ ] Validate 95% accuracy target
+- [ ] Update feature_list.json status
 
 ---
 
 ## DOING
 
-None
+None (checkpoint pause)
 
 ---
 
 ## BLOCKED
 
-None
+### F003: Location Triage
+- **Blocker:** Implementation decision needed (prompt-based vs code-based)
+- **Impact:** 28% of conversations (310/1,106 users)
+- **Options:** 15 min (prompt) or 2 hours (code)
 
 ---
 
 ## DONE
 
-### Media Download Safety Hardening [2025-12-11]
-- [x] Implemented 25MB file size limit in `lib/bird/media.ts`
-- [x] Added `Content-Length` validation to prevent OOM
-- [x] Updated `CHANGELOG.md` to v2.2.2
+### v1.0 Feature Validation [2025-12-14 to 2025-12-15]
+- [x] Created validation scripts (F001-F006) - 1,130 lines total
+- [x] F001: Data Collection - VALIDATED (all tests passed)
+- [x] F002: Price Inquiry Handover - VALIDATED (with documented limitation)
+- [x] F003: Location Triage - VALIDATED AS MISSING (not implemented)
+- [x] F004: Photo Quality Analysis - VALIDATED (3103ms, within budget)
+- [x] F005: Audio Transcription - VALIDATED (config confirmed)
+- [x] F006: Guardrails Compliance - VALIDATED (all tests passed)
+- [x] Created validation reports (6 reports, 1 summary)
+- [x] Fixed git push issue (removed conversations/ with patient data)
+- [x] Merged docs/optimize-llm-format → main
+- [x] Created Vercel staging deployment plan
 
-### BUG-001 Resolution: Field Name Mapping [2025-12-05]
-- [x] Diagnosed root cause: HTTP Request not mapping Bird field names to API schema
-- [x] Updated `/plan/bugs.md` - Correct diagnosis (RESOLVED status)
-- [x] Updated `/docs/bird/bird-ai-employees-setup-guide.md` - Section 4.4 HTTP Request body
-- [x] Documented Custom Function alternative as fallback
-- [x] Updated tracking files (plan.md, todo.md)
+**Status:** 5/6 features CODE COMPLETE (83%)
+**Scripts:** scripts/validate-f001.ts through validate-f006.ts
+**Reports:** validation-reports/f001 through f006 + v1.0-validation-summary.md
 
-### Documentation: WhatsApp → Bird Media Flow [2025-12-05]
-- [x] Created `/plan/bugs.md` - Known issues tracker
-- [x] Created `/docs/bird/bird-whatsapp-media-flow.md` - Complete flow (150 lines)
-- [x] Updated `/docs-global/platforms/whatsapp/api-v23-guide.md` - Media payload section
-- [x] Updated `/docs-global/platforms/bird/bird-media-handling.md` - WhatsApp conversion
-
-### Phase 5: AI Efficiency Optimization [DEPLOYED]
-- [x] All 4 sub-phases complete (5.1-5.4)
-- [x] Groq timeout + audio budget integration
-- [x] AI SDK migration for Groq
-- [x] Text post-processing with Groq LLM
-- [x] Research validation (83-88% cost savings)
-- [x] Build + lint verification (PASSING)
-- [x] Vercel production deployment (v2.2.1)
-- [x] Added .vercelignore for optimized deployment
-- [x] Fixed vercel.json configuration
-
-### Earlier Phases [COMPLETE]
-- [x] Phases 1-3: Foundation + Multimodal + Image Routing
-- [x] Stack research + AI Gateway setup
-- [x] Two-stage classification pipeline
-- [x] Git repo + GitHub push
+### Git Housekeeping [2025-12-15]
+- [x] Fixed .gitignore to exclude .claude/ (lowercase)
+- [x] Commit: 391e413
 
 ---
 
-**Lines:** 45
+**Lines:** 47
