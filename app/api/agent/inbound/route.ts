@@ -12,6 +12,7 @@ import {
 import { upsertLeadTool } from '@/lib/agent/tools/crm';
 import { sendMessageTool } from '@/lib/agent/tools/whatsapp';
 import { createTicketTool, executeHandover } from '@/lib/agent/tools/handover';
+import { retrieveKnowledgeTool } from '@/lib/agent/tools/retrieve-knowledge';
 import { EVA_SYSTEM_PROMPT } from '@/lib/agent/prompts/eva-system';
 
 export const runtime = 'edge';
@@ -103,6 +104,7 @@ export async function POST(request: Request) {
           upsertLead: upsertLeadTool,
           sendMessage: sendMessageTool,
           createTicket: createTicketTool,
+          retrieveKnowledge: retrieveKnowledgeTool,
         },
         toolChoice: 'auto',
         temperature: 0.7,

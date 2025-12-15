@@ -1,4 +1,38 @@
-import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, integer, customType } from 'drizzle-orm/pg-core';
+
+/**
+ * Custom type for pgvector embeddings
+ * Stores 768-dimensional vectors for semantic search
+ */
+const vector = customType<{ data: number[]; driverData: string }>({
+  dataType() {
+    return 'vector(768)';
+  },
+  toDriver(value: number[]): string {
+    return JSON.stringify(value);
+  },
+  fromDriver(value: string): number[] {
+    return JSON.parse(value);
+  }
+});
+
+/**
+ * Medical knowledge base - Validated content with vector embeddings for RAG
+ */
+export const medicalKnowledge = pgTable('medical_knowledge', {
+  knowledgeId: uuid('knowledge_id').primaryKey().defaultRandom(),
+  content: text('content').notNull(),
+  embedding: vector('embedding'),
+  category: varchar('category', { length: 50 }).notNull(),
+  subcategory: text('subcategory'),
+  metadata: jsonb('metadata'),
+  validatedBy: varchar('validated_by', { length: 100 }).notNull(),
+  validatedAt: timestamp('validated_at').notNull(),
+  version: integer('version').notNull().default(1),
+  active: boolean('active').notNull().default(true),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+  updatedAt: timestamp('updated_at').notNull().defaultNow()
+});
 
 /**
  * Leads table - Tracks potential patients and their journey
@@ -103,3 +137,6 @@ export type NewMessageLog = typeof messageLogs.$inferInsert;
 
 export type ConversationState = typeof conversationState.$inferSelect;
 export type NewConversationState = typeof conversationState.$inferInsert;
+
+export type MedicalKnowledge = typeof medicalKnowledge.$inferSelect;
+export type NewMedicalKnowledge = typeof medicalKnowledge.$inferInsert;

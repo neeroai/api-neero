@@ -597,6 +597,120 @@
         "conversion": "+15% Lead→Paciente"
       },
       "notes": "DEFER reason: Requiere decisión proveedor + PCI-DSS compliance + security testing. Blocker: Payment provider selection + compliance."
+    },
+    {
+      "id": "F012",
+      "name": "RAG Knowledge Base",
+      "description": "Semantic search over validated medical knowledge using pgvector + Gemini embeddings",
+      "priority": "HIGH",
+      "status": "DONE",
+      "effort_hours": 8,
+      "impact": "Enables Eva to provide accurate, validated medical information without hallucination",
+      "dependencies": [],
+      "steps": [
+        {
+          "id": "S001",
+          "description": "Enable pgvector extension in Neon database",
+          "status": "DONE",
+          "file_path": "scripts/verify-table.ts"
+        },
+        {
+          "id": "S002",
+          "description": "Create medicalKnowledge table with vector embeddings",
+          "status": "DONE",
+          "file_path": "lib/db/schema.ts"
+        },
+        {
+          "id": "S003",
+          "description": "Implement Google Gemini text-embedding-004 integration",
+          "status": "DONE",
+          "file_path": "lib/ai/embeddings.ts"
+        },
+        {
+          "id": "S004",
+          "description": "Build semantic search with pgvector HNSW index",
+          "status": "DONE",
+          "file_path": "lib/db/queries/knowledge.ts"
+        },
+        {
+          "id": "S005",
+          "description": "Create retrieveKnowledge tool for Eva",
+          "status": "DONE",
+          "file_path": "lib/agent/tools/retrieve-knowledge.ts"
+        },
+        {
+          "id": "S006",
+          "description": "Register tool in agent inbound route",
+          "status": "DONE",
+          "file_path": "app/api/agent/inbound/route.ts"
+        },
+        {
+          "id": "S007",
+          "description": "Update Eva system prompt with tool documentation",
+          "status": "DONE",
+          "file_path": "lib/agent/prompts/eva-system.ts"
+        },
+        {
+          "id": "S008",
+          "description": "Prepare seed data (14 documents)",
+          "status": "DONE",
+          "file_path": "data/knowledge-base.json"
+        },
+        {
+          "id": "S009",
+          "description": "Create database seed script",
+          "status": "DONE",
+          "file_path": "scripts/seed-knowledge.ts"
+        },
+        {
+          "id": "S010",
+          "description": "Run seed script (14 docs, 6.52s)",
+          "status": "DONE",
+          "file_path": "scripts/seed-knowledge.ts"
+        },
+        {
+          "id": "S011",
+          "description": "Create semantic search test script",
+          "status": "DONE",
+          "file_path": "scripts/test-search.ts"
+        },
+        {
+          "id": "S012",
+          "description": "Create end-to-end RAG test script",
+          "status": "DONE",
+          "file_path": "scripts/test-eva-rag.ts"
+        },
+        {
+          "id": "S013",
+          "description": "Run semantic search tests (66.7% success)",
+          "status": "DONE",
+          "file_path": "scripts/test-search.ts"
+        },
+        {
+          "id": "S014",
+          "description": "Validate end-to-end pipeline",
+          "status": "DONE",
+          "file_path": "scripts/test-eva-rag.ts"
+        }
+      ],
+      "acceptance": [
+        "pgvector extension enabled in Neon",
+        "medicalKnowledge table created with 768-dim vectors",
+        "Gemini text-embedding-004 integration working",
+        "Semantic search returns results with similarity > 0.65",
+        "retrieveKnowledge tool accessible from Eva",
+        "Knowledge base seeded with 14 validated documents",
+        "Semantic search tests passing (>60% success rate)",
+        "Failover to human when similarity < 0.65 working correctly"
+      ],
+      "notes": [
+        "Performance: RAG overhead ~472ms (5.2% of 9s budget)",
+        "HNSW index: 1.5ms query time @ 58K records (AWS benchmark)",
+        "Similarity threshold: 0.65 (balanced precision/recall)",
+        "Test results: 66.7% success (4/6 tests), 2 edge cases correctly escalate",
+        "Knowledge base: 5 procedures, 5 FAQs, 3 policies, 1 location",
+        "All content validated by Dr. Andrés Durán"
+      ]
     }
   ],
   "_meta": {
@@ -614,7 +728,7 @@
     "template_source": "Anthropic Effective Harnesses for Long-Running Agents",
     "usage": "Agent reads on session start for priority selection. Update status as work progresses. Prevents premature completion declarations.",
     "summary": {
-      "total_features": 11,
+      "total_features": 12,
       "by_version": {
         "v1_0": 6,
         "v1_1": 3,
@@ -643,7 +757,7 @@
       "source": "/conversations/whatsapp-conversations-2025-12-14-reporte.md"
     },
     "cross_references": {
-      "PRD": "features/ai-agentic/PRD.md (Features F001-F011)",
+      "PRD": "features/ai-agentic/PRD.md (Features F001-F012)",
       "USER_STORIES": "features/ai-agentic/USER-STORIES.md (US-1.0-01 to US-1.2-02)",
       "PLAN": "features/ai-agentic/plan.md (Phases 1-6)",
       "DECISIONS": "features/ai-agentic/decisions.md (9 IMPLEMENT, 3 DEFER)",

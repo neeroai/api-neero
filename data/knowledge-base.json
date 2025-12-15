@@ -1,0 +1,223 @@
+{
+  "procedures": [
+    {
+      "content": "La rinoplastia es un procedimiento quirúrgico para modificar la forma y estructura de la nariz, mejorando tanto la estética como la función respiratoria. El procedimiento dura entre 2-3 horas bajo anestesia general. La recuperación inicial toma 10-14 días para retomar actividades normales, aunque los resultados finales se aprecian después de 12 meses cuando la inflamación disminuye completamente. Durante las primeras 2 semanas se usa férula nasal y es normal presentar moretones alrededor de los ojos.",
+      "category": "procedure",
+      "subcategory": "rinoplastia",
+      "metadata": {
+        "duration_hours": "2-3",
+        "anesthesia": "general",
+        "recovery_days": 10,
+        "return_to_work_days": 7,
+        "final_results_months": 12,
+        "contraindications": ["pregnancy", "active_infection", "uncontrolled_hypertension", "smoking_active"]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "La lipoescultura es un procedimiento para remodelar el contorno corporal eliminando depósitos de grasa localizada que no responden a dieta y ejercicio. Se realiza mediante cánulas delgadas bajo anestesia general o sedación, con duración de 2-4 horas dependiendo del área tratada. La recuperación permite retomar actividades ligeras en 3-5 días y actividades completas en 2-3 semanas. Se debe usar faja de compresión durante 4-6 semanas. Los resultados finales se aprecian después de 3-6 meses cuando la inflamación disminuye completamente.",
+      "category": "procedure",
+      "subcategory": "lipoescultura",
+      "metadata": {
+        "duration_hours": "2-4",
+        "anesthesia": "general o sedación",
+        "recovery_days": 5,
+        "return_to_work_days": 5,
+        "final_results_months": 6,
+        "compression_garment_weeks": 6,
+        "contraindications": ["pregnancy", "obesity", "heart_disease", "diabetes_uncontrolled"]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "La mamoplastia de aumento es un procedimiento para aumentar el tamaño y mejorar la forma de los senos mediante implantes de silicona cohesiva de última generación. La cirugía dura aproximadamente 2-3 horas bajo anestesia general. La recuperación inicial toma 7-10 días, pudiendo retomar actividades normales en 2-3 semanas. Se debe evitar ejercicio intenso y levantamiento de peso durante 6 semanas. Los implantes modernos tienen garantía de por vida del fabricante. Los resultados finales se aprecian después de 3-6 meses.",
+      "category": "procedure",
+      "subcategory": "mamoplastia-aumento",
+      "metadata": {
+        "duration_hours": "2-3",
+        "anesthesia": "general",
+        "recovery_days": 10,
+        "return_to_work_days": 7,
+        "final_results_months": 3,
+        "exercise_restriction_weeks": 6,
+        "implant_warranty": "lifetime",
+        "contraindications": ["pregnancy", "breastfeeding", "active_breast_infection", "autoimmune_disease"]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "La blefaroplastia es un procedimiento para rejuvenecer la apariencia de los párpados, eliminando exceso de piel y bolsas de grasa que generan aspecto cansado o envejecido. Se puede realizar en párpados superiores, inferiores, o ambos. La cirugía dura 1-2 horas bajo anestesia local con sedación. La recuperación es rápida, con moretones e inflamación que disminuyen en 7-10 días. Los resultados son naturales y duraderos, con efecto de rejuvenecimiento facial notable.",
+      "category": "procedure",
+      "subcategory": "blefaroplastia",
+      "metadata": {
+        "duration_hours": "1-2",
+        "anesthesia": "local con sedación",
+        "recovery_days": 7,
+        "return_to_work_days": 7,
+        "final_results_weeks": 4,
+        "results_duration": "long-lasting",
+        "contraindications": ["active_eye_infection", "glaucoma", "retinal_detachment", "dry_eye_severe"]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "La abdominoplastia es un procedimiento para eliminar exceso de piel y grasa abdominal, y reparar la separación de músculos abdominales (diástasis). Es ideal para pacientes que han tenido embarazos múltiples o pérdida significativa de peso. La cirugía dura 3-4 horas bajo anestesia general. La recuperación inicial toma 2-3 semanas, y se requiere uso de faja de compresión durante 6-8 semanas. Actividades completas y ejercicio se retoman después de 6-8 semanas. Los resultados son permanentes si se mantiene peso estable.",
+      "category": "procedure",
+      "subcategory": "abdominoplastia",
+      "metadata": {
+        "duration_hours": "3-4",
+        "anesthesia": "general",
+        "recovery_weeks": 3,
+        "return_to_work_days": 14,
+        "final_results_months": 6,
+        "compression_garment_weeks": 8,
+        "exercise_restriction_weeks": 8,
+        "contraindications": ["pregnancy", "planning_pregnancy", "obesity", "smoking_active"]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    }
+  ],
+  "faqs": [
+    {
+      "content": "La consulta de valoración inicial con el Dr. Andrés Durán tiene una duración aproximada de 30-45 minutos. Durante la consulta se evalúa su caso específico, se revisan antecedentes médicos, se explica el procedimiento en detalle, se muestran resultados previos (antes y después), y se resuelven todas sus dudas. El Dr. Durán realizará un examen físico y recomendará el mejor plan de tratamiento personalizado para sus objetivos estéticos. Es importante traer lista de medicamentos actuales y antecedentes médicos relevantes.",
+      "category": "faq",
+      "subcategory": "consulta-valoracion",
+      "metadata": {
+        "duration_minutes": 45,
+        "cost_included": "examination y plan de tratamiento",
+        "what_to_bring": ["lista de medicamentos", "antecedentes médicos", "preguntas preparadas"]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "Los exámenes preoperatorios requeridos varían según el procedimiento y la salud del paciente, pero típicamente incluyen: hemograma completo, tiempos de coagulación, química sanguínea, electrocardiograma (ECG), y en algunos casos radiografía de tórax. Para pacientes mayores de 40 años o con condiciones médicas específicas, pueden requerirse exámenes adicionales. Estos exámenes deben realizarse máximo 30 días antes de la cirugía y son necesarios para garantizar su seguridad durante el procedimiento. El Dr. Durán le entregará la orden de exámenes específica en la consulta de valoración.",
+      "category": "faq",
+      "subcategory": "examenes-preoperatorios",
+      "metadata": {
+        "validity_days": 30,
+        "basic_exams": ["hemograma", "coagulación", "química sanguínea", "ECG"],
+        "additional_over_40": true
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "El cuidado postoperatorio es fundamental para una recuperación exitosa. Incluye: uso de medicamentos analgésicos y antibióticos según prescripción, reposo relativo durante los primeros días, evitar esfuerzos físicos intensos, mantener las heridas limpias y secas, usar prendas de compresión si están indicadas, asistir a controles médicos programados, y seguir instrucciones específicas de alimentación e hidratación. El Dr. Durán y su equipo estarán disponibles 24/7 para resolver cualquier duda durante su recuperación. Se entregan instrucciones detalladas por escrito al momento del alta.",
+      "category": "faq",
+      "subcategory": "cuidados-postoperatorios",
+      "metadata": {
+        "medication_types": ["analgésicos", "antibióticos", "antiinflamatorios"],
+        "follow_up_required": true,
+        "support_availability": "24/7"
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "El dolor postoperatorio varía según el procedimiento y cada paciente. En general, se describe como molestia moderada más que dolor intenso, y se controla efectivamente con medicamentos analgésicos prescritos. El Dr. Durán utiliza técnicas de manejo del dolor multimodal para minimizar las molestias. Los primeros 2-3 días son los de mayor incomodidad, mejorando significativamente después. Es importante tomar los medicamentos exactamente como se indican y comunicar cualquier dolor intenso que no mejore con la medicación prescrita.",
+      "category": "faq",
+      "subcategory": "manejo-dolor",
+      "metadata": {
+        "pain_level": "moderado",
+        "peak_days": 3,
+        "management": "multimodal",
+        "when_to_call": "dolor intenso que no mejora con medicación"
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "Las cicatrices son inevitables en cualquier cirugía, pero el Dr. Durán utiliza técnicas avanzadas de sutura y ubicación estratégica de incisiones para minimizar su visibilidad. Las cicatrices evolucionan durante 12-18 meses, pasando de rojizas inicialmente a líneas delgadas y claras. Se recomiendan tratamientos específicos con silicona en gel y protección solar estricta para optimizar la cicatrización. La mayoría de las cicatrices quedan en zonas poco visibles o naturalmente ocultas (pliegues naturales, líneas del bikini, etc).",
+      "category": "faq",
+      "subcategory": "cicatrices",
+      "metadata": {
+        "maturation_months": 18,
+        "treatment": ["silicona en gel", "protección solar", "masaje cicatricial"],
+        "visibility": "mínima",
+        "location": "zonas estratégicas poco visibles"
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    }
+  ],
+  "policies": [
+    {
+      "content": "La clínica del Dr. Andrés Durán cuenta con opciones flexibles de financiamiento para hacer más accesibles los procedimientos. Se aceptan todas las tarjetas de crédito principales con opción de diferir a cuotas según la entidad bancaria. Adicionalmente, se tienen convenios con entidades financieras especializadas en créditos de salud que permiten financiamiento hasta 36 meses con aprobación inmediata. Un asesor financiero le brindará información detallada sobre las opciones disponibles y le ayudará a encontrar el plan que mejor se ajuste a su presupuesto.",
+      "category": "policy",
+      "subcategory": "financiamiento",
+      "metadata": {
+        "payment_methods": ["efectivo", "tarjetas de crédito", "transferencia", "créditos especializados"],
+        "max_installments": 36,
+        "credit_approval": "inmediata",
+        "advisor_available": true
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "El costo de los procedimientos incluye: honorarios del cirujano (Dr. Andrés Durán), honorarios del anestesiólogo, uso de sala de cirugía y hospitalización, insumos y materiales quirúrgicos, medicamentos intrahospitalarios, implantes (cuando aplique), controles postoperatorios durante el primer año, y atención 24/7 durante el período de recuperación. NO incluye: exámenes preoperatorios, medicamentos para casa, prendas de compresión, ni tratamientos complementarios opcionales. Se entrega cotización detallada por escrito en la consulta de valoración.",
+      "category": "policy",
+      "subcategory": "costos-incluidos",
+      "metadata": {
+        "included": [
+          "honorarios cirujano",
+          "anestesiólogo",
+          "sala de cirugía",
+          "hospitalización",
+          "insumos",
+          "medicamentos intrahospitalarios",
+          "implantes",
+          "controles primer año",
+          "atención 24/7"
+        ],
+        "not_included": [
+          "exámenes preoperatorios",
+          "medicamentos para casa",
+          "prendas de compresión",
+          "tratamientos complementarios"
+        ]
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "La clínica cuenta con estrictos protocolos de seguridad y calidad. Todos los procedimientos se realizan en salas de cirugía certificadas que cumplen con los más altos estándares internacionales. El equipo médico está altamente capacitado y el Dr. Durán cuenta con más de 15 años de experiencia en cirugía plástica estética y reconstructiva. Se utilizan únicamente implantes y materiales de marcas reconocidas mundialmente con certificación FDA y INVIMA. El seguimiento postoperatorio es riguroso con disponibilidad 24/7 para cualquier eventualidad.",
+      "category": "policy",
+      "subcategory": "seguridad-calidad",
+      "metadata": {
+        "certifications": ["salas de cirugía certificadas", "FDA", "INVIMA"],
+        "surgeon_experience_years": 15,
+        "emergency_support": "24/7",
+        "quality_materials": true
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    }
+  ],
+  "locations": [
+    {
+      "content": "La clínica principal del Dr. Andrés Durán está ubicada en Bogotá, en la Calle 119 # 7-14, Consultorio 456, en la zona de Usaquén. El horario de atención para consultas es de lunes a viernes de 8:00 AM a 6:00 PM, y sábados de 8:00 AM a 1:00 PM. Las cirugías se programan de lunes a viernes. La clínica cuenta con parqueadero, acceso para personas con movilidad reducida, y está cerca de las principales vías de acceso. Para agendar cita puede comunicarse al (601) 123-4567 o vía WhatsApp al 300-123-4567.",
+      "category": "location",
+      "subcategory": "bogota-principal",
+      "metadata": {
+        "address": "Calle 119 # 7-14, Consultorio 456",
+        "city": "Bogotá",
+        "neighborhood": "Usaquén",
+        "schedule_weekdays": "8:00 AM - 6:00 PM",
+        "schedule_saturday": "8:00 AM - 1:00 PM",
+        "phone": "(601) 123-4567",
+        "whatsapp": "300-123-4567",
+        "parking": true,
+        "wheelchair_accessible": true
+      },
+      "validatedBy": "Dr. Andrés Durán",
+      "validatedAt": "2025-12-15T00:00:00Z"
+    }
+  ]
+}

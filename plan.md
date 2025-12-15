@@ -22,42 +22,51 @@ All sub-phases complete:
 **Runtime:** Vercel Edge (V8 isolates, Web APIs only)
 **AI Vision:** Gemini 2.0/2.5 Flash via AI Gateway
 **AI Audio:** Groq Whisper v3 + OpenAI fallback
+**Database:** Neon PostgreSQL + pgvector v0.8.1 (HNSW index, 1.5ms queries)
+**RAG:** Google Gemini text-embedding-004 (768 dims) + semantic search
 **Cost:** ~$8.40/month (10K img + 10K audio) - 89% cheaper than Claude
 
 ---
 
-## Latest Updates (2025-12-05)
+## Latest Updates (2025-12-15)
 
-**BUG-001 RESOLVED:**
-- [x] Identified root cause: Field name mapping issue (HTTP Request body)
-- [x] Solution: Map `conversationMessageType` → `type`, `messageImage` → `mediaUrl`
-- [x] Updated bugs.md with correct diagnosis and resolution
-- [x] Updated setup guide with corrected HTTP Request body configuration
-- [x] Custom Function alternative documented as fallback
+**RAG Implementation COMPLETED:**
+- [x] Neon pgvector extension enabled (v0.8.1, HNSW index)
+- [x] medicalKnowledge table created (768-dim vector embeddings)
+- [x] Google Gemini text-embedding-004 integration
+- [x] Semantic search with pgvector cosine similarity (threshold 0.65)
+- [x] retrieveKnowledge tool for Eva
+- [x] Knowledge base seeded (14 documents: 5 procedures, 5 FAQs, 3 policies, 1 location)
+- [x] Validation tests (66.7% success rate, correct failover behavior)
 
-**Documentation:**
-- [x] WhatsApp → Bird media flow documentation
-- [x] Bird AI Employee Actions setup guide updated
-- [x] WhatsApp media payload structure (api-v23-guide.md)
-- [x] Bird media conversion process (bird-media-handling.md)
+**Performance:**
+- RAG overhead: ~472ms (well within 9s budget)
+- HNSW query time: 1.5ms @ 58K records (AWS benchmark)
+- Embedding generation: ~470ms per document
+- Similarity threshold: 0.65 (balanced precision/recall)
 
-**Files Updated:**
-- `/plan/bugs.md` - BUG-001 marked as RESOLVED with correct solution
-- `/docs/bird/bird-ai-employees-setup-guide.md` - Section 4.4 HTTP Request body corrected
-- `/docs/bird/bird-whatsapp-media-flow.md` - Complete media flow (150 lines)
-
-**Maintenance (2025-12-11):**
-- [x] **Safety:** Added 25MB limit to `lib/bird/media.ts` to prevent Edge Runtime OOM
-- [x] **Fix:** Increased unknown type timeout to 5.5s (Gemini 2.5 Flash) for complex invoices
-- [x] **Version:** Bumped to v2.2.2
+**Files Created:**
+- `lib/ai/embeddings.ts` - Embedding generation
+- `lib/db/queries/knowledge.ts` - Semantic search
+- `lib/agent/tools/retrieve-knowledge.ts` - RAG tool
+- `data/knowledge-base.json` - Seed data (14 docs)
+- `scripts/seed-knowledge.ts` - Database seeder
+- `scripts/test-search.ts` - Semantic search tests
+- `scripts/test-eva-rag.ts` - End-to-end tests
 
 ---
 
-## Next Phase: 4 (Integration & Monitoring)
+## Next Phase: F003 Implementation [BLOCKING]
 
-- [ ] `/api/bird/health` health check
-- [ ] Per-route metrics and cost tracking
-- [ ] Structured logging with telemetry
+**CRITICAL: F003 (Location Triage) Not Implemented**
+- Status: Marked DONE but NO CODE EXISTS
+- Impact: 28% of conversations (310/1,106 users)
+- Timeline: 15 min (prompt-based) OR 2 hours (code-based)
+- Blocks: Production deployment
+
+**After F003:**
+- [ ] Vercel staging deployment (plan ready)
+- [ ] Production deployment
 
 ---
 

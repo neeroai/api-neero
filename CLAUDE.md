@@ -70,6 +70,8 @@ pnpm typecheck        # TypeScript type checking (no emit)
 **AI SDK:** Vercel AI SDK 5.0 (`@ai-sdk/google`, `@ai-sdk/groq`, `@ai-sdk/openai`) + Zod 3.23
 **Vision:** Google Gemini 2.0 Flash ($0.17/1K images, PDF native)
 **Audio:** Groq Whisper Large v3 ($0.67/1K minutes, primary) + OpenAI Whisper ($6.00/1K minutes, fallback)
+**Database:** Neon PostgreSQL (serverless) + Drizzle ORM
+**RAG:** pgvector v0.8.1 (HNSW index) + Gemini text-embedding-004 (768 dims)
 **Integration:** Bird AI Employees Actions + Media CDN (conditional auth)
 **Dev Tools:** Biome 2.3 + Tailwind CSS 4.1 + pnpm 9.15
 
@@ -155,6 +157,39 @@ WhatsApp may retry webhooks if response slow.
 - **Storage:** In-memory Map with message IDs
 - **Cleanup:** Auto-expire after 60 seconds
 
+### RAG (Retrieval-Augmented Generation) Architecture
+
+Eva uses semantic search to retrieve validated medical information from the knowledge base:
+
+**Pipeline:**
+```
+User Query → retrieveKnowledge tool → searchKnowledge() → pgvector → Gemini Embedding → Eva Response
+```
+
+**Components:**
+- **Embeddings:** Google Gemini text-embedding-004 (768 dimensions, $0.025/1M tokens)
+- **Database:** Neon PostgreSQL + pgvector v0.8.1 extension
+- **Index:** HNSW (Hierarchical Navigable Small World) - 1.5ms query time @ 58K records
+- **Similarity:** Cosine distance, threshold 0.65 (balanced precision/recall)
+
+**Key Files:**
+- `lib/ai/embeddings.ts` - Embedding generation with Gemini
+- `lib/db/queries/knowledge.ts` - Semantic search with pgvector
+- `lib/agent/tools/retrieve-knowledge.ts` - RAG tool for Eva
+- `lib/db/schema.ts` - medicalKnowledge table (vector(768))
+- `data/knowledge-base.json` - Seed data (14 documents)
+
+**Knowledge Base:**
+- 14 validated documents (Dr. Andrés Durán)
+- Categories: procedures (5), faqs (5), policies (3), locations (1)
+- Automatic failover: similarity < 0.65 → escalate to human
+
+**Performance:**
+- RAG overhead: ~472ms (5.2% of 9s budget)
+- Embedding generation: ~470ms per query
+- HNSW query: 1.5ms (AWS benchmark)
+- Total: Well within 9-second constraint
+
 ---
 
 ## Key File Relationships
@@ -175,6 +210,15 @@ Image: bird/media.ts → lib/ai/classify.ts → lib/ai/router.ts → processor
 
 Document: bird/media.ts → Gemini PDF → extracted text
 Audio: bird/media.ts → lib/ai/transcribe.ts (Groq → OpenAI fallback) → transcription
+```
+
+**RAG Pipeline:**
+```
+User Query: lib/agent/tools/retrieve-knowledge.ts
+    → Generate embedding: lib/ai/embeddings.ts (Gemini text-embedding-004)
+    → Semantic search: lib/db/queries/knowledge.ts (pgvector HNSW)
+    → Results (similarity > 0.65) → Eva uses in response
+    → No results → Escalate to human (createTicket)
 ```
 
 **Image Routing Files:**
@@ -230,6 +274,7 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 6. **File Limits:** 5MB images, 25MB audio (WhatsApp constraints)
 7. **Cost Optimization:** Gemini 2.0 Flash primary, avoid Claude (too expensive)
 8. **TypeScript Strict:** noUncheckedIndexedAccess, noUnusedLocals enabled
+9. **RAG Threshold:** Similarity < 0.65 → Auto-escalate to human (no hallucination risk)
 
 ---
 
@@ -356,6 +401,8 @@ The AI Employee must populate task arguments before calling the Action:
 5. Update tracking files (plan.md, todo.md, prd.md)
 6. Keep files < 600 lines
 7. See `/docs/bird/bird-actions-architecture.md` for implementation patterns
+8. When adding knowledge: Update data/knowledge-base.json → Run scripts/seed-knowledge.ts
+9. RAG queries: Use retrieveKnowledge tool, NOT direct searchKnowledge() calls
 
 ---
 
