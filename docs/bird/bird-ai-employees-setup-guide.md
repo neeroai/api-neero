@@ -323,6 +323,26 @@ curl -X POST https://api.neero.ai/api/bird \
 
 ---
 
+## Specialized Configurations
+
+### Eva Valoración: Contact Update Action
+
+For configuring Eva Valoración's contact update functionality (name cleaning, email validation, country mapping), see the dedicated guide:
+
+**Guide:** `/docs/bird/eva-contact-update-setup.md`
+
+**Features:**
+- Automatic emoji removal from names (`Juan 😊` → `Juan`)
+- Proper capitalization (`MARIA GARCIA` → `Maria Garcia`)
+- Email/phone/country validation with specific error messages
+- Before/after change transparency
+- Post-update verification
+
+**Time:** 15-20 minutes
+**Prerequisites:** Eva Valoración AI Employee created, `/api/contacts/update` endpoint deployed
+
+---
+
 ## Sources
 
 **Official Bird Documentation:**

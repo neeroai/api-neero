@@ -152,3 +152,217 @@ export function isSuccessResponse(
 export function isErrorResponse(response: BirdActionResponse): response is BirdActionErrorResponse {
   return response.success === false;
 }
+
+/**
+ * Bird Contact identifier
+ */
+export interface BirdContactIdentifier {
+  key: string;
+  value: string;
+}
+
+/**
+ * Bird Contact attributes (custom fields configured in Bird workspace)
+ * IMPORTANT: Only include attributes that EXIST in your Bird workspace
+ */
+export interface BirdContactAttributes {
+  // Display Name fields (NEW - discovered from Bird API docs)
+  displayName?: string; // Direct displayName attribute (may have priority over computed)
+  firstName?: string; // First name (can be in attributes for storage)
+  lastName?: string; // Last name (can be in attributes for storage)
+
+  // Custom attributes that EXIST
+  jose?: string; // Full name (custom attribute)
+  telefono?: string; // Local phone number
+  email?: string; // Email (system attribute, can be in attributes too)
+  city?: string; // City (system attribute)
+  country?: string; // Country (custom attribute for location)
+  fase?: string; // Lead phase (custom attribute)
+  initialSource?: string; // Initial contact source (custom attribute)
+
+  // Allow additional custom attributes from Bird workspace
+  pagovaloracion?: string;
+  referido?: string;
+  birthday?: string;
+  accountIds?: string[];
+
+  [key: string]: any; // Allow other custom attributes
+}
+
+/**
+ * Bird Contact (GET response)
+ */
+export interface BirdContact {
+  id: string;
+  computedDisplayName: string;
+  featuredIdentifiers: BirdContactIdentifier[];
+  identifierCount: number;
+  attributes: Record<string, any>;
+  listIds: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Bird Contact Update payload (PATCH request)
+ * Includes system fields (firstName, lastName) that fix the Contact column display
+ */
+export interface BirdContactUpdate {
+  firstName?: string; // System field - fixes Contact column
+  lastName?: string; // System field - fixes Contact column
+  attributes?: BirdContactAttributes;
+}
+
+/**
+ * Bird Conversation Participant
+ */
+export interface BirdConversationParticipant {
+  type: string;
+  displayName?: string;
+  contact?: {
+    identifierValue?: string;
+  };
+}
+
+/**
+ * Bird Conversation
+ */
+export interface BirdConversation {
+  id: string;
+  channelId?: string;
+  featuredParticipants?: BirdConversationParticipant[];
+  lastMessage?: {
+    createdAt?: string;
+  };
+  lastMessageIncomingAt?: string;
+  lastMessageOutgoingAt?: string;
+}
+
+/**
+ * Bird Conversations API response
+ */
+export interface BirdConversationsResponse {
+  results: BirdConversation[];
+  nextPageToken?: string;
+}
+
+/**
+ * Bird Message Body
+ */
+export type BirdMessageBody =
+  | { type: 'text'; text?: { text?: string } | string }
+  | { type: 'image' }
+  | { type: 'file' }
+  | { type: 'location' }
+  | { type: string; [key: string]: unknown };
+
+/**
+ * Bird Conversation Message
+ */
+export interface BirdMessage {
+  id: string;
+  createdAt: string;
+  sender: { type: string; displayName?: string };
+  body: BirdMessageBody;
+}
+
+/**
+ * Bird Messages API response
+ */
+export interface BirdMessagesResponse {
+  results: BirdMessage[];
+  nextPageToken?: string;
+}
+
+/**
+ * Contact Update API - Request/Response Schemas
+ * For /api/contacts/update endpoint
+ */
+
+/**
+ * Contact Update Request (POST body)
+ */
+export const ContactUpdateRequestSchema = z.object({
+  context: z.object({
+    conversationId: z.string().uuid(),
+    contactPhone: z.string().min(1), // Required for searching contact
+    contactName: z.string().optional(), // Optional for logging
+  }),
+  updates: z
+    .object({
+      displayName: z.string().min(1).max(100).optional(),
+      email: z.string().email().optional(),
+      phone: z.string().optional(),
+      country: z.string().length(2).optional(), // ISO 3166-1 alpha-2
+    })
+    .refine((data) => Object.keys(data).length > 0, {
+      message: 'At least one field must be provided for update',
+    }),
+});
+
+export type ContactUpdateRequest = z.infer<typeof ContactUpdateRequestSchema>;
+
+/**
+ * Contact Update Success Response
+ */
+export const ContactUpdateSuccessResponseSchema = z.object({
+  success: z.literal(true),
+  message: z.string(),
+  data: z.object({
+    contactId: z.string().uuid(),
+    before: z.object({
+      displayName: z.string().optional(),
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      country: z.string().optional(),
+    }),
+    after: z.object({
+      displayName: z.string().optional(),
+      email: z.string().optional(),
+      phone: z.string().optional(),
+      country: z.string().optional(),
+    }),
+    updatedFields: z.array(z.string()),
+    verified: z.boolean(),
+  }),
+  processingTime: z.string(),
+});
+
+export type ContactUpdateSuccessResponse = z.infer<typeof ContactUpdateSuccessResponseSchema>;
+
+/**
+ * Contact Update Error Codes
+ */
+export const ContactUpdateErrorCodeSchema = z.enum([
+  'VALIDATION_ERROR',
+  'CONTACT_NOT_FOUND',
+  'UPDATE_ERROR',
+  'VERIFICATION_ERROR',
+  'TIMEOUT_ERROR',
+  'UNAUTHORIZED',
+]);
+
+export type ContactUpdateErrorCode = z.infer<typeof ContactUpdateErrorCodeSchema>;
+
+/**
+ * Contact Update Error Response
+ */
+export const ContactUpdateErrorResponseSchema = z.object({
+  success: z.literal(false),
+  error: z.string(),
+  code: ContactUpdateErrorCodeSchema,
+  details: z.record(z.string(), z.any()).optional(),
+  processingTime: z.string().optional(),
+});
+
+export type ContactUpdateErrorResponse = z.infer<typeof ContactUpdateErrorResponseSchema>;
+
+/**
+ * Contact Update Response (union of success and error)
+ */
+export const ContactUpdateResponseSchema = z.union([
+  ContactUpdateSuccessResponseSchema,
+  ContactUpdateErrorResponseSchema,
+]);
+
+export type ContactUpdateResponse = z.infer<typeof ContactUpdateResponseSchema>;
