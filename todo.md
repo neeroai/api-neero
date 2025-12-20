@@ -1,12 +1,22 @@
 # todo.md - EVA AI Employee (Cirugía Plástica)
 
-**Version:** 1.0 | **Date:** 2025-12-15 16:35 | **Status:** Active
+**Version:** 1.1 | **Date:** 2025-12-20 20:45 | **Status:** Active
 
 ---
 
 ## TODO
 
-### Phase 1: F003 Implementation [NEXT - BLOCKING PRODUCTION]
+### Phase 1: Eva KB Deployment [NEXT - READY]
+- [ ] Review executive summary with stakeholder
+- [ ] Upload Knowledge Base files to Bird Dashboard (15 min)
+- [ ] Update Additional Instructions in Bird Dashboard (10 min)
+- [ ] Run smoke tests (3 messages via WhatsApp)
+- [ ] Configure monitoring alerts (3 alerts)
+- [ ] Execute 6 test cases from testing guide
+- [ ] Monitor metrics for 7 days
+- [ ] Validate ROI on Day 7 (4/4 metrics must pass)
+
+### Phase 2: F003 Implementation [BLOCKING API PRODUCTION]
 - [ ] Decide implementation approach (prompt-based 15min or code-based 2hrs)
 - [ ] Implement location triage for Bogotá (auto-respond)
 - [ ] Implement escalation for other cities (Medellín, Cali, etc.)
@@ -14,7 +24,7 @@
 - [ ] Validate 95% accuracy target
 - [ ] Update feature_list.json status
 
-### Phase 2: Staging Deployment [After F003]
+### Phase 3: Staging Deployment [After F003]
 - [ ] Create Vercel staging project (api-neero-staging)
 - [ ] Create Neon PostgreSQL staging database
 - [ ] Run database migrations on staging
@@ -27,13 +37,9 @@
 
 ## DOING
 
-### Documentation Update [Completed 2025-12-15 16:45]
-- [x] Create codebase-guide.md (quick navigation reference)
-- [x] Update plan.md with RAG implementation
-- [x] Update todo.md with completed RAG work
-- [x] Update claude-progress.md with latest session
-- [x] Update CLAUDE.md with RAG section
-- [x] Update feature_list.json with F012
+Nothing currently in progress.
+
+---
 
 ---
 
@@ -48,6 +54,21 @@
 ---
 
 ## DONE
+
+### Eva Knowledge Base Optimization [2025-12-20]
+- [x] Fase 1: Content classification (DINÁMICO vs ESTÁTICO)
+- [x] Fase 2: Create Knowledge Base files (procedimientos, ubicaciones, faqs)
+- [x] Fase 3: Reduce Additional Instructions (9,000 → 3,260 tokens)
+- [x] Fase 4: Create testing guide (6 test cases)
+- [x] Fase 5: Create deployment guide (30-45 min procedure)
+- [x] Create executive summary (ROI: $24,300/year, 12-day payback)
+- [x] Git commits (3 commits: cbd114b, b7b2174, eb6eb98)
+
+**Results:**
+- Token reduction: -64% (9,000 → 3,260)
+- Expected cost reduction: -48% ($4,095 → $2,070/month)
+- Expected latency reduction: -22% (3.2s → 2.5s)
+- Files created: 8 (3 KB + 4 docs + 1 script)
 
 ### RAG Implementation [2025-12-15]
 - [x] Enable pgvector extension in Neon database

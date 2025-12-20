@@ -278,6 +278,26 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 
 ---
 
+## Eva Knowledge Base Optimization
+
+**Status:** Implementation complete, ready for Bird Dashboard deployment
+**Impact:** -64% tokens, -48% cost, -22% latency, $24,300/year savings
+
+**Key Files:**
+- `knowledge-base/procedimientos.md` - 17 procedures (~4,200 tokens)
+- `knowledge-base/ubicaciones.md` - 2 offices + virtual (~400 tokens)
+- `knowledge-base/faqs.md` - 6 FAQs (~500 tokens)
+- `feature/eva-valoracion/eva-valoracion.agent.json` - Optimized config (3,260 tokens)
+
+**Documentation:**
+- `docs/eva-kb-optimization-executive-summary.md` - Executive summary
+- `docs/eva-kb-optimization-deployment-guide.md` - Deployment (30-45 min)
+- `docs/eva-kb-optimization-testing-guide.md` - Testing (6 test cases)
+
+**Next Step:** Upload KB files to Bird Dashboard + Update Additional Instructions
+
+---
+
 ## Documentation
 
 **Project Docs (`/docs`):**
@@ -286,6 +306,7 @@ See `/docs/bird/bird-actions-architecture.md` for authentication details.
 - `bird/` - Other Bird docs (webhooks for reference only)
 - `ai-integration.md` - Gemini, Groq, OpenAI integration via AI SDK
 - `deployment.md` - Vercel deployment, environment configuration
+- `eva-kb-optimization-*.md` - Eva optimization guides (3 docs)
 
 **Reference:** /Users/mercadeo/neero/docs-global/platforms/{vercel,bird}/
 

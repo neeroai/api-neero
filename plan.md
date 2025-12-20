@@ -1,6 +1,6 @@
 # plan.md - Cost-Optimized Multimodal API
 
-**Project:** api-neero | **Version:** 2.2.3 | **Updated:** 2025-12-11
+**Project:** api-neero | **Version:** 2.2.3 | **Updated:** 2025-12-20
 
 ---
 
@@ -14,6 +14,7 @@ All sub-phases complete:
 - 5.2: AI SDK Migration (Groq REST to SDK)
 - 5.3: Text Post-Processing (llama-3.1-8b-instant)
 - 5.4: Research Validation (optimal model selection)
+- 5.5: Eva KB Optimization (64% token reduction)
 
 ---
 
@@ -28,7 +29,36 @@ All sub-phases complete:
 
 ---
 
-## Latest Updates (2025-12-15)
+## Latest Updates (2025-12-20)
+
+**Eva Knowledge Base Optimization COMPLETED:**
+- [x] Content classification: 9,000 tokens → 3,260 tokens (-64%)
+- [x] Knowledge Base files created (procedimientos, ubicaciones, faqs)
+- [x] Additional Instructions optimized (dynamic flows only)
+- [x] Testing guide created (6 test cases)
+- [x] Deployment guide created (30-45 min procedure)
+- [x] Executive summary created (ROI: $24,300/year)
+
+**Expected Benefits:**
+- Token reduction: -64% (9,000 → 3,260)
+- Cost reduction: -48% ($4,095 → $2,070/month)
+- Latency reduction: -22% (3.2s → 2.5s)
+- Quality maintained: ≥95% correct responses
+- Payback period: 12 days
+
+**Files Created:**
+- `knowledge-base/procedimientos.md` - 17 procedures (~4,200 tokens)
+- `knowledge-base/ubicaciones.md` - 2 offices + virtual (~400 tokens)
+- `knowledge-base/faqs.md` - 6 FAQs (~500 tokens)
+- `docs/eva-content-classification-analysis.md` - Analysis
+- `docs/eva-kb-optimization-testing-guide.md` - Testing
+- `docs/eva-kb-optimization-deployment-guide.md` - Deployment
+- `docs/eva-kb-optimization-executive-summary.md` - Summary
+- `scripts/reduce-additional-text.py` - Reduction script
+
+---
+
+## Previous Updates (2025-12-15)
 
 **RAG Implementation COMPLETED:**
 - [x] Neon pgvector extension enabled (v0.8.1, HNSW index)
@@ -44,15 +74,6 @@ All sub-phases complete:
 - HNSW query time: 1.5ms @ 58K records (AWS benchmark)
 - Embedding generation: ~470ms per document
 - Similarity threshold: 0.65 (balanced precision/recall)
-
-**Files Created:**
-- `lib/ai/embeddings.ts` - Embedding generation
-- `lib/db/queries/knowledge.ts` - Semantic search
-- `lib/agent/tools/retrieve-knowledge.ts` - RAG tool
-- `data/knowledge-base.json` - Seed data (14 docs)
-- `scripts/seed-knowledge.ts` - Database seeder
-- `scripts/test-search.ts` - Semantic search tests
-- `scripts/test-eva-rag.ts` - End-to-end tests
 
 ---
 
