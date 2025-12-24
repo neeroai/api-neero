@@ -64,6 +64,54 @@ pnpm typecheck        # TypeScript type checking (no emit)
 
 ---
 
+## Quality Gates & Testing
+
+**Framework:** Vitest + Edge Runtime VM
+**Coverage Target:** 60%+ (statements, branches, functions, lines)
+**CI Pipeline:** GitHub Actions (5 sequential gates)
+
+### Quality Gates (CI)
+
+| Gate | Tool | Command | Pass Criteria |
+|------|------|---------|---------------|
+| Format | Biome | `pnpm run format --check` | Exit 0 |
+| Lint | Biome | `pnpm run lint` | Exit 0 |
+| Types | TypeScript | `pnpm run typecheck` | Exit 0 |
+| Tests | Vitest | `pnpm run test` | All pass |
+| Build | Next.js | `pnpm run build` | Exit 0 |
+
+**Protocol:** ALL gates must pass before merge to main
+
+### Edge Runtime Testing
+
+**Critical Constraints:**
+- Use Web APIs only: `fetch`, `crypto.subtle`, `ReadableStream`
+- NO Node.js APIs: `fs`, `Buffer`, `crypto.createHmac`
+- Mock AI SDK calls (avoid real API requests)
+- Use `@edge-runtime/vm` for testing environment
+
+**Test Commands:**
+```bash
+pnpm test              # Run all tests
+pnpm test:watch        # Watch mode
+pnpm test:ui           # Visual UI
+pnpm test:coverage     # Coverage report
+```
+
+### SDD Tracking Files
+
+| File | Purpose | Update Frequency |
+|------|---------|------------------|
+| plan.md | Architecture + phases | Phase milestones |
+| todo.md | [TODO\|DOING\|DONE] | Every session |
+| feature_list.json | Feature tracking | Feature completion |
+| claude-progress.md | Session handoff | Session end |
+
+**Templates:** `/Users/mercadeo/neero/docs-global/templates/sdd/`
+**Methodology:** `/Users/mercadeo/neero/docs-global/workflows/sdd-methodology.md`
+
+---
+
 ## Tech Stack
 
 **Core:** Next.js 16 + React 19 + TypeScript 5.9 + Vercel Edge Runtime
