@@ -121,13 +121,13 @@ export function parseFullName(displayName: string): {
 
   if (parts.length === 1) {
     return {
-      firstName: capitalizeProper(parts[0]),
+      firstName: capitalizeProper(parts[0] ?? ''),
       lastName: '',
     };
   }
 
   // Multiple parts: first = firstName, rest = lastName
-  const firstName = capitalizeProper(parts[0]);
+  const firstName = capitalizeProper(parts[0] ?? '');
   const lastName = parts.slice(1).map(capitalizeProper).join(' ');
 
   return { firstName, lastName };

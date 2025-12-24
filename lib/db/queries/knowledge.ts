@@ -46,30 +46,49 @@ export async function searchKnowledge(
 
   // Generate embedding for the query
   const queryEmbedding = await generateEmbedding(query);
-
-  // Build the WHERE clause for category filter
-  const categoryFilter = category ? `AND category = '${category}'` : '';
+  const embeddingVector = JSON.stringify(queryEmbedding);
 
   // Execute semantic search using pgvector cosine similarity
   // <=> operator: cosine distance (0 = identical, 2 = opposite)
   // similarity = 1 - distance (1 = identical, -1 = opposite)
-  const results = await sql`
-    SELECT
-      knowledge_id,
-      content,
-      category,
-      subcategory,
-      metadata,
-      1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) as similarity
-    FROM medical_knowledge
-    WHERE active = true
-      ${sql.unsafe(categoryFilter)}
-      AND 1 - (embedding <=> ${JSON.stringify(queryEmbedding)}::vector) > ${threshold}
-    ORDER BY embedding <=> ${JSON.stringify(queryEmbedding)}::vector
-    LIMIT ${limit}
-  `;
+  // Use conditional query to avoid sql.unsafe (not available in Neon client)
+  let results;
+  if (category) {
+    results = await sql`
+      SELECT
+        knowledge_id,
+        content,
+        category,
+        subcategory,
+        metadata,
+        1 - (embedding <=> ${embeddingVector}::vector) as similarity
+      FROM medical_knowledge
+      WHERE active = true
+        AND category = ${category}
+        AND 1 - (embedding <=> ${embeddingVector}::vector) > ${threshold}
+      ORDER BY embedding <=> ${embeddingVector}::vector
+      LIMIT ${limit}
+    `;
+  } else {
+    results = await sql`
+      SELECT
+        knowledge_id,
+        content,
+        category,
+        subcategory,
+        metadata,
+        1 - (embedding <=> ${embeddingVector}::vector) as similarity
+      FROM medical_knowledge
+      WHERE active = true
+        AND 1 - (embedding <=> ${embeddingVector}::vector) > ${threshold}
+      ORDER BY embedding <=> ${embeddingVector}::vector
+      LIMIT ${limit}
+    `;
+  }
 
-  return results.map((row: any) => ({
+  // Cast to array since Neon returns union type (any[][] | Record<string, any>[] | FullQueryResults)
+  const rows = results as Array<Record<string, any>>;
+  return rows.map((row) => ({
     knowledgeId: row.knowledge_id,
     content: row.content,
     category: row.category,
@@ -113,6 +132,9 @@ export async function insertKnowledge(
     })
     .returning();
 
+  if (!result) {
+    throw new Error('Failed to insert knowledge document');
+  }
   return result;
 }
 
@@ -184,6 +206,9 @@ export async function updateKnowledge(
     .where(eq(medicalKnowledge.knowledgeId, knowledgeId))
     .returning();
 
+  if (!result) {
+    throw new Error(`Failed to update knowledge document: ${knowledgeId}`);
+  }
   return result;
 }
 

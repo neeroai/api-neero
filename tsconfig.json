@@ -38,5 +38,13 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": ["node_modules"]
+  "exclude": [
+    "node_modules",
+    "scripts",
+    "lib/normalization",
+    "lib/utils/csv-parser.ts",
+    "lib/utils/name-cleaning.ts",
+    "lib/utils/data-extraction.ts",
+    "app/api/cron"
+  ]
 }

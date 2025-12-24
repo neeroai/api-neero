@@ -7,6 +7,9 @@ import { birdFetch } from './client';
 import { getBirdConfig } from './env';
 import type { BirdContact, BirdContactUpdate } from './types';
 
+// Re-export types for convenience
+export type { BirdContact, BirdContactUpdate };
+
 /**
  * Fetch a Bird contact by ID
  *
@@ -135,6 +138,44 @@ export async function addEmailIdentifier(
       `Bird API error ${response.status}: ${JSON.stringify(errorData)}`
     );
   }
+
+  return response.json();
+}
+
+/**
+ * Update identifier subscription status
+ *
+ * @param identifierKey - Identifier type (e.g., 'phonenumber')
+ * @param identifierValue - Identifier value (e.g., '+573001234567')
+ * @param subscriptions - Subscription status to update
+ * @returns Updated contact
+ *
+ * @example
+ * await updateIdentifierSubscription('phonenumber', '+573001234567', {
+ *   subscribedSms: true
+ * });
+ */
+export async function updateIdentifierSubscription(
+  identifierKey: string,
+  identifierValue: string,
+  subscriptions: {
+    subscribedSms?: boolean;
+    subscribedWhatsapp?: boolean;
+    subscribedEmail?: boolean;
+    subscribedPush?: boolean;
+    subscribedRcs?: boolean;
+  }
+): Promise<BirdContact> {
+  const { workspaceId } = getBirdConfig();
+  // Note: Don't encode identifierValue - fetch() will handle URL encoding automatically
+  // and Bird API expects the raw phone number format (e.g., +573001234567)
+  const path = `/workspaces/${workspaceId}/contacts/identifiers/${identifierKey}/${identifierValue}`;
+
+  const response = await birdFetch(path, {
+    method: 'PATCH',
+    body: JSON.stringify({ attributes: subscriptions }),
+    retryCount: 2,
+  });
 
   return response.json();
 }

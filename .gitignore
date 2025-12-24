@@ -46,7 +46,7 @@ pnpm-debug.log*
 plan
 
 # Symlinks
-docs-global
+docs-global/
 /docs-global
 
 # Archive folders
@@ -58,3 +58,14 @@ convers/
 /convers
 conversations/
 /conversations
+
+# Documentation files
+docs/
+validation-reports/
+results/
+plan/
+feature/
+knowledge-base/
+
+# Development scripts (local only)
+scripts/
