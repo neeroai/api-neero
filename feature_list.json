@@ -1,767 +1,283 @@
 {
-  "version": "1.0",
-  "updated": "2025-12-14 13:20",
-  "project": "eva-ai-employee-cirugia-plastica",
-  "owner": "Javier Polo",
-  "status": "pre-production",
+  "project": "api-neero",
+  "version": "3.0.0",
+  "lastUpdated": "2025-12-24T12:30:00Z",
   "features": [
     {
       "id": "F001",
       "name": "Data Collection (1 Message)",
-      "version": "v1.0",
-      "status": "DOING",
-      "priority": "HIGH",
-      "effort": 3,
-      "story": "US-1.0-01",
-      "phase": 1,
-      "description": "Recolecta 5 campos en 1 mensaje (nombre, edad, ciudad, procedimiento, contacto)",
-      "validation": "60% de 1,106 conversaciones completadas en 1 mensaje (664/1,106)",
+      "description": "Collects 5 fields (name, phone, email, country, procedure) in free-form format with upsertLeadTool",
+      "status": "completed",
+      "priority": "P0",
       "steps": [
         {
           "id": "S001",
-          "description": "Implementar upsertLead tool",
-          "status": "DONE"
+          "description": "Implement upsertLeadTool with insert + update logic",
+          "status": "completed"
         },
         {
           "id": "S002",
-          "description": "Crear tabla leads en Neon PostgreSQL",
-          "status": "DONE"
+          "description": "Create leads table with conversation_id unique index",
+          "status": "completed"
         },
         {
           "id": "S003",
-          "description": "Validar formato datos 100% casos",
-          "status": "DONE"
+          "description": "Integrate with Bird Contacts API for CRM sync",
+          "status": "completed"
         },
         {
-          "id": "S099",
-          "description": "Deploy to production (Vercel)",
-          "status": "TODO"
+          "id": "S004",
+          "description": "Create automated validation script",
+          "status": "completed"
         }
       ],
       "acceptance": [
-        "Solicita 5 campos en formato bullets",
-        "Acepta respuestas en formato libre o estructurado",
-        "60% completitud en primer mensaje validado",
-        "Guarda datos estructurados en tabla leads"
+        "Accepts free-form format with 87% completion rate target",
+        "Updates Bird Contact after lead upsert",
+        "All validation tests passing (165 lines script)",
+        "Handles duplicate conversation_id gracefully"
       ],
-      "dependencies": [],
-      "files": [
-        "/lib/agent/tools/crm.ts",
-        "/lib/agent/prompts/eva-system.md",
-        "/lib/db/schema.ts"
-      ],
-      "metrics": {
-        "baseline": "5-8 min manual",
-        "target": "<2 min",
-        "success_rate": "60%"
-      }
+      "implementation": "/lib/agent/tools/crm.ts",
+      "validation": "scripts/validate-f001-data-collection.ts"
     },
     {
       "id": "F002",
       "name": "Price Inquiry Handover",
-      "version": "v1.0",
-      "status": "DOING",
-      "priority": "HIGH",
-      "effort": 2,
-      "story": "US-1.0-02",
-      "phase": 2,
-      "description": "Escalación inmediata a coordinador cuando usuario pregunta precio",
-      "validation": "50% de 1,106 conversaciones preguntan precio (553/1,106)",
+      "description": "Two-layer architecture (AI proactive + guardrails reactive) to detect pricing questions and escalate to human",
+      "status": "completed",
+      "priority": "P0",
       "steps": [
         {
           "id": "S001",
-          "description": "Implementar keyword detection (precio, cuánto, costo, valor, $)",
-          "status": "DONE"
+          "description": "Implement createTicket tool with reason='pricing'",
+          "status": "completed"
         },
         {
           "id": "S002",
-          "description": "Implementar createTicket tool para escalación",
-          "status": "DONE"
+          "description": "Add 14 pricing keywords to guardrails detection",
+          "status": "completed"
         },
         {
           "id": "S003",
-          "description": "Agregar template respuesta handover",
-          "status": "DONE"
+          "description": "Create conversation_state handover tracking",
+          "status": "completed"
         },
         {
-          "id": "S099",
-          "description": "Deploy to production (Vercel)",
-          "status": "TODO"
+          "id": "S004",
+          "description": "Create automated validation script",
+          "status": "completed"
         }
       ],
       "acceptance": [
-        "Detecta keywords: precio, cuánto, costo, valor, $",
-        "Escala con contexto completo",
-        "100% escalación detectada",
-        "Template respuesta: Te conecto con coordinador para presupuesto personalizado"
+        "Detects pricing questions with two-layer architecture",
+        "Creates structured ticket with reason='pricing'",
+        "Updates conversation_state with requiresHuman=true",
+        "All validation tests passing (210 lines script)",
+        "Known limitation: Guardrails only detect responses with '$', relies on AI for questions"
       ],
-      "dependencies": [],
-      "files": [
-        "/lib/agent/tools/handover.ts",
-        "/lib/agent/guardrails.ts",
-        "/app/api/agent/inbound/route.ts"
-      ],
-      "metrics": {
-        "detection_rate": "100%",
-        "response_time": "<30 min coordinador",
-        "satisfaction": "Sin frustración"
-      }
+      "implementation": "/lib/agent/guardrails.ts, /lib/agent/tools/crm.ts",
+      "validation": "scripts/validate-f002-pricing-handover.ts"
     },
     {
       "id": "F003",
-      "name": "Location Triage (Bogotá/Otros)",
-      "version": "v1.0",
-      "status": "DOING",
-      "priority": "HIGH",
-      "effort": 2,
-      "story": "US-1.0-03",
-      "phase": 2,
-      "description": "Respuesta automática para Bogotá, escalación para otras ciudades",
-      "validation": "28% de 1,106 conversaciones preguntan ubicación (310/1,106)",
+      "name": "Location Triage",
+      "description": "Immediate location responses for Bogotá/Barranquilla, virtual offer for other Colombia, escalate outside Colombia",
+      "status": "blocked",
+      "priority": "P0",
+      "blocker": "Feature marked DONE but NO code exists - CRITICAL BLOCKER affecting 28% of conversations (310/1,106)",
       "steps": [
         {
           "id": "S001",
-          "description": "Detectar ciudad en mensaje usuario",
-          "status": "DONE"
+          "description": "Create SPEC.md with problem, contracts, rules, DoD",
+          "status": "pending"
         },
         {
           "id": "S002",
-          "description": "Responder con dirección Bogotá automático",
-          "status": "DONE"
+          "description": "Create PLAN.md with implementation steps",
+          "status": "pending"
         },
         {
           "id": "S003",
-          "description": "Escalar a coordinador otras ciudades",
-          "status": "DONE"
-        },
-        {
-          "id": "S099",
-          "description": "Deploy to production (Vercel)",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Detecta ciudad en mensaje",
-        "Responde con dirección específica si Bogotá",
-        "Escala a coordinador si otra ciudad",
-        "95% accuracy detección ciudad"
-      ],
-      "dependencies": [],
-      "files": [
-        "/lib/agent/prompts/eva-system.md",
-        "/app/api/agent/inbound/route.ts"
-      ],
-      "metrics": {
-        "detection_accuracy": "95%",
-        "bogota_auto_response": "100%",
-        "other_cities_escalation": "Automática"
-      }
-    },
-    {
-      "id": "F004",
-      "name": "Photo Quality Analysis (Gemini)",
-      "version": "v1.0",
-      "status": "DOING",
-      "priority": "MEDIUM",
-      "effort": 4,
-      "story": "US-1.0-04",
-      "phase": 3,
-      "description": "Análisis de fotos con Gemini 2.0 Flash (iluminación, enfoque, área visible)",
-      "validation": "Pipeline reused from api-neero multimodal (image routing)",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Integrar Gemini 2.0 Flash para análisis",
-          "status": "DONE"
-        },
-        {
-          "id": "S002",
-          "description": "Validar: iluminación, enfoque, área visible",
-          "status": "DONE"
-        },
-        {
-          "id": "S003",
-          "description": "Guardar análisis en message_logs",
-          "status": "DONE"
+          "description": "Create TASKS.md with 1-4hr task breakdown",
+          "status": "pending"
         },
         {
           "id": "S004",
-          "description": "Reutilizar pipeline /lib/ai (classify + router)",
-          "status": "DONE"
-        },
-        {
-          "id": "S099",
-          "description": "Deploy to production (Vercel)",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Procesa imágenes vía Gemini 2.0 Flash",
-        "Valida: iluminación, enfoque, área visible",
-        "Guarda análisis en message_logs",
-        "100% reuso pipeline multimodal existente"
-      ],
-      "dependencies": [],
-      "files": [
-        "/lib/agent/tools/media.ts",
-        "/lib/ai/classify.ts",
-        "/lib/ai/router.ts",
-        "/lib/db/schema.ts"
-      ],
-      "metrics": {
-        "latency_p95": "<5s",
-        "quality_levels": "3 niveles (buena/regular/mala)",
-        "code_reuse": "100% pipeline existente"
-      }
-    },
-    {
-      "id": "F005",
-      "name": "Audio Transcription (Whisper)",
-      "version": "v1.0",
-      "status": "DOING",
-      "priority": "MEDIUM",
-      "effort": 3,
-      "story": "US-1.0-05",
-      "phase": 3,
-      "description": "Transcripción de audio en español con Groq Whisper v3 + fallback OpenAI",
-      "validation": "Voice notes feature para pacientes LATAM (español optimizado)",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Integrar Groq Whisper v3 (primary)",
-          "status": "DONE"
-        },
-        {
-          "id": "S002",
-          "description": "Implementar fallback OpenAI Whisper",
-          "status": "DONE"
-        },
-        {
-          "id": "S003",
-          "description": "Optimizar para español (idioma primario)",
-          "status": "DONE"
-        },
-        {
-          "id": "S099",
-          "description": "Deploy to production (Vercel)",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Procesa audio con Groq Whisper v3 (primary)",
-        "Fallback a OpenAI Whisper si Groq falla",
-        "Optimizado para español",
-        "Guarda transcripción en message_logs"
-      ],
-      "dependencies": [],
-      "files": [
-        "/lib/agent/tools/media.ts",
-        "/lib/ai/transcribe.ts",
-        "/lib/db/schema.ts"
-      ],
-      "metrics": {
-        "latency_groq_p95": "<8s",
-        "latency_openai_p95": "<12s",
-        "accuracy_spanish": ">95%",
-        "fallback_rate": "<5%"
-      }
-    },
-    {
-      "id": "F006",
-      "name": "Guardrails Compliance (Safety Validation)",
-      "version": "v1.0",
-      "status": "DOING",
-      "priority": "HIGH",
-      "effort": 5,
-      "story": "US-1.0-06",
-      "phase": 2,
-      "description": "Sistema de guardrails para evitar riesgos legales, médicos y reputacionales",
-      "validation": "100 conversation audit → 0 violations",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Detectar emergencias P0 (sangrado, dolor extremo)",
-          "status": "DONE"
-        },
-        {
-          "id": "S002",
-          "description": "Bloquear advice médico (diagnósticos, tratamientos)",
-          "status": "DONE"
-        },
-        {
-          "id": "S003",
-          "description": "No comprometer precios (solo coordinador autorizado)",
-          "status": "DONE"
-        },
-        {
-          "id": "S004",
-          "description": "Validar consentimiento datos (GDPR/Ley 1581)",
-          "status": "DONE"
+          "description": "Create TESTPLAN.md with 80%+ coverage strategy",
+          "status": "pending"
         },
         {
           "id": "S005",
-          "description": "Implementar 100% logging en Supabase",
-          "status": "DONE"
-        },
-        {
-          "id": "S099",
-          "description": "Deploy to production (Vercel)",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Detecta emergencias P0 → Escalación inmediata",
-        "Bloquea advice médico",
-        "No compromete precios",
-        "Valida consentimiento datos (GDPR/Ley 1581)",
-        "100% logging en Supabase: conversationId, reason_code, risk_flags"
-      ],
-      "dependencies": [],
-      "files": [
-        "/lib/agent/guardrails.ts",
-        "/lib/agent/consent.ts",
-        "/lib/db/schema.ts",
-        "/docs/POLICY_GUARDRAILS.md"
-      ],
-      "metrics": {
-        "violations": "0",
-        "emergency_detection": "100% escalación <30s",
-        "compliance_audit": "100% pass"
-      }
-    },
-    {
-      "id": "F007",
-      "name": "Proactive Closure CTA",
-      "version": "v1.1",
-      "status": "TODO",
-      "priority": "HIGH",
-      "effort": 6,
-      "story": "US-1.1-01",
-      "phase": 5,
-      "description": "Mensaje de cierre automático + próximos pasos después de completar solicitud",
-      "validation": "95% conversaciones terminan sin closure (1,051/1,106)",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Actualizar eva-system.md prompt con closure logic",
-          "status": "TODO"
-        },
-        {
-          "id": "S002",
-          "description": "Implementar send-closure-cta.ts action (4 escenarios)",
-          "status": "TODO"
-        },
-        {
-          "id": "S003",
-          "description": "Validar WhatsApp 24h window compliance",
-          "status": "TODO"
-        },
-        {
-          "id": "S004",
-          "description": "Testing con 10 conversaciones reales",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Datos completos → Envía cierre + 24h promise",
-        "Datos parciales → Solicita faltantes primero",
-        "Post-escalación → Confirmación coordinador",
-        "Fuera de horario → Respuesta mañana 9am-6pm"
-      ],
-      "dependencies": [
-        "F001",
-        "Phase 5 outbound endpoint complete"
-      ],
-      "files": [
-        "/lib/agent/prompts/eva-system.md",
-        "/lib/agent/actions/send-closure-cta.ts"
-      ],
-      "metrics": {
-        "baseline": "5% con closure (55/1,106)",
-        "target_v1_1": "20% (+300%)",
-        "target_v1_2": "50% (+900%)"
-      },
-      "notes": "Risk: WhatsApp 24h window. Mitigación: validar timestamp antes de enviar."
-    },
-    {
-      "id": "F008",
-      "name": "Proactive Price/Value Explanation",
-      "version": "v1.1",
-      "status": "TODO",
-      "priority": "HIGH",
-      "effort": 8,
-      "story": "US-1.1-02",
-      "phase": 5,
-      "description": "Explicación proactiva de factores de costo antes de pregunta directa",
-      "validation": "50% preguntan precio inmediatamente (553/1,106), 47% nunca comparten datos después",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Crear pricing-education.ts con rangos autorizados",
-          "status": "TODO"
-        },
-        {
-          "id": "S002",
-          "description": "Actualizar eva-system.md con proactive pricing logic",
-          "status": "TODO"
-        },
-        {
-          "id": "S003",
-          "description": "Legal review: rangos pricing compliance",
-          "status": "TODO"
-        },
-        {
-          "id": "S004",
-          "description": "A/B test: con/sin explicación (100 conversaciones cada grupo)",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Primera mención procedimiento → Incluye explicación costo",
-        "Pregunta directa precio → Explica factores + rango general",
-        "Comparación precios → Diferenciadores + coordinador"
-      ],
-      "dependencies": [
-        "Coordinador approval: rangos pricing autorizados por procedimiento"
-      ],
-      "files": [
-        "/lib/agent/prompts/pricing-education.ts",
-        "/lib/agent/prompts/eva-system.md"
-      ],
-      "metrics": {
-        "baseline": "47% preguntan precio sin datos (261/553)",
-        "target_v1_1": "35% (-25%)",
-        "target_v1_2": "25% (-47%)",
-        "understanding": "10% → 50% entienden factores costo"
-      },
-      "notes": "Risk: Compliance pricing. Mitigación: usar rangos amplios + disclaimer coordinador da presupuesto exacto."
-    },
-    {
-      "id": "F009",
-      "name": "Dynamic Location Triage (8 Cities)",
-      "version": "v1.1",
-      "status": "TODO",
-      "priority": "MEDIUM",
-      "effort": 6,
-      "story": "US-1.1-03",
-      "phase": 5,
-      "description": "Expansión de respuestas automáticas a 8 ciudades principales colombianas",
-      "validation": "28% preguntan ubicación (310/1,106), solo Bogotá tiene respuesta automática actualmente",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Crear locations.ts con datos 8 ciudades (Bogotá, Medellín, Cali, Barranquilla, Cartagena, Bucaramanga, Pereira, Santa Marta)",
-          "status": "TODO"
-        },
-        {
-          "id": "S002",
-          "description": "Actualizar eva-system.md con dynamic location logic",
-          "status": "TODO"
-        },
-        {
-          "id": "S003",
-          "description": "Validar datos con coordinador (direcciones, horarios, opciones servicio)",
-          "status": "TODO"
-        },
-        {
-          "id": "S004",
-          "description": "User testing: 5 conversaciones por ciudad",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Bogotá, Medellín → Dirección específica + horarios",
-        "Cali, Barranquilla, etc. → Opciones servicio (videollamada/presencial)",
-        "Otras ciudades → Fallback (videollamada o viajar)",
-        "95% accuracy detección ciudad"
-      ],
-      "dependencies": [
-        "Coordinador input: ciudades con cobertura confirmada + opciones servicio"
-      ],
-      "files": [
-        "/lib/agent/data/locations.ts",
-        "/lib/agent/prompts/eva-system.md",
-        "/app/api/agent/inbound/route.ts"
-      ],
-      "metrics": {
-        "baseline": "28% preguntan ubicación (310/1,106)",
-        "target_v1_1": "20% (-29%)",
-        "coverage": "1 ciudad → 8 ciudades",
-        "satisfaction": "6/10 → 8/10"
-      },
-      "notes": "Risk: Datos desactualizados. Mitigación: archivo editable, review trimestral."
-    },
-    {
-      "id": "F010",
-      "name": "Appointment Scheduling",
-      "version": "v1.2",
-      "status": "DEFER",
-      "priority": "MEDIUM",
-      "effort": 18,
-      "story": "US-1.2-01",
-      "phase": 6,
-      "description": "Agendamiento de citas directamente desde WhatsApp con Google Calendar integration",
-      "validation": "Validar ROI: costo desarrollo (16-20h) vs ahorro coordinador (45 min/semana)",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Solicitar Google Calendar API approval (~2 weeks)",
-          "status": "TODO"
-        },
-        {
-          "id": "S002",
-          "description": "Implementar calendar integration",
-          "status": "TODO"
-        },
-        {
-          "id": "S003",
-          "description": "Lógica double-booking prevention",
-          "status": "TODO"
-        },
-        {
-          "id": "S004",
-          "description": "Recordatorios 48h y 24h antes",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Google Calendar API integration",
-        "Propone 3 slots disponibles (próximos 7-14 días)",
-        "Confirmación automática vía WhatsApp + Calendar invite",
-        "Recordatorios 48h y 24h antes de cita",
-        "Maneja reagendamiento (1 cambio gratis)"
-      ],
-      "dependencies": [
-        "Google Calendar API approval",
-        "F007 (Closure CTA debe existir primero)"
-      ],
-      "metrics": {
-        "target": "30% Leads agendan directamente (vs 0% actual)",
-        "no_shows": "15% → 8%",
-        "coordinador_time": "-45 min/semana"
-      },
-      "notes": "DEFER reason: Requiere validación ROI + Google Calendar API approval (~2 weeks). Blocker: External API dependency."
-    },
-    {
-      "id": "F011",
-      "name": "Payment Links",
-      "version": "v1.2",
-      "status": "DEFER",
-      "priority": "LOW",
-      "effort": 14,
-      "story": "US-1.2-02",
-      "phase": 6,
-      "description": "Links de pago personalizados (Stripe/Wompi/Mercado Pago) para anticipo automático",
-      "validation": "Validar ROI: reducción tiempo confirmación (24h → 2h)",
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Decisión proveedor pago (Stripe/Wompi/Mercado Pago)",
-          "status": "TODO"
-        },
-        {
-          "id": "S002",
-          "description": "Setup cuenta + API keys",
-          "status": "TODO"
-        },
-        {
-          "id": "S003",
-          "description": "Implementar payment link generation",
-          "status": "TODO"
-        },
-        {
-          "id": "S004",
-          "description": "PCI-DSS compliance review",
-          "status": "TODO"
-        },
-        {
-          "id": "S005",
-          "description": "Security testing",
-          "status": "TODO"
-        }
-      ],
-      "acceptance": [
-        "Integración Stripe/Wompi/Mercado Pago seleccionado",
-        "Genera link personalizado (monto, concepto, vencimiento)",
-        "Confirma pago automáticamente en CRM",
-        "Envía recibo electrónico vía WhatsApp"
-      ],
-      "dependencies": [
-        "Decisión proveedor pago",
-        "PCI-DSS compliance",
-        "F010 (Appointment debe existir primero para flow completo)"
-      ],
-      "metrics": {
-        "target": "50% pagan anticipo vía link (vs 0% actual)",
-        "confirmation_time": "24h → 2h",
-        "conversion": "+15% Lead→Paciente"
-      },
-      "notes": "DEFER reason: Requiere decisión proveedor + PCI-DSS compliance + security testing. Blocker: Payment provider selection + compliance."
-    },
-    {
-      "id": "F012",
-      "name": "RAG Knowledge Base",
-      "description": "Semantic search over validated medical knowledge using pgvector + Gemini embeddings",
-      "priority": "HIGH",
-      "status": "DONE",
-      "effort_hours": 8,
-      "impact": "Enables Eva to provide accurate, validated medical information without hallucination",
-      "dependencies": [],
-      "steps": [
-        {
-          "id": "S001",
-          "description": "Enable pgvector extension in Neon database",
-          "status": "DONE",
-          "file_path": "scripts/verify-table.ts"
-        },
-        {
-          "id": "S002",
-          "description": "Create medicalKnowledge table with vector embeddings",
-          "status": "DONE",
-          "file_path": "lib/db/schema.ts"
-        },
-        {
-          "id": "S003",
-          "description": "Implement Google Gemini text-embedding-004 integration",
-          "status": "DONE",
-          "file_path": "lib/ai/embeddings.ts"
-        },
-        {
-          "id": "S004",
-          "description": "Build semantic search with pgvector HNSW index",
-          "status": "DONE",
-          "file_path": "lib/db/queries/knowledge.ts"
-        },
-        {
-          "id": "S005",
-          "description": "Create retrieveKnowledge tool for Eva",
-          "status": "DONE",
-          "file_path": "lib/agent/tools/retrieve-knowledge.ts"
+          "description": "Implement location detection logic",
+          "status": "pending"
         },
         {
           "id": "S006",
-          "description": "Register tool in agent inbound route",
-          "status": "DONE",
-          "file_path": "app/api/agent/inbound/route.ts"
+          "description": "Add location tool or prompt instructions",
+          "status": "pending"
         },
         {
           "id": "S007",
-          "description": "Update Eva system prompt with tool documentation",
-          "status": "DONE",
-          "file_path": "lib/agent/prompts/eva-system.ts"
-        },
-        {
-          "id": "S008",
-          "description": "Prepare seed data (14 documents)",
-          "status": "DONE",
-          "file_path": "data/knowledge-base.json"
-        },
-        {
-          "id": "S009",
-          "description": "Create database seed script",
-          "status": "DONE",
-          "file_path": "scripts/seed-knowledge.ts"
-        },
-        {
-          "id": "S010",
-          "description": "Run seed script (14 docs, 6.52s)",
-          "status": "DONE",
-          "file_path": "scripts/seed-knowledge.ts"
-        },
-        {
-          "id": "S011",
-          "description": "Create semantic search test script",
-          "status": "DONE",
-          "file_path": "scripts/test-search.ts"
-        },
-        {
-          "id": "S012",
-          "description": "Create end-to-end RAG test script",
-          "status": "DONE",
-          "file_path": "scripts/test-eva-rag.ts"
-        },
-        {
-          "id": "S013",
-          "description": "Run semantic search tests (66.7% success)",
-          "status": "DONE",
-          "file_path": "scripts/test-search.ts"
-        },
-        {
-          "id": "S014",
-          "description": "Validate end-to-end pipeline",
-          "status": "DONE",
-          "file_path": "scripts/test-eva-rag.ts"
+          "description": "Write unit and integration tests",
+          "status": "pending"
         }
       ],
       "acceptance": [
-        "pgvector extension enabled in Neon",
-        "medicalKnowledge table created with 768-dim vectors",
-        "Gemini text-embedding-004 integration working",
-        "Semantic search returns results with similarity > 0.65",
-        "retrieveKnowledge tool accessible from Eva",
-        "Knowledge base seeded with 14 validated documents",
-        "Semantic search tests passing (>60% success rate)",
-        "Failover to human when similarity < 0.65 working correctly"
+        "Bogotá: Provide address + offer valoración",
+        "Barranquilla: Provide address (Cra 52 #82-110) + offer valoración",
+        "Other Colombia cities: Offer virtual valoración",
+        "Outside Colombia: Escalate to coordinator",
+        "80%+ test coverage (unit + integration)",
+        "Handles ambiguous city names, typos, Spanish/English queries"
       ],
-      "notes": [
-        "Performance: RAG overhead ~472ms (5.2% of 9s budget)",
-        "HNSW index: 1.5ms query time @ 58K records (AWS benchmark)",
-        "Similarity threshold: 0.65 (balanced precision/recall)",
-        "Test results: 66.7% success (4/6 tests), 2 edge cases correctly escalate",
-        "Knowledge base: 5 procedures, 5 FAQs, 3 policies, 1 location",
-        "All content validated by Dr. Andrés Durán"
-      ]
+      "implementation": "TBD - /lib/agent/location.ts or prompt-based",
+      "validation": "TBD - scripts/validate-f003-location-triage.ts"
+    },
+    {
+      "id": "F004",
+      "name": "Photo Quality Analysis",
+      "description": "Consent-based photo analysis with Gemini 2.0 Flash providing quality feedback (no diagnosis)",
+      "status": "completed",
+      "priority": "P1",
+      "steps": [
+        {
+          "id": "S001",
+          "description": "Implement analyzePhotoTool with consent checking",
+          "status": "completed"
+        },
+        {
+          "id": "S002",
+          "description": "Create consents table with type='photo_analysis'",
+          "status": "completed"
+        },
+        {
+          "id": "S003",
+          "description": "Integrate Gemini 2.0 Flash for quality analysis",
+          "status": "completed"
+        },
+        {
+          "id": "S004",
+          "description": "Add guardrails to prevent medical diagnosis",
+          "status": "completed"
+        },
+        {
+          "id": "S005",
+          "description": "Create automated validation script",
+          "status": "completed"
+        }
+      ],
+      "acceptance": [
+        "Explicit consent requested before first photo processing (photoCount === 0)",
+        "Quality feedback: lighting, angle, distance, focus",
+        "NO medical diagnosis in responses",
+        "Processing time <6s (target: 3.1s actual)",
+        "All validation tests passing (160 lines script)",
+        "Photos NOT stored (process in memory, discard)"
+      ],
+      "implementation": "/lib/agent/tools/media.ts, /lib/agent/consent.ts",
+      "validation": "scripts/validate-f004-photo-quality.ts"
+    },
+    {
+      "id": "F005",
+      "name": "Audio Transcription",
+      "description": "Groq Whisper v3 primary + OpenAI Whisper fallback for Spanish voice notes",
+      "status": "completed",
+      "priority": "P1",
+      "steps": [
+        {
+          "id": "S001",
+          "description": "Implement transcribeAudioTool integration",
+          "status": "completed"
+        },
+        {
+          "id": "S002",
+          "description": "Add Groq Whisper v3 as primary provider",
+          "status": "completed"
+        },
+        {
+          "id": "S003",
+          "description": "Add OpenAI Whisper as fallback provider",
+          "status": "completed"
+        },
+        {
+          "id": "S004",
+          "description": "Implement Spanish language optimization",
+          "status": "completed"
+        },
+        {
+          "id": "S005",
+          "description": "Add optional Groq text post-processing",
+          "status": "completed"
+        },
+        {
+          "id": "S006",
+          "description": "Create automated validation script",
+          "status": "completed"
+        }
+      ],
+      "acceptance": [
+        "Primary: Groq Whisper v3 (95% success rate, $0.67/1K min)",
+        "Fallback: OpenAI Whisper (5% when Groq fails, $6.00/1K min)",
+        "Spanish language optimization enabled",
+        "228x realtime processing speed",
+        "All validation tests passing (235 lines script)",
+        "Processing time within budget"
+      ],
+      "implementation": "/lib/ai/transcribe.ts, /lib/ai/groq.ts, /lib/ai/openai-whisper.ts",
+      "validation": "scripts/validate-f005-audio-transcription.ts"
+    },
+    {
+      "id": "F006",
+      "name": "Guardrails Compliance",
+      "description": "Pre-send validation with 66 keywords across 3 severity levels to prevent medical/legal violations",
+      "status": "completed",
+      "priority": "P0",
+      "steps": [
+        {
+          "id": "S001",
+          "description": "Implement guardrails validation with 66 keywords",
+          "status": "completed"
+        },
+        {
+          "id": "S002",
+          "description": "Define 3 severity levels (critical, high, medium)",
+          "status": "completed"
+        },
+        {
+          "id": "S003",
+          "description": "Add auto-handover on critical violations",
+          "status": "completed"
+        },
+        {
+          "id": "S004",
+          "description": "Create comprehensive validation script",
+          "status": "completed"
+        }
+      ],
+      "acceptance": [
+        "66 keywords detection: diagnosis, prescription, guarantees, pricing",
+        "Critical (22): Auto-handover + log",
+        "High (24): Auto-handover + log",
+        "Medium (20): Warning + log",
+        "All validation tests passing (360 lines script)",
+        "Zero violations in 100-conversation test"
+      ],
+      "implementation": "/lib/agent/guardrails.ts",
+      "validation": "scripts/validate-f006-guardrails.ts"
     }
   ],
-  "_meta": {
-    "status_values": [
-      "TODO",
-      "DOING",
-      "DONE",
-      "DEFER"
-    ],
-    "priority_values": [
-      "LOW",
-      "MEDIUM",
-      "HIGH"
-    ],
-    "template_source": "Anthropic Effective Harnesses for Long-Running Agents",
-    "usage": "Agent reads on session start for priority selection. Update status as work progresses. Prevents premature completion declarations.",
-    "summary": {
-      "total_features": 12,
-      "by_version": {
-        "v1_0": 6,
-        "v1_1": 3,
-        "v1_2": 2
-      },
-      "by_status": {
-        "DOING": 6,
-        "TODO": 3,
-        "DEFER": 2
-      },
-      "by_priority": {
-        "HIGH": 6,
-        "MEDIUM": 3,
-        "LOW": 2
-      },
-      "total_effort_hours": 79,
-      "completed_effort_hours": 0,
-      "completion_percentage": 0,
-      "code_implemented_percentage": 60,
-      "notes": "v1.0 features: código implementado pero NO deployed. Status DOING hasta producción."
-    },
-    "conversation_data": {
-      "total_conversations": 1106,
-      "total_messages": 10764,
-      "period": "2025-11-12 to 2025-12-14",
-      "source": "/conversations/whatsapp-conversations-2025-12-14-reporte.md"
-    },
-    "cross_references": {
-      "PRD": "features/ai-agentic/PRD.md (Features F001-F012)",
-      "USER_STORIES": "features/ai-agentic/USER-STORIES.md (US-1.0-01 to US-1.2-02)",
-      "PLAN": "features/ai-agentic/plan.md (Phases 1-6)",
-      "DECISIONS": "features/ai-agentic/decisions.md (9 IMPLEMENT, 3 DEFER)",
-      "GUIDE": "features/ai-agentic/AI-AGENTIC-GUIDE.md (Implementation reference)"
-    }
-  }
+  "summary": {
+    "total": 6,
+    "completed": 5,
+    "inProgress": 0,
+    "blocked": 1,
+    "pending": 0,
+    "completionRate": "83%"
+  },
+  "notes": [
+    "F003 is CRITICAL BLOCKER affecting 28% of conversations (310/1,106)",
+    "All completed features have automated validation scripts passing",
+    "v1.0 MVP blocked until F003 implemented",
+    "SDD methodology being implemented for F003"
+  ]
 }

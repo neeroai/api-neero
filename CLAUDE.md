@@ -112,6 +112,76 @@ pnpm test:coverage     # Coverage report
 
 ---
 
+## SDD (Spec-Driven Development)
+
+**Methodology:** Spec-first approach ensuring features are specified, validated, and planned before implementation.
+
+### When to Use SDD
+
+**Use for:**
+- Features touching 3+ files
+- API integrations (Bird, AI models)
+- Database schema changes
+- Auth/security features
+- Performance-critical paths (<9s constraint)
+- Features with unclear requirements
+
+**Skip for:**
+- Single file bug fixes (<50 lines)
+- UI tweaks, docs-only changes
+- Refactoring with no behavior change
+- Hotfixes (create retroactive SPEC)
+
+**Rule:** "Can I explain this in 3 months?" YES = SDD | NO = Skip
+
+### 8-Step Lifecycle
+
+| Step | Deliverable | Gate |
+|------|------------|------|
+| 1. SPEC | SPEC.md | Problem + Contracts clear |
+| 2. PLAN | PLAN.md | Stack validated, steps defined |
+| 3. TASKS | TASKS.md | Granular tasks in todo.md |
+| 4. ADR | ADR.md (optional) | 4/4 YES (ClaudeCode&OnlyMe) |
+| 5. TESTPLAN | TESTPLAN.md | >80% coverage planned |
+| 6. IMPLEMENT | Code + Tests | All gates pass |
+| 7. REVIEW | PR approved | CI green, manual QA |
+| 8. SHIP | Deployed | Smoke test pass |
+
+### Directory Structure
+
+```
+specs/
+├── README.md              # SDD process guide
+├── f003-location-triage/  # Example feature
+│   ├── SPEC.md           # Problem, contracts, rules, DoD
+│   ├── PLAN.md           # Stack, steps, risks
+│   ├── TASKS.md          # TODO/DOING/DONE
+│   ├── TESTPLAN.md       # Test strategy, 80%+ coverage
+│   └── ADR.md            # Optional: Architecture decisions
+└── _archive/             # Completed features (3+ months)
+```
+
+### Quick Start
+
+```bash
+# 1. Create feature directory
+mkdir -p specs/<feature-slug>
+
+# 2. Copy templates
+cp /Users/mercadeo/neero/docs-global/templates/sdd/*.md specs/<feature-slug>/
+
+# 3. Fill SPEC.md → PLAN.md → TASKS.md → TESTPLAN.md
+
+# 4. Update tracking files
+# - /feature_list.json: Add feature
+# - /todo.md: Copy tasks from TASKS.md
+```
+
+**Full Guide:** `/specs/README.md`
+**Example:** `/specs/f003-location-triage/` (complete reference)
+
+---
+
 ## Tech Stack
 
 **Core:** Next.js 16 + React 19 + TypeScript 5.9 + Vercel Edge Runtime
@@ -463,15 +533,18 @@ The AI Employee must populate task arguments before calling the Action:
 - 2-person team optimization (no enterprise bloat)
 
 **When Adding Features:**
-1. Check Edge Runtime compatibility (no Node.js APIs)
-2. Validate against docs-global/platforms/{bird,vercel}/
-3. Maintain < 9 sec synchronous response
-4. Test with Bird Actions (HTTP request, not webhooks)
-5. Update tracking files (plan.md, todo.md, prd.md)
-6. Keep files < 600 lines
-7. See `/docs/bird/bird-actions-architecture.md` for implementation patterns
-8. When adding knowledge: Update data/knowledge-base.json → Run scripts/seed-knowledge.ts
-9. RAG queries: Use retrieveKnowledge tool, NOT direct searchKnowledge() calls
+1. Use SDD methodology if feature touches 3+ files (see SDD section above)
+2. Create specs/<feature-slug>/ with SPEC, PLAN, TASKS, TESTPLAN
+3. Check Edge Runtime compatibility (no Node.js APIs)
+4. Validate against docs-global/platforms/{bird,vercel}/
+5. Maintain < 9 sec synchronous response
+6. Test with Bird Actions (HTTP request, not webhooks)
+7. Update tracking files (plan.md, todo.md, feature_list.json)
+8. Keep files < 600 lines
+9. Achieve 80%+ test coverage per TESTPLAN.md
+10. See `/docs/bird/bird-actions-architecture.md` for implementation patterns
+11. When adding knowledge: Update data/knowledge-base.json → Run scripts/seed-knowledge.ts
+12. RAG queries: Use retrieveKnowledge tool, NOT direct searchKnowledge() calls
 
 ---
 
