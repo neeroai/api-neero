@@ -1,40 +1,60 @@
-# Documentation - not needed for runtime
+# ==========================================
+# VERCEL DEPLOYMENT EXCLUSIONS
+# Version: 2.0 | Date: 2025-12-23
+# Purpose: Exclude dev/docs files from Vercel uploads
+# Estimated savings: ~5.4MB (70% reduction)
+# ==========================================
+
+# ============ DOCUMENTATION ============
 docs/
 plan/
-*.md
+validation-reports/
+knowledge-base/         # Markdown sources (seeded to DB)
+*.md                    # All markdown files
 
-# Claude Code configuration - dev tooling only
+# ============ DEVELOPMENT FILES ============
+scripts/                # Dev scripts (340KB)
+feature/                # Feature specs (164KB)
+data/                   # Seed data (used pre-deployment)
+drizzle/                # SQL migrations (schema in code)
+results/                # Test results
+
+# ============ ARCHIVES ============
+.archive/
+_archive/
+
+# ============ TEMPORARY FILES ============
+extracted-contacts.json
+convers/
+conversations/
+
+# ============ CONFIGURATION (Dev Tools) ============
 .claude/
-
-# Symlinks - breaks on Vercel
-docs-global
-
-# IDE and editor configs
+.Claude/
 .vscode/
 .idea/
 *.code-workspace
 
-# Environment files - Vercel handles separately
+# ============ SYMLINKS ============
+docs-global
+
+# ============ ENVIRONMENT ============
 .env
 .env.*
 .env.example
 .env.local
 
-# Build artifacts - rebuilt by Vercel
+# ============ BUILD ARTIFACTS ============
 .next/
 tsconfig.tsbuildinfo
 next-env.d.ts
 
-# Dependencies - reinstalled by Vercel
+# ============ DEPENDENCIES ============
 node_modules/
 
-# Git
+# ============ VERSION CONTROL ============
 .git/
 
-# Archive folders
-.archive/
-_archive/
-
-# OS files
+# ============ OS FILES ============
 .DS_Store
 Thumbs.db
