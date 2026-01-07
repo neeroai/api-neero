@@ -1,7 +1,7 @@
-import { db, sql } from '@/lib/db/client';
-import { medicalKnowledge, type MedicalKnowledge, type NewMedicalKnowledge } from '@/lib/db/schema';
-import { generateEmbedding } from '@/lib/ai/embeddings';
 import { eq } from 'drizzle-orm';
+import { generateEmbedding } from '@/lib/ai/embeddings';
+import { db, sql } from '@/lib/db/client';
+import { type MedicalKnowledge, medicalKnowledge, type NewMedicalKnowledge } from '@/lib/db/schema';
 
 /**
  * Result type for knowledge search with similarity score
@@ -94,7 +94,7 @@ export async function searchKnowledge(
     category: row.category,
     subcategory: row.subcategory,
     metadata: row.metadata,
-    similarity: parseFloat(row.similarity)
+    similarity: parseFloat(row.similarity),
   }));
 }
 
@@ -128,7 +128,7 @@ export async function insertKnowledge(
     .insert(medicalKnowledge)
     .values({
       ...knowledge,
-      embedding
+      embedding,
     })
     .returning();
 
@@ -233,9 +233,7 @@ export async function deactivateKnowledge(knowledgeId: string): Promise<void> {
  * @param knowledgeId - UUID of knowledge document
  * @returns Knowledge document or undefined if not found
  */
-export async function getKnowledgeById(
-  knowledgeId: string
-): Promise<MedicalKnowledge | undefined> {
+export async function getKnowledgeById(knowledgeId: string): Promise<MedicalKnowledge | undefined> {
   const [result] = await db
     .select()
     .from(medicalKnowledge)

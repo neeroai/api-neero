@@ -78,8 +78,7 @@ export function validatePhone(phone: string): ValidationResult {
   if (!phoneRegex.test(phone)) {
     return {
       valid: false,
-      error:
-        'Invalid phone format. Must be E.164 format: +[country][number]',
+      error: 'Invalid phone format. Must be E.164 format: +[country][number]',
     };
   }
 
@@ -117,8 +116,7 @@ export function validateCountryCode(code: string): ValidationResult {
   if (!/^[A-Z]{2}$/.test(code)) {
     return {
       valid: false,
-      error:
-        'Invalid country code. Must be ISO 3166-1 alpha-2 (e.g., CO, US)',
+      error: 'Invalid country code. Must be ISO 3166-1 alpha-2 (e.g., CO, US)',
     };
   }
 

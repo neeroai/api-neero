@@ -36,7 +36,7 @@ export async function birdFetch(path: string, options: BirdFetchOptions = {}) {
     } catch (error) {
       lastError = error;
       if (attempt < retryCount) {
-        const wait = Math.pow(2, attempt) * 100; // 100ms, 200ms, 400ms
+        const wait = 2 ** attempt * 100; // 100ms, 200ms, 400ms
         await new Promise((resolve) => setTimeout(resolve, wait));
       }
     }

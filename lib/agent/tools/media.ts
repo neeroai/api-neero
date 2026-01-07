@@ -1,12 +1,12 @@
 import { tool } from 'ai';
+import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { processImage } from '@/lib/ai/pipeline';
 import { transcribeWithFallback } from '@/lib/ai/transcribe';
-import { downloadMedia } from '@/lib/bird/media';
 import { fetchLatestMediaFromConversation } from '@/lib/bird/fetch-latest-media';
+import { downloadMedia } from '@/lib/bird/media';
 import { db } from '@/lib/db/client';
 import { consents, leads } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
 import type { ConsentType } from '../types';
 
 const mediaToolParams = z.object({
@@ -38,9 +38,7 @@ async function hasConsent(conversationId: string, consentType: ConsentType): Pro
   const consent = await db
     .select()
     .from(consents)
-    .where(
-      and(eq(consents.leadId, leadData[0].leadId), eq(consents.consentType, consentType))
-    )
+    .where(and(eq(consents.leadId, leadData[0].leadId), eq(consents.consentType, consentType)))
     .limit(1);
 
   return consent.length > 0 && (consent[0]?.granted || false);
@@ -67,8 +65,7 @@ export const analyzePhotoTool = tool({
           return {
             success: false,
             error: 'consent_required',
-            message:
-              'Necesito tu consentimiento para analizar la foto. ¿Puedo proceder? (Sí/No)',
+            message: 'Necesito tu consentimiento para analizar la foto. ¿Puedo proceder? (Sí/No)',
           };
         }
       }

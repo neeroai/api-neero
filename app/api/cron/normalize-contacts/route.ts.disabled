@@ -1,0 +1,304 @@
+/**
+ * Vercel Cron Job - Bird CRM Contact Normalization
+ *
+ * Automatically normalizes Bird CRM contacts every 6 hours.
+ * Extracts patient names, emails, and countries from conversation history.
+ *
+ * Endpoint: POST /api/cron/normalize-contacts
+ * Schedule: Every 6 hours (configured in vercel.json)
+ * Authentication: Bearer token via CRON_SECRET env var
+ *
+ * CRITICAL: Must use Node.js runtime (NOT Edge) for full database access
+ */
+
+import { NextRequest, NextResponse } from 'next/server';
+import {
+  listAllContacts,
+  updateContact,
+  type BirdContact,
+} from '@/lib/bird/contacts';
+import { getConversationMessages } from '@/lib/bird/conversations';
+import {
+  extractNameHybrid,
+  extractEmail,
+  inferCountryFromPhone,
+  isInstagramUsername,
+  isOnlyEmojis,
+  isValidName,
+} from '@/lib/normalization/extractors';
+import { saveNormalizationResult } from '@/lib/normalization/tracking';
+
+// CRITICAL: Use Node.js runtime (NOT Edge) for Neon database access
+export const runtime = 'nodejs';
+
+// Allow up to 5 minutes execution time (Vercel Pro plan)
+export const maxDuration = 300;
+
+/**
+ * Sleep utility for rate limiting
+ */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/**
+ * Check if contact needs normalization
+ */
+function needsNormalization(contact: BirdContact): boolean {
+  const displayName = contact.displayName || '';
+
+  return (
+    isOnlyEmojis(displayName) ||
+    isInstagramUsername(displayName) ||
+    !contact.firstName ||
+    !contact.lastName ||
+    !contact.attributes?.email ||
+    !contact.attributes?.country
+  );
+}
+
+/**
+ * Normalize a single contact
+ */
+async function normalizeContact(contact: BirdContact): Promise<{
+  contactId: string;
+  status: 'success' | 'needs_review' | 'error' | 'skipped';
+  confidence?: number;
+}> {
+  const contactId = contact.id;
+
+  try {
+    // Get conversation ID
+    const conversationId = contact.conversationId;
+
+    if (!conversationId) {
+      return { contactId, status: 'skipped' };
+    }
+
+    // Fetch conversation messages
+    const messages = await getConversationMessages(conversationId);
+
+    if (messages.length === 0) {
+      return { contactId, status: 'skipped' };
+    }
+
+    // Extract text content (user messages only)
+    const messageTexts = messages
+      .filter((m) => m.direction === 'received')
+      .map((m) => m.text?.body)
+      .filter((text): text is string => Boolean(text));
+
+    // Extract data
+    const nameResult = await extractNameHybrid(messageTexts);
+    const emailResult = extractEmail(messageTexts);
+    const countryResult = inferCountryFromPhone(
+      contact.identifierValue || ''
+    );
+
+    // Validate confidence (threshold: 0.6 for Gemini-assisted extraction)
+    if (nameResult.confidence < 0.6) {
+      await saveNormalizationResult({
+        contactId,
+        conversationId,
+        status: 'needs_review',
+        confidence: nameResult.confidence,
+        extractedData: {
+          ...nameResult,
+          email: emailResult,
+          country: countryResult,
+        },
+      });
+
+      return {
+        contactId,
+        status: 'needs_review',
+        confidence: nameResult.confidence,
+      };
+    }
+
+    // Validate extracted name
+    if (
+      !isValidName(nameResult.firstName) ||
+      !isValidName(nameResult.lastName)
+    ) {
+      await saveNormalizationResult({
+        contactId,
+        conversationId,
+        status: 'needs_review',
+        confidence: nameResult.confidence,
+        extractedData: {
+          ...nameResult,
+          email: emailResult,
+          country: countryResult,
+        },
+        errorMessage: 'Invalid name format',
+      });
+
+      return {
+        contactId,
+        status: 'needs_review',
+        confidence: nameResult.confidence,
+      };
+    }
+
+    // Build update payload
+    const updatePayload: {
+      firstName?: string;
+      lastName?: string;
+      attributes?: Record<string, string>;
+    } = {};
+
+    if (nameResult.firstName && nameResult.lastName) {
+      updatePayload.firstName = nameResult.firstName;
+      updatePayload.lastName = nameResult.lastName;
+    }
+
+    updatePayload.attributes = { ...contact.attributes };
+    if (emailResult) {
+      updatePayload.attributes.email = emailResult;
+    }
+    if (countryResult) {
+      updatePayload.attributes.country = countryResult;
+    }
+
+    // Update contact
+    await updateContact(contactId, updatePayload);
+
+    // Save success
+    await saveNormalizationResult({
+      contactId,
+      conversationId,
+      status: 'success',
+      confidence: nameResult.confidence,
+      extractedData: {
+        ...nameResult,
+        email: emailResult,
+        country: countryResult,
+      },
+      before: {
+        displayName: contact.displayName,
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        email: contact.attributes?.email,
+        country: contact.attributes?.country,
+      },
+      after: {
+        firstName: updatePayload.firstName,
+        lastName: updatePayload.lastName,
+        email: updatePayload.attributes?.email,
+        country: updatePayload.attributes?.country,
+      },
+    });
+
+    return {
+      contactId,
+      status: 'success',
+      confidence: nameResult.confidence,
+    };
+  } catch (error: any) {
+    // Save error
+    await saveNormalizationResult({
+      contactId,
+      status: 'error',
+      errorMessage: error.message,
+    });
+
+    return {
+      contactId,
+      status: 'error',
+    };
+  }
+}
+
+/**
+ * GET handler - Vercel Cron Job endpoint
+ */
+export async function GET(request: NextRequest) {
+  try {
+    // Verify cron secret
+    const authHeader = request.headers.get('authorization');
+    const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
+
+    if (authHeader !== expectedAuth) {
+      console.error('Unauthorized cron request');
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
+    console.log('[CRON] Starting contact normalization...');
+
+    // Fetch all contacts
+    const allContacts = await listAllContacts();
+    console.log(`[CRON] Total contacts: ${allContacts.length}`);
+
+    // Filter contacts needing normalization
+    const needsNorm = allContacts.filter(needsNormalization);
+    console.log(`[CRON] Needs normalization: ${needsNorm.length}`);
+
+    if (needsNorm.length === 0) {
+      console.log('[CRON] No contacts need normalization.');
+      return NextResponse.json({
+        success: true,
+        processed: 0,
+        results: {
+          success: 0,
+          needsReview: 0,
+          errors: 0,
+          skipped: 0,
+        },
+      });
+    }
+
+    // Process each contact with rate limiting
+    const results: Array<{
+      contactId: string;
+      status: 'success' | 'needs_review' | 'error' | 'skipped';
+      confidence?: number;
+    }> = [];
+
+    for (let i = 0; i < needsNorm.length; i++) {
+      const contact = needsNorm[i];
+
+      console.log(
+        `[CRON] Processing ${i + 1}/${needsNorm.length}: ${contact.displayName}`
+      );
+
+      const result = await normalizeContact(contact);
+      results.push(result);
+
+      // Rate limiting: 100ms delay between requests
+      if (i < needsNorm.length - 1) {
+        await sleep(100);
+      }
+    }
+
+    // Calculate summary
+    const summary = {
+      success: results.filter((r) => r.status === 'success').length,
+      needsReview: results.filter((r) => r.status === 'needs_review')
+        .length,
+      errors: results.filter((r) => r.status === 'error').length,
+      skipped: results.filter((r) => r.status === 'skipped').length,
+    };
+
+    console.log('[CRON] Summary:', summary);
+
+    return NextResponse.json({
+      success: true,
+      processed: needsNorm.length,
+      results: summary,
+    });
+  } catch (error: any) {
+    console.error('[CRON] Fatal error:', error);
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}

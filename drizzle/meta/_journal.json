@@ -1,0 +1,27 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1765720889796,
+      "tag": "0000_empty_outlaw_kid",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1765805943743,
+      "tag": "0001_glorious_maginty",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1766268081221,
+      "tag": "0002_equal_excalibur",
+      "breakpoints": true
+    }
+  ]
+}

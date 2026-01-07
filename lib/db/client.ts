@@ -34,7 +34,7 @@ export const db = new Proxy({} as ReturnType<typeof drizzle>, {
   get(_target, prop) {
     initializeDb();
     return (_db as any)[prop];
-  }
+  },
 });
 
 /**
@@ -49,5 +49,5 @@ export const sql = new Proxy({} as ReturnType<typeof neon>, {
   apply(_target, _thisArg, args) {
     initializeDb();
     return (_sql as any)(...args);
-  }
+  },
 });

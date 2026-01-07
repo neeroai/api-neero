@@ -60,7 +60,7 @@ conversations/
 /conversations
 
 # Documentation files
-docs/
+#docs/
 validation-reports/
 results/
 plan/

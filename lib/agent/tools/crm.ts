@@ -1,18 +1,14 @@
 import { tool } from 'ai';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { registerLead as registerLeadWebhook } from '@/lib/bird/leads';
 import { db } from '@/lib/db/client';
 import { leads } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { registerLead as registerLeadWebhook } from '@/lib/bird/leads';
 
 const upsertLeadSchema = z.object({
   conversationId: z.string().uuid().describe('UUID de la conversación en Bird'),
   name: z.string().min(2).optional().describe('Nombre completo del paciente'),
-  phone: z
-    .string()
-    .min(7)
-    .optional()
-    .describe('Número de teléfono (formato internacional)'),
+  phone: z.string().min(7).optional().describe('Número de teléfono (formato internacional)'),
   email: z.string().email().optional().describe('Correo electrónico'),
   country: z.string().min(2).optional().describe('País (ej: Colombia)'),
   city: z.string().optional().describe('Ciudad (ej: Bogotá)'),
@@ -24,10 +20,7 @@ const upsertLeadSchema = z.object({
     .enum(['new', 'contacted', 'qualified', 'appointment_scheduled'])
     .default('new')
     .describe('Etapa en el funnel de conversión'),
-  metadata: z
-    .record(z.unknown())
-    .optional()
-    .describe('Metadata adicional (custom fields)'),
+  metadata: z.record(z.unknown()).optional().describe('Metadata adicional (custom fields)'),
 });
 
 /**

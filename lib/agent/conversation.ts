@@ -1,6 +1,6 @@
+import { desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
-import { messageLogs, leads, conversationState } from '@/lib/db/schema';
-import { eq, desc } from 'drizzle-orm';
+import { conversationState, leads, messageLogs } from '@/lib/db/schema';
 import type { ConversationContext, MessageMetadata } from './types';
 
 /**
@@ -12,43 +12,44 @@ import type { ConversationContext, MessageMetadata } from './types';
  */
 export async function reconstructContext(conversationId: string): Promise<ConversationContext> {
   const [messages, leadData, state] = await Promise.all([
-    db.select()
+    db
+      .select()
       .from(messageLogs)
       .where(eq(messageLogs.conversationId, conversationId))
       .orderBy(desc(messageLogs.createdAt))
       .limit(10),
 
-    db.select()
-      .from(leads)
-      .where(eq(leads.conversationId, conversationId))
-      .limit(1),
+    db.select().from(leads).where(eq(leads.conversationId, conversationId)).limit(1),
 
-    db.select()
+    db
+      .select()
       .from(conversationState)
       .where(eq(conversationState.conversationId, conversationId))
-      .limit(1)
+      .limit(1),
   ]);
 
   return {
     conversationId,
     leadId: leadData[0]?.leadId,
-    messages: messages.reverse().map(msg => ({
-      role: msg.direction === 'incoming' ? 'user' as const : 'assistant' as const,
+    messages: messages.reverse().map((msg) => ({
+      role: msg.direction === 'incoming' ? ('user' as const) : ('assistant' as const),
       content: msg.text || '',
-      timestamp: msg.createdAt
+      timestamp: msg.createdAt,
     })),
-    lead: leadData[0] ? {
-      name: leadData[0].name || undefined,
-      phone: leadData[0].phone || undefined,
-      email: leadData[0].email || undefined,
-      procedureInterest: leadData[0].procedureInterest || undefined,
-      stage: leadData[0].stage
-    } : undefined,
+    lead: leadData[0]
+      ? {
+          name: leadData[0].name || undefined,
+          phone: leadData[0].phone || undefined,
+          email: leadData[0].email || undefined,
+          procedureInterest: leadData[0].procedureInterest || undefined,
+          stage: leadData[0].stage,
+        }
+      : undefined,
     metadata: {
       currentStage: state[0]?.currentStage,
       messagesCount: state[0]?.messagesCount,
-      requiresHuman: state[0]?.requiresHuman
-    }
+      requiresHuman: state[0]?.requiresHuman,
+    },
   };
 }
 
@@ -82,7 +83,7 @@ export async function saveMessage(
     model: extraMetadata?.model,
     tokensUsed: extraMetadata?.tokensUsed,
     processingTimeMs: extraMetadata?.processingTimeMs,
-    metadata: extraMetadata?.metadata
+    metadata: extraMetadata?.metadata,
   });
 }
 
@@ -102,7 +103,8 @@ export async function updateConversationState(
     messagesCount?: unknown;
   }
 ): Promise<void> {
-  const existing = await db.select()
+  const existing = await db
+    .select()
     .from(conversationState)
     .where(eq(conversationState.conversationId, conversationId))
     .limit(1);
@@ -111,14 +113,15 @@ export async function updateConversationState(
     await db.insert(conversationState).values({
       conversationId,
       ...updates,
-      lastMessageAt: new Date()
+      lastMessageAt: new Date(),
     });
   } else {
-    await db.update(conversationState)
+    await db
+      .update(conversationState)
       .set({
         ...updates,
         lastMessageAt: new Date(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(conversationState.conversationId, conversationId));
   }
@@ -131,7 +134,8 @@ export async function updateConversationState(
  * @returns True if handover is required
  */
 export async function requiresHandover(conversationId: string): Promise<boolean> {
-  const state = await db.select()
+  const state = await db
+    .select()
     .from(conversationState)
     .where(eq(conversationState.conversationId, conversationId))
     .limit(1);
@@ -145,12 +149,9 @@ export async function requiresHandover(conversationId: string): Promise<boolean>
  * @param conversationId - UUID of the conversation
  * @param reason - Reason for handover
  */
-export async function markForHandover(
-  conversationId: string,
-  reason: string
-): Promise<void> {
+export async function markForHandover(conversationId: string, reason: string): Promise<void> {
   await updateConversationState(conversationId, {
     requiresHuman: true,
-    handoverReason: reason
+    handoverReason: reason,
   });
 }

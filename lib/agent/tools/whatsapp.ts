@@ -1,19 +1,15 @@
 import { tool } from 'ai';
+import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { sendTemplateMessage, sendTextMessage } from '@/lib/bird/messages';
 import { checkServiceWindow } from '@/lib/bird/service-window';
-import { sendTextMessage, sendTemplateMessage } from '@/lib/bird/messages';
 import { db } from '@/lib/db/client';
 import { leads } from '@/lib/db/schema';
-import { eq } from 'drizzle-orm';
 
 const sendMessageSchema = z.object({
   conversationId: z.string().uuid().describe('UUID de la conversación en Bird'),
   text: z.string().min(1).describe('Texto del mensaje a enviar'),
-  buttons: z
-    .array(z.string())
-    .max(3)
-    .optional()
-    .describe('Botones de respuesta rápida (máximo 3)'),
+  buttons: z.array(z.string()).max(3).optional().describe('Botones de respuesta rápida (máximo 3)'),
   useTemplate: z
     .boolean()
     .default(true)
@@ -143,8 +139,7 @@ export const sendMessageTool = tool({
         success: false,
         error: 'window_closed',
         windowState: 'closed',
-        message:
-          'No se puede enviar mensaje. La ventana de 24h está cerrada y useTemplate=false.',
+        message: 'No se puede enviar mensaje. La ventana de 24h está cerrada y useTemplate=false.',
       };
     } catch (error) {
       console.error('[sendMessageTool] Error:', error);

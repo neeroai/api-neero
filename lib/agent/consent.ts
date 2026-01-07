@@ -1,6 +1,6 @@
+import { and, eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { consents, leads } from '@/lib/db/schema';
-import { eq, and } from 'drizzle-orm';
 import type { ConsentType } from './types';
 
 /**

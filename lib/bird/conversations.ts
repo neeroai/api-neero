@@ -22,9 +22,7 @@ import type {
  * @param phone - Contact phone number in E.164 format (e.g., "+573001234567")
  * @returns Conversation object if found, null otherwise
  */
-export async function findConversationByPhone(
-  phone: string
-): Promise<BirdConversation | null> {
+export async function findConversationByPhone(phone: string): Promise<BirdConversation | null> {
   const { workspaceId } = getBirdConfig();
   const basePath = `/workspaces/${workspaceId}/conversations`;
 
@@ -64,9 +62,7 @@ export async function findConversationByPhone(
  * @param conversationId - Bird conversation UUID
  * @returns Array of all messages in the conversation
  */
-export async function getConversationMessages(
-  conversationId: string
-): Promise<BirdMessage[]> {
+export async function getConversationMessages(conversationId: string): Promise<BirdMessage[]> {
   const { workspaceId } = getBirdConfig();
   const basePath = `/workspaces/${workspaceId}/conversations/${conversationId}/messages`;
 

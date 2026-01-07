@@ -120,9 +120,7 @@ export function validateResponse(response: string): GuardrailsValidation {
   if (violations.length > 0) {
     // Medical advice and unsafe recommendations are CRITICAL
     const hasMedicalViolation = violations.some(
-      (v) =>
-        v.includes('Medical advice') ||
-        v.includes('Unsafe recommendation')
+      (v) => v.includes('Medical advice') || v.includes('Unsafe recommendation')
     );
 
     // Pricing commitments are HIGH (not critical but should escalate)
@@ -306,7 +304,10 @@ export function extractMetadata(
   if (lowerResponse.includes('dolor en el pecho') || lowerResponse.includes('dolor de pecho')) {
     risk_flags.push('CHEST_PAIN');
   }
-  if (lowerResponse.includes('dificultad para respirar') || lowerResponse.includes('falta de aire')) {
+  if (
+    lowerResponse.includes('dificultad para respirar') ||
+    lowerResponse.includes('falta de aire')
+  ) {
     risk_flags.push('SHORTNESS_OF_BREATH');
   }
   if (lowerResponse.includes('fiebre alta') || lowerResponse.includes('temperatura alta')) {
@@ -363,9 +364,13 @@ export function extractMetadata(
     const reasons: string[] = [];
 
     if (urgency === 'emergency') {
-      reasons.push(`Emergency symptoms detected (${risk_flags.filter((f) =>
-        ['CHEST_PAIN', 'SHORTNESS_OF_BREATH', 'FEVER_HIGH', 'WOUND_PUS_ODOR'].includes(f)
-      ).join(', ')})`);
+      reasons.push(
+        `Emergency symptoms detected (${risk_flags
+          .filter((f) =>
+            ['CHEST_PAIN', 'SHORTNESS_OF_BREATH', 'FEVER_HIGH', 'WOUND_PUS_ODOR'].includes(f)
+          )
+          .join(', ')})`
+      );
     }
 
     if (validation.severity === 'critical') {

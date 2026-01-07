@@ -36,8 +36,8 @@ export async function classifyImage(
   // Use max 3 seconds for classification (accounts for AI Gateway latency)
   // Adaptive: 1.5s minimum, up to 3s if budget allows, reserve 1s buffer for downstream
   const classificationTimeout = Math.max(
-    1500,  // Minimum viable timeout
-    Math.min(3000, remainingMs - 1000)  // Max 3s, reserve 1s buffer
+    1500, // Minimum viable timeout
+    Math.min(3000, remainingMs - 1000) // Max 3s, reserve 1s buffer
   );
 
   if (classificationTimeout < 1000) {

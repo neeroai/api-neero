@@ -117,10 +117,7 @@ export async function updateContact(
  * @example
  * await addEmailIdentifier('contact-uuid-123', '[email protected]');
  */
-export async function addEmailIdentifier(
-  contactId: string,
-  email: string
-): Promise<BirdContact> {
+export async function addEmailIdentifier(contactId: string, email: string): Promise<BirdContact> {
   const { workspaceId } = getBirdConfig();
   const path = `/workspaces/${workspaceId}/contacts/${contactId}/identifiers`;
 
@@ -134,9 +131,7 @@ export async function addEmailIdentifier(
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(
-      `Bird API error ${response.status}: ${JSON.stringify(errorData)}`
-    );
+    throw new Error(`Bird API error ${response.status}: ${JSON.stringify(errorData)}`);
   }
 
   return response.json();

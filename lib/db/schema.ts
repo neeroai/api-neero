@@ -1,4 +1,16 @@
-import { pgTable, uuid, varchar, text, timestamp, jsonb, boolean, integer, customType } from 'drizzle-orm/pg-core';
+import {
+  boolean,
+  customType,
+  integer,
+  jsonb,
+  pgTable,
+  real,
+  serial,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+} from 'drizzle-orm/pg-core';
 
 /**
  * Custom type for pgvector embeddings
@@ -13,7 +25,7 @@ const vector = customType<{ data: number[]; driverData: string }>({
   },
   fromDriver(value: string): number[] {
     return JSON.parse(value);
-  }
+  },
 });
 
 /**
@@ -31,7 +43,7 @@ export const medicalKnowledge = pgTable('medical_knowledge', {
   version: integer('version').notNull().default(1),
   active: boolean('active').notNull().default(true),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow()
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 /**
@@ -50,7 +62,7 @@ export const leads = pgTable('leads', {
   source: varchar('source', { length: 50 }).notNull().default('whatsapp'),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow()
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 /**
@@ -58,7 +70,9 @@ export const leads = pgTable('leads', {
  */
 export const consents = pgTable('consents', {
   consentId: uuid('consent_id').primaryKey().defaultRandom(),
-  leadId: uuid('lead_id').notNull().references(() => leads.leadId),
+  leadId: uuid('lead_id')
+    .notNull()
+    .references(() => leads.leadId),
   conversationId: uuid('conversation_id').notNull(),
   consentType: varchar('consent_type', { length: 50 }).notNull(),
   granted: boolean('granted').notNull().default(false),
@@ -66,7 +80,7 @@ export const consents = pgTable('consents', {
   ipAddress: varchar('ip_address', { length: 45 }),
   userAgent: text('user_agent'),
   metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').notNull().defaultNow()
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 /**
@@ -74,7 +88,9 @@ export const consents = pgTable('consents', {
  */
 export const appointments = pgTable('appointments', {
   appointmentId: uuid('appointment_id').primaryKey().defaultRandom(),
-  leadId: uuid('lead_id').notNull().references(() => leads.leadId),
+  leadId: uuid('lead_id')
+    .notNull()
+    .references(() => leads.leadId),
   conversationId: uuid('conversation_id').notNull(),
   appointmentType: varchar('appointment_type', { length: 50 }).notNull(),
   scheduledAt: timestamp('scheduled_at').notNull(),
@@ -83,7 +99,7 @@ export const appointments = pgTable('appointments', {
   remindersSent: jsonb('reminders_sent'),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow()
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
 });
 
 /**
@@ -100,7 +116,7 @@ export const messageLogs = pgTable('message_logs', {
   tokensUsed: jsonb('tokens_used'),
   processingTimeMs: jsonb('processing_time_ms'),
   metadata: jsonb('metadata'),
-  createdAt: timestamp('created_at').notNull().defaultNow()
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 /**
@@ -117,7 +133,24 @@ export const conversationState = pgTable('conversation_state', {
   context: jsonb('context'),
   metadata: jsonb('metadata'),
   createdAt: timestamp('created_at').notNull().defaultNow(),
-  updatedAt: timestamp('updated_at').notNull().defaultNow()
+  updatedAt: timestamp('updated_at').notNull().defaultNow(),
+});
+
+/**
+ * Contact normalizations table - Tracks CRM contact data normalization results
+ * Used by Bird CRM data normalization system to ensure all contacts have complete data
+ */
+export const contactNormalizations = pgTable('contact_normalizations', {
+  id: serial('id').primaryKey(),
+  contactId: text('contact_id').notNull(),
+  conversationId: text('conversation_id'),
+  status: varchar('status', { length: 20 }).notNull(), // 'success', 'needs_review', 'error'
+  confidence: real('confidence'),
+  extractedData: jsonb('extracted_data'),
+  before: jsonb('before'),
+  after: jsonb('after'),
+  errorMessage: text('error_message'),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
 });
 
 /**
@@ -140,3 +173,6 @@ export type NewConversationState = typeof conversationState.$inferInsert;
 
 export type MedicalKnowledge = typeof medicalKnowledge.$inferSelect;
 export type NewMedicalKnowledge = typeof medicalKnowledge.$inferInsert;
+
+export type ContactNormalization = typeof contactNormalizations.$inferSelect;
+export type NewContactNormalization = typeof contactNormalizations.$inferInsert;
