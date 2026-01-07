@@ -11,27 +11,29 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ZodError } from 'zod';
 import { TimeBudget, TimeoutBudgetError } from '@/lib/ai/timeout';
+import { validateApiKey } from '@/lib/auth/api-key';
 import {
-  createUnauthorizedResponse,
-  validateApiKey,
-} from '@/lib/auth/api-key';
-import {
+  addEmailIdentifier,
+  fetchContactById,
   searchContactByPhone,
   updateContact,
-  fetchContactById,
-  addEmailIdentifier,
 } from '@/lib/bird/contacts';
 import type {
+  BirdContact,
   ContactUpdateRequest,
   ContactUpdateSuccessResponse,
-  ContactUpdateErrorResponse,
-  BirdContact,
 } from '@/lib/bird/types';
 import { ContactUpdateRequestSchema } from '@/lib/bird/types';
 import { validateContactUpdates } from '@/lib/utils/contact-validation';
 import { cleanDisplayName, parseFullName } from '@/lib/utils/name-cleaning';
+import {
+  NotFoundError,
+  TimeoutError,
+  UnauthorizedError,
+  ValidationError,
+  handleRouteError,
+} from '@/lib/errors';
 
 export const runtime = 'edge';
 
@@ -45,44 +47,30 @@ export async function POST(request: Request): Promise<Response> {
   try {
     // 1. API Key Validation (optional)
     if (!validateApiKey(request)) {
-      return createUnauthorizedResponse();
+      throw new UnauthorizedError('API key required or invalid');
     }
 
     // 2. Parse and validate request body
-    const bodyOrError = await parseRequestBody(request, startTime);
-    if (bodyOrError instanceof Response) {
-      return bodyOrError;
-    }
-    const body = bodyOrError;
+    const body = await parseRequestBody(request);
 
     budget.checkBudget();
 
     // 3. Validate update fields
     const validation = validateContactUpdates(body.updates);
     if (!validation.valid) {
-      return createErrorResponse(
-        'VALIDATION_ERROR',
-        'Validation failed',
-        400,
-        startTime,
-        validation.errors
-      );
+      throw new ValidationError('Validation failed', validation.errors);
     }
 
     budget.checkBudget();
 
     // 4. Search contact by phone
-    console.log(
-      `[Contact Update] Searching contact: ${maskPhone(body.context.contactPhone)}`
-    );
+    console.log(`[Contact Update] Searching contact: ${maskPhone(body.context.contactPhone)}`);
     const contact = await searchContactByPhone(body.context.contactPhone);
 
     if (!contact) {
-      return createErrorResponse(
-        'CONTACT_NOT_FOUND',
+      throw new NotFoundError(
         `Contact with phone ${maskPhone(body.context.contactPhone)} not found`,
-        404,
-        startTime
+        { phone: body.context.contactPhone }
       );
     }
 
@@ -102,9 +90,7 @@ export async function POST(request: Request): Promise<Response> {
       try {
         await addEmailIdentifier(contact.id, body.updates.email);
       } catch (error) {
-        console.warn(
-          `[Contact Update] Failed to add email identifier: ${error}`
-        );
+        console.warn(`[Contact Update] Failed to add email identifier: ${error}`);
         // Non-critical - continue
       }
     }
@@ -137,53 +123,25 @@ export async function POST(request: Request): Promise<Response> {
     return NextResponse.json(response, { status: 200 });
   } catch (error) {
     if (error instanceof TimeoutBudgetError) {
-      return createErrorResponse('TIMEOUT_ERROR', error.message, 408, startTime);
+      throw new TimeoutError(error.message, { budgetMs: 8500 });
     }
 
-    return createErrorResponse(
-      'UPDATE_ERROR',
-      error instanceof Error ? error.message : 'Unexpected error',
-      500,
-      startTime
-    );
+    return handleRouteError(error);
   }
 }
 
 /**
  * Helper: Parse request body
  */
-async function parseRequestBody(
-  request: Request,
-  startTime: number
-): Promise<ContactUpdateRequest | Response> {
-  try {
-    const rawBody = await request.json();
-    return ContactUpdateRequestSchema.parse(rawBody);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return createErrorResponse(
-        'VALIDATION_ERROR',
-        `Invalid request body: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
-        400,
-        startTime
-      );
-    }
-    return createErrorResponse(
-      'VALIDATION_ERROR',
-      'Invalid JSON body',
-      400,
-      startTime
-    );
-  }
+async function parseRequestBody(request: Request): Promise<ContactUpdateRequest> {
+  const rawBody = await request.json();
+  return ContactUpdateRequestSchema.parse(rawBody);
 }
 
 /**
  * Helper: Prepare update payload with cleaning
  */
-function prepareUpdatePayload(
-  contact: BirdContact,
-  updates: ContactUpdateRequest['updates']
-) {
+function prepareUpdatePayload(contact: BirdContact, updates: ContactUpdateRequest['updates']) {
   const before: Record<string, any> = {};
   const after: Record<string, any> = {};
   const updatedFields: string[] = [];
@@ -191,8 +149,7 @@ function prepareUpdatePayload(
 
   // Display Name (with cleaning and dual-field strategy)
   if (updates.displayName) {
-    before.displayName =
-      contact.attributes?.displayName || contact.computedDisplayName;
+    before.displayName = contact.attributes?.displayName || contact.computedDisplayName;
 
     const cleaned = cleanDisplayName(updates.displayName);
     const { firstName, lastName } = parseFullName(cleaned);
@@ -260,15 +217,11 @@ function convertCountryCodeToName(code: string): string {
 /**
  * Helper: Verify update succeeded
  */
-function verifyUpdate(
-  updatedContact: BirdContact,
-  expectedAfter: Record<string, any>
-): boolean {
+function verifyUpdate(updatedContact: BirdContact, expectedAfter: Record<string, any>): boolean {
   // Check displayName (either computedDisplayName or attribute)
   if (expectedAfter.displayName) {
     const actualDisplayName =
-      updatedContact.computedDisplayName ||
-      updatedContact.attributes?.displayName;
+      updatedContact.computedDisplayName || updatedContact.attributes?.displayName;
 
     if (actualDisplayName !== expectedAfter.displayName) {
       console.warn(
@@ -314,28 +267,6 @@ function maskPhone(phone: string): string {
   return masked + lastFour;
 }
 
-/**
- * Helper: Create error response
- */
-function createErrorResponse(
-  code: ContactUpdateErrorResponse['code'],
-  message: string,
-  status: number,
-  startTime: number,
-  details?: Record<string, any>
-): Response {
-  const response: ContactUpdateErrorResponse = {
-    success: false,
-    error: message,
-    code,
-    details,
-    processingTime: formatProcessingTime(startTime),
-  };
-
-  console.error(`[Contact Update Error] ${code}: ${message}`);
-
-  return NextResponse.json(response, { status });
-}
 
 /**
  * Helper: Format processing time

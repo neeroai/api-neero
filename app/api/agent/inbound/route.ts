@@ -1,19 +1,20 @@
-import { NextResponse } from 'next/server';
-import { generateText } from 'ai';
 import { google } from '@ai-sdk/google';
-import { AgentInboundRequestSchema, type AgentInboundResponse } from '@/lib/agent/types';
+import { generateText } from 'ai';
+import { NextResponse } from 'next/server';
 import { reconstructContext, saveMessage, updateConversationState } from '@/lib/agent/conversation';
-import { validateResponse, getSafeFallback, extractMetadata } from '@/lib/agent/guardrails';
+import { extractMetadata, getSafeFallback, validateResponse } from '@/lib/agent/guardrails';
+import { EVA_SYSTEM_PROMPT } from '@/lib/agent/prompts/eva-system';
+import { upsertLeadTool } from '@/lib/agent/tools/crm';
+import { createTicketTool, executeHandover } from '@/lib/agent/tools/handover';
 import {
   analyzePhotoTool,
-  transcribeAudioTool,
   extractDocumentTool,
+  transcribeAudioTool,
 } from '@/lib/agent/tools/media';
-import { upsertLeadTool } from '@/lib/agent/tools/crm';
-import { sendMessageTool } from '@/lib/agent/tools/whatsapp';
-import { createTicketTool, executeHandover } from '@/lib/agent/tools/handover';
 import { retrieveKnowledgeTool } from '@/lib/agent/tools/retrieve-knowledge';
-import { EVA_SYSTEM_PROMPT } from '@/lib/agent/prompts/eva-system';
+import { sendMessageTool } from '@/lib/agent/tools/whatsapp';
+import { AgentInboundRequestSchema, type AgentInboundResponse } from '@/lib/agent/types';
+import { InternalError, UnauthorizedError, ValidationError, handleRouteError } from '@/lib/errors';
 
 export const runtime = 'edge';
 
@@ -46,26 +47,17 @@ export async function POST(request: Request) {
   try {
     // 1. Authenticate
     if (!authenticate(request)) {
-      return NextResponse.json({ error: 'unauthorized' }, { status: 401 });
+      throw new UnauthorizedError('API key required or invalid');
     }
 
     // 2. Parse request body
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch (error) {
-      return NextResponse.json(
-        { error: 'invalid json', detail: `${error}` },
-        { status: 400 }
-      );
-    }
+    const body = await request.json();
 
     const parsed = AgentInboundRequestSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json(
-        { error: 'invalid request', detail: parsed.error },
-        { status: 400 }
-      );
+      throw new ValidationError('Invalid request', {
+        issues: parsed.error.errors,
+      });
     }
 
     const { context, message } = parsed.data;
@@ -91,34 +83,28 @@ export async function POST(request: Request) {
     });
 
     // 6. Call AI with tools
-    let aiResponse;
-    try {
-      aiResponse = await generateText({
-        model: google('gemini-2.0-flash-exp'),
-        system: EVA_SYSTEM_PROMPT,
-        messages,
-        tools: {
-          analyzePhoto: analyzePhotoTool,
-          transcribeAudio: transcribeAudioTool,
-          extractDocument: extractDocumentTool,
-          upsertLead: upsertLeadTool,
-          sendMessage: sendMessageTool,
-          createTicket: createTicketTool,
-          retrieveKnowledge: retrieveKnowledgeTool,
-        },
-        toolChoice: 'auto',
-        temperature: 0.7,
-      });
-    } catch (error) {
+    const aiResponse = await generateText({
+      model: google('gemini-2.0-flash-exp'),
+      system: EVA_SYSTEM_PROMPT,
+      messages,
+      tools: {
+        analyzePhoto: analyzePhotoTool,
+        transcribeAudio: transcribeAudioTool,
+        extractDocument: extractDocumentTool,
+        upsertLead: upsertLeadTool,
+        sendMessage: sendMessageTool,
+        createTicket: createTicketTool,
+        retrieveKnowledge: retrieveKnowledgeTool,
+      },
+      toolChoice: 'auto',
+      temperature: 0.7,
+    }).catch((error) => {
       console.error('[inbound] AI generation failed:', error);
-      return NextResponse.json(
-        {
-          error: 'ai_generation_failed',
-          detail: error instanceof Error ? error.message : 'Unknown error',
-        },
-        { status: 500 }
+      throw new InternalError(
+        error instanceof Error ? error.message : 'AI generation failed',
+        { operation: 'ai_generation', conversationId }
       );
-    }
+    });
 
     const aiText = aiResponse.text;
 
@@ -177,11 +163,14 @@ export async function POST(request: Request) {
 
       // Check if any tool calls triggered handover
       if (aiResponse.toolCalls && aiResponse.toolCalls.length > 0) {
-        const handoverCall = aiResponse.toolCalls.find((call) => 'toolName' in call && call.toolName === 'createTicket');
+        const handoverCall = aiResponse.toolCalls.find(
+          (call) => 'toolName' in call && call.toolName === 'createTicket'
+        );
 
         if (handoverCall && 'args' in handoverCall) {
           status = 'handover';
-          handoverReason = ((handoverCall.args as Record<string, unknown>).reason as string) || 'user_requested';
+          handoverReason =
+            ((handoverCall.args as Record<string, unknown>).reason as string) || 'user_requested';
         }
       }
     }
@@ -242,15 +231,6 @@ export async function POST(request: Request) {
     return NextResponse.json(response);
   } catch (error) {
     console.error('[inbound] Unhandled error:', error);
-
-    return NextResponse.json(
-      {
-        reply: 'Disculpa, tuve un problema técnico. Un asesor te contactará pronto.',
-        status: 'error',
-        error: 'internal_server_error',
-        detail: error instanceof Error ? error.message : 'Unknown error',
-      },
-      { status: 500 }
-    );
+    return handleRouteError(error);
   }
 }

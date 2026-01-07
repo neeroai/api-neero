@@ -7,25 +7,29 @@
  */
 
 import { NextResponse } from 'next/server';
-import { ZodError } from 'zod';
 import { processImage } from '@/lib/ai/pipeline';
 import type { DocumentData as AIDocumentData } from '@/lib/ai/schemas/document';
 import type { InvoiceData } from '@/lib/ai/schemas/invoice';
 import type { PhotoAnalysis } from '@/lib/ai/schemas/photo';
 import { TimeBudget, TimeoutBudgetError, type TimeTracker } from '@/lib/ai/timeout';
 import { transcribeWithFallback } from '@/lib/ai/transcribe';
-import { createUnauthorizedResponse, validateApiKey } from '@/lib/auth/api-key';
+import { validateApiKey } from '@/lib/auth/api-key';
 import { fetchLatestMediaFromConversation } from '@/lib/bird/fetch-latest-media';
 import { downloadMedia } from '@/lib/bird/media';
 import type {
-  BirdActionErrorResponse,
   BirdActionRequest,
   BirdActionSuccessResponse,
   DocumentData as BirdDocumentData,
-  ErrorCode,
   ImageData,
 } from '@/lib/bird/types';
 import { BirdActionRequestSchema } from '@/lib/bird/types';
+import {
+  InternalError,
+  TimeoutError,
+  UnauthorizedError,
+  ValidationError,
+  handleRouteError,
+} from '@/lib/errors';
 
 export const runtime = 'edge';
 
@@ -112,38 +116,21 @@ function documentToBirdDocumentData(document: AIDocumentData): BirdDocumentData 
 /**
  * Parse and validate request body
  */
-async function parseRequestBody(
-  request: Request,
-  startTime: number
-): Promise<BirdActionRequest | Response> {
-  try {
-    const rawBody = await request.json();
-    return BirdActionRequestSchema.parse(rawBody);
-  } catch (error) {
-    if (error instanceof ZodError) {
-      return createErrorResponse(
-        'VALIDATION_ERROR',
-        `Invalid request body: ${error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
-        400,
-        startTime
-      );
-    }
-    return createErrorResponse('VALIDATION_ERROR', 'Invalid JSON body', 400, startTime);
-  }
+async function parseRequestBody(request: Request): Promise<BirdActionRequest> {
+  const rawBody = await request.json();
+  return BirdActionRequestSchema.parse(rawBody);
 }
 
 /**
  * Download media with error handling
  */
-async function downloadMediaSafe(url: string, startTime: number): Promise<ArrayBuffer | Response> {
+async function downloadMediaSafe(url: string): Promise<ArrayBuffer> {
   try {
     return await downloadMedia(url);
   } catch (error) {
-    return createErrorResponse(
-      'MEDIA_DOWNLOAD_ERROR',
+    throw new InternalError(
       error instanceof Error ? error.message : 'Failed to download media',
-      500,
-      startTime
+      { operation: 'media_download', url: url.substring(0, 50) }
     );
   }
 }
@@ -263,15 +250,11 @@ export async function POST(request: Request): Promise<Response> {
   try {
     // 1. API Key Validation
     if (!validateApiKey(request)) {
-      return createUnauthorizedResponse();
+      throw new UnauthorizedError('API key required or invalid');
     }
 
     // 2. Parse request body (v3.0 schema: no mediaUrl, required context.conversationId)
-    const bodyOrError = await parseRequestBody(request, startTime);
-    if (bodyOrError instanceof Response) {
-      return bodyOrError;
-    }
-    const body = bodyOrError;
+    const body = await parseRequestBody(request);
 
     budget.checkBudget();
 
@@ -289,89 +272,43 @@ export async function POST(request: Request): Promise<Response> {
 
       console.log(`[Bird API] Extracted: type=${mediaType}, url=${mediaUrl.substring(0, 50)}...`);
     } catch (error) {
-      return createErrorResponse(
-        'MEDIA_EXTRACTION_ERROR',
+      throw new InternalError(
         error instanceof Error ? error.message : 'Could not extract media from conversation',
-        500,
-        startTime
+        {
+          operation: 'media_extraction',
+          conversationId: body.context.conversationId,
+        }
       );
     }
 
     budget.checkBudget();
 
     // 4. Download media
-    const bufferOrError = await downloadMediaSafe(mediaUrl, startTime);
-    if (bufferOrError instanceof Response) {
-      return bufferOrError;
-    }
-    const mediaBuffer = bufferOrError;
+    const mediaBuffer = await downloadMediaSafe(mediaUrl);
 
     budget.checkBudget();
 
     // 5. Process based on DETECTED media type (not body.mediaType)
-    try {
-      switch (mediaType) {
-        case 'image':
-          return await handleImageProcessing(mediaUrl, budget, startTime);
-        case 'audio':
-          return await handleAudioProcessing(mediaBuffer, budget, startTime);
-        case 'document':
-          return await handleDocumentProcessing(mediaUrl, budget, startTime);
-        default: {
-          const _exhaustive: never = mediaType;
-          return createErrorResponse(
-            'UNSUPPORTED_MEDIA_TYPE',
-            `Unsupported media type: ${_exhaustive}`,
-            400,
-            startTime
-          );
-        }
+    switch (mediaType) {
+      case 'image':
+        return await handleImageProcessing(mediaUrl, budget, startTime);
+      case 'audio':
+        return await handleAudioProcessing(mediaBuffer, budget, startTime);
+      case 'document':
+        return await handleDocumentProcessing(mediaUrl, budget, startTime);
+      default: {
+        const _exhaustive: never = mediaType;
+        throw new ValidationError(`Unsupported media type: ${_exhaustive}`);
       }
-    } catch (error) {
-      if (error instanceof TimeoutBudgetError) {
-        return createErrorResponse('TIMEOUT_ERROR', error.message, 408, startTime);
-      }
-      return createErrorResponse(
-        'PROCESSING_ERROR',
-        error instanceof Error ? error.message : 'Processing failed',
-        500,
-        startTime
-      );
     }
   } catch (error) {
     if (error instanceof TimeoutBudgetError) {
-      return createErrorResponse('TIMEOUT_ERROR', error.message, 408, startTime);
+      throw new TimeoutError(error.message, { budgetMs: 8500 });
     }
-    return createErrorResponse(
-      'PROCESSING_ERROR',
-      error instanceof Error ? error.message : 'Unexpected error',
-      500,
-      startTime
-    );
+    return handleRouteError(error);
   }
 }
 
-/**
- * Create error response
- */
-function createErrorResponse(
-  code: ErrorCode,
-  message: string,
-  status: number,
-  startTime: number
-): Response {
-  const response: BirdActionErrorResponse = {
-    success: false,
-    error: message,
-    code,
-    processingTime: formatProcessingTime(startTime),
-  };
-
-  // Log error for monitoring
-  console.error(`[Bird API Error] ${code}: ${message}`);
-
-  return NextResponse.json(response, { status });
-}
 
 /**
  * Format processing time as string (e.g., "2.3s")
