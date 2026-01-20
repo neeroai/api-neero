@@ -1,8 +1,19 @@
+---
+title: "api-neero - Bird.com Multimodal AI API"
+summary: "Cost-optimized multimodal API for Bird.com AI employees. Handles image classification, document OCR, audio transcription with 9s timeout. Uses Gemini 2.0 Flash (89% cheaper than Claude). Includes contact normalization with hybrid extraction (regex+AI). Next.js 16 Edge Runtime."
+description: "Next.js 16 Edge Runtime API: image/document/audio processing, RAG with pgvector, Bird CRM integration"
+version: "3.0"
+date: "2025-12-27"
+updated: "2026-01-20 00:15"
+tags: ["api", "edge-runtime", "multimodal", "bird-crm", "ai-integration", "next.js-16"]
+scope: "project"
+---
+
 # CLAUDE.md
 
 **Project**: api-neero | **Type**: API | **Stack**: Next.js 16 + Vercel Edge + Gemini + Groq + Whisper
 **Purpose**: Cost-optimized multimodal API for Bird.com AI employees - 89% cheaper than Claude alternatives
-**Last Updated**: 2025-12-27 11:15
+**Last Updated**: 2026-01-19 11:45
 
 ---
 
@@ -23,6 +34,16 @@ pnpm test:coverage    # Coverage report (60%+ target)
 
 ---
 
+## Recent Security Updates
+
+**2026-01-19**: Upgraded to Next.js 16.0.10 & React 19.2.3
+- Fixed CVE-2025-55182 (React2Shell) - CVSS 10.0 critical RCE
+- Upgraded from Next.js 16.0.10 + React 19.2.0
+- All quality gates passing
+- Deployed to Vercel (commit 6d12ccc)
+
+---
+
 ## Structure
 
 - `/app/api/bird/route.ts` - Bird Actions entrypoint (HTTP POST, <9s)
@@ -31,6 +52,28 @@ pnpm test:coverage    # Coverage report (60%+ target)
 - `/lib/db` - Drizzle schema, pgvector semantic search
 - `/lib/agent/tools` - RAG tool (retrieveKnowledge)
 - `/__tests__` - Edge Runtime VM, mock AI SDK
+
+---
+
+## Module Map
+
+**IMPORTANT**: All modules have CLAUDE.md semantic maps. Read module CLAUDE.md to understand module structure without exploring individual files.
+
+| Module | CLAUDE.md | Purpose | Files |
+|--------|-----------|---------|-------|
+| lib/ | lib/CLAUDE.md | Core library overview | - |
+| lib/ai/ | lib/ai/CLAUDE.md | Image classify/route, transcribe, embeddings | 23 |
+| lib/bird/ | lib/bird/CLAUDE.md | Bird CRM client + media download | 11 |
+| lib/db/ | lib/db/CLAUDE.md | Database schema + pgvector search | 3 |
+| lib/normalization/ | lib/normalization/CLAUDE.md | Contact data extraction | 9 |
+| lib/agent/ | lib/agent/CLAUDE.md | Agent orchestration + tools | 10 |
+| app/api/ | app/api/CLAUDE.md | API routes + handlers | 5 |
+
+**Navigation Protocol**:
+1. Read root CLAUDE.md (this file) for project overview
+2. Read module CLAUDE.md for module structure
+3. Read file @file headers before reading full file
+4. Only read full file if header insufficient
 
 ---
 
@@ -46,6 +89,21 @@ Next.js 16 + React 19 + TypeScript 5.9 + Vercel Edge Runtime + Vercel AI SDK 5.0
 **Style**: Functional > OOP, early returns, 2 spaces, 100 chars, single quotes, semicolons, files <600 lines
 **Edge Runtime**: Web APIs only (fetch, crypto.subtle, ReadableStream), NO Node.js APIs (fs, Buffer)
 **Quality Gates**: Format → Lint → Types → Tests (60%+) → Build (ALL must pass)
+
+---
+
+## File Headers
+
+**Coverage**: 62/62 files (100%)
+
+All .ts/.tsx files have complete @file headers:
+- `@file` - Descriptive name
+- `@description` - One-line purpose
+- `@module` - Relative path from lib/ or app/api/
+- `@exports` - All exported functions/types/constants
+- `@runtime` - Edge/node (app/api routes only)
+
+**Navigation**: Read file headers before reading full file contents. Headers provide sufficient context for most navigation tasks.
 
 ---
 
@@ -141,4 +199,4 @@ NEERO_API_KEY=xxx         # Custom API key for Actions
 
 ---
 
-**Lines**: 200 | **Token Budget**: ~850 tokens
+**Lines**: 250 | **Token Budget**: ~1,100 tokens
