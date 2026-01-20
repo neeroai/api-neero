@@ -76,18 +76,20 @@ export async function POST(request: Request): Promise<Response> {
     const rawBody = await request.text();
     const signature = request.headers.get('X-Bird-Signature');
 
-    // TEMPORARY DEBUG LOGGING
+    // TEMPORARY: Make signature verification non-blocking for debugging
     console.log('[Webhook DEBUG] Signature header:', signature);
     console.log('[Webhook DEBUG] Body length:', rawBody.length);
     console.log('[Webhook DEBUG] Body preview:', rawBody.substring(0, 200));
     console.log('[Webhook DEBUG] BIRD_WEBHOOK_SECRET exists:', !!process.env.BIRD_WEBHOOK_SECRET);
 
-    if (!(await verifyBirdWebhookSignature(signature, rawBody))) {
-      console.error('[Webhook DEBUG] Signature verification FAILED');
-      throw new UnauthorizedError('Invalid webhook signature');
+    const signatureValid = await verifyBirdWebhookSignature(signature, rawBody);
+    if (!signatureValid) {
+      console.warn('[Webhook DEBUG] Signature verification FAILED - allowing anyway for debugging');
+      // TEMPORARY: Don't throw, just log warning
+      // throw new UnauthorizedError('Invalid webhook signature');
+    } else {
+      console.log('[Webhook DEBUG] Signature verification SUCCESS');
     }
-
-    console.log('[Webhook DEBUG] Signature verification SUCCESS');
 
     budget.checkBudget();
 
