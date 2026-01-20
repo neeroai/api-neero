@@ -107,12 +107,14 @@ export async function GET(request: Request): Promise<Response> {
           continue;
         }
 
-        // Fetch messages
-        const messages = await getConversationMessages(conversation.id, { limit: 10 });
+        // Fetch messages (get all, then take last 10)
+        const allMessages = await getConversationMessages(conversation.id);
+        const messages = allMessages.slice(-10); // Last 10 messages
         const conversationText = messages
           .map((msg) => {
             if (msg.body.type === 'text') {
-              return typeof msg.body.text === 'string' ? msg.body.text : msg.body.text?.text || '';
+              const body = msg.body as { type: 'text'; text?: { text?: string } | string };
+              return typeof body.text === 'string' ? body.text : body.text?.text || '';
             }
             return '';
           })

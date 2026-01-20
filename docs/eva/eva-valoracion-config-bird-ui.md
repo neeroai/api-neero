@@ -497,7 +497,7 @@ MONITORING Y MEJORA:
 
 **Name:** actualizacion de datos
 
-**Description:** Actualizar datos de contacto usando endpoint con validación
+**Description:** Actualizar y normalizar datos de contacto automáticamente. Limpia emojis, capitaliza nombres, valida formato email/teléfono. Llamar SIEMPRE que el paciente proporcione nombre, email o país.
 
 **Type:** HTTP Request
 
@@ -516,11 +516,20 @@ MONITORING Y MEJORA:
 **Body:**
 ```json
 {
-  "conversationId": "{{arguments.conversationId}}",
-  "contactPhone": "{{arguments.contactPhone}}",
-  "updateData": "{{arguments.updateData}}"
+  "context": {
+    "conversationId": "{{arguments.conversationId}}",
+    "contactPhone": "{{arguments.contactPhone}}",
+    "contactName": "{{arguments.contactName}}"
+  },
+  "updates": {
+    "displayName": "{{arguments.displayName}}",
+    "email": "{{arguments.email}}",
+    "country": "{{arguments.country}}"
+  }
 }
 ```
+
+**CRITICAL:** Body uses nested `context` and `updates` objects (NOT flat structure).
 
 **Arguments Schema:**
 ```json
@@ -529,32 +538,30 @@ MONITORING Y MEJORA:
   "properties": {
     "conversationId": {
       "type": "string",
-      "description": "ID de la conversación actual"
+      "description": "ID de conversación (OPCIONAL - para auditoría)"
     },
     "contactPhone": {
       "type": "string",
-      "description": "Teléfono del contacto con código de país (+57...)"
+      "description": "Teléfono con código de país (+57...) - REQUERIDO"
     },
-    "updateData": {
-      "type": "object",
-      "description": "Objeto JSON con SOLO los campos a actualizar",
-      "properties": {
-        "displayName": {
-          "type": "string",
-          "description": "Nombre completo (opcional)"
-        },
-        "email": {
-          "type": "string",
-          "description": "Correo electrónico (opcional)"
-        },
-        "country": {
-          "type": "string",
-          "description": "Código de país 2 letras (CO, MX, US, etc.)"
-        }
-      }
+    "contactName": {
+      "type": "string",
+      "description": "Nombre del contacto (OPCIONAL - para logs)"
+    },
+    "displayName": {
+      "type": "string",
+      "description": "Nombre completo a actualizar (OPCIONAL)"
+    },
+    "email": {
+      "type": "string",
+      "description": "Email a actualizar (OPCIONAL)"
+    },
+    "country": {
+      "type": "string",
+      "description": "Código país 2 letras: CO, MX, US (OPCIONAL)"
     }
   },
-  "required": ["conversationId", "contactPhone", "updateData"]
+  "required": ["contactPhone"]
 }
 ```
 
