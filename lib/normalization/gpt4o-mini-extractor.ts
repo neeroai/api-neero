@@ -25,10 +25,9 @@ const ContactExtractionSchema = z.object({
   firstName: z.string().describe('First name only (proper case)'),
   lastName: z.string().describe('Last name(s) - LATAM format supports 2 apellidos'),
   email: z
-    .string()
-    .email()
+    .union([z.string().email(), z.literal('')])
     .optional()
-    .describe('Valid email address from conversation (RFC 5322)'),
+    .describe('Valid email address from conversation (RFC 5322) or empty string if not found'),
   country: z
     .enum(['CO', 'MX', 'US', 'AR', 'CL', 'PE', 'EC', 'VE', 'ES', 'NL', 'PA', 'CR', 'GT', 'BO'])
     .optional()
@@ -206,7 +205,7 @@ export async function extractContactDataGPT4oMini(
 
     // Call GPT-4o-mini with structured outputs
     const result = await generateObject({
-      model: openai('gpt-4o-mini-2025-01-21'), // Latest Jan 2026 model
+      model: openai('gpt-4o-mini-2024-07-18'), // GPT-4o-mini stable release
       schema: ContactExtractionSchema,
       system: SYSTEM_PROMPT,
       prompt: userPrompt,

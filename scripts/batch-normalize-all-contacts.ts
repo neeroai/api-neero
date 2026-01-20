@@ -129,6 +129,17 @@ async function main() {
   console.log(`Total contacts: ${contacts.length}`);
   console.log();
 
+  // Sort by createdAt descending (newest first)
+  contacts.sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return dateB - dateA; // Descending order
+  });
+  console.log(`Sorted by creation date (newest first)`);
+  console.log(`Newest: ${contacts[0]?.createdAt || 'N/A'}`);
+  console.log(`Oldest: ${contacts[contacts.length - 1]?.createdAt || 'N/A'}`);
+  console.log();
+
   // Apply limit if specified
   const contactsToProcess = options.limit ? contacts.slice(0, options.limit) : contacts;
   console.log(`Contacts to process: ${contactsToProcess.length}`);
@@ -240,7 +251,7 @@ async function main() {
 
       // 6. Update contact if confidence >= 0.6 (and not dry-run)
       if (extracted.confidence >= 0.6 && extracted.displayName && !options.dryRun) {
-        // Prepare update payload
+        // Prepare update payload (NO email - attribute doesn't exist in Bird)
         const updatePayload: any = {
           firstName: extracted.firstName,
           lastName: extracted.lastName,
@@ -249,13 +260,11 @@ async function main() {
             firstName: extracted.firstName,
             lastName: extracted.lastName,
             jose: extracted.displayName,
+            estatus: 'datosok', // Mark as successfully normalized
           },
         };
 
-        if (extracted.email) {
-          updatePayload.attributes.email = extracted.email;
-        }
-
+        // Add country if available
         if (extracted.country) {
           const countryNames: Record<string, string> = {
             CO: 'Colombia', MX: 'Mexico', US: 'United States',

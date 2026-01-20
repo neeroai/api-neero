@@ -26,22 +26,30 @@ import {
 export const runtime = 'edge';
 
 /**
- * Zod schema for Bird conversation.created event
+ * Zod schema for Bird conversation.created event (actual format from Bird API)
  */
 const ConversationCreatedEventSchema = z.object({
+  service: z.literal('conversations'),
   event: z.literal('conversation.created'),
-  data: z.object({
-    conversation: z.object({
-      id: z.string().uuid(),
-      channelId: z.string().optional(),
-      contact: z
-        .object({
-          id: z.string().uuid(),
-          identifierValue: z.string(), // Phone number
+  payload: z.object({
+    id: z.string().uuid(), // Conversation ID
+    channelId: z.string().optional(),
+    featuredParticipants: z
+      .array(
+        z.object({
+          id: z.string().uuid(), // Contact/Participant ID
+          type: z.string(),
           displayName: z.string().optional(),
+          contact: z
+            .object({
+              identifierKey: z.string(),
+              identifierValue: z.string(), // Phone number
+              platformAddress: z.string().optional(),
+            })
+            .optional(),
         })
-        .optional(),
-    }),
+      )
+      .optional(),
   }),
 });
 
@@ -292,24 +300,35 @@ function parseWebhookEvent(rawBody: string): ConversationCreatedEvent {
 }
 
 /**
- * Helper: Extract relevant data from event
+ * Helper: Extract relevant data from event (updated for actual Bird format)
  */
 function extractEventData(event: ConversationCreatedEvent): {
   conversationId: string;
   contactId: string;
   contactPhone: string;
 } {
-  const conversationId = event.data.conversation.id;
-  const contact = event.data.conversation.contact;
+  const conversationId = event.payload.id;
+  const participants = event.payload.featuredParticipants;
 
-  if (!contact) {
-    throw new ValidationError('Missing contact in webhook payload');
+  if (!participants || participants.length === 0) {
+    throw new ValidationError('Missing featuredParticipants in webhook payload');
+  }
+
+  // Find first contact participant
+  const contactParticipant = participants.find((p) => p.type === 'contact');
+
+  if (!contactParticipant) {
+    throw new ValidationError('No contact participant found in webhook payload');
+  }
+
+  if (!contactParticipant.contact?.identifierValue) {
+    throw new ValidationError('Missing contact identifierValue in webhook payload');
   }
 
   return {
     conversationId,
-    contactId: contact.id,
-    contactPhone: contact.identifierValue,
+    contactId: contactParticipant.id,
+    contactPhone: contactParticipant.contact.identifierValue,
   };
 }
 
