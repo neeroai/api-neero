@@ -1,3 +1,9 @@
+/**
+ * @file Crm
+ * @description Exports upsertLeadTool
+ * @module lib/agent/tools/crm
+ * @exports upsertLeadTool
+ */
 import { tool } from 'ai';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';

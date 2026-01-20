@@ -1,3 +1,9 @@
+/**
+ * @file Embeddings
+ * @description Exports 2 functions and types
+ * @module lib/ai/embeddings
+ * @exports generateEmbedding, generateEmbeddingsBatch
+ */
 import { google } from '@ai-sdk/google';
 import { embed } from 'ai';
 

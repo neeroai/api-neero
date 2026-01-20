@@ -95,6 +95,77 @@
       },
       "validatedBy": "Dr. Andrés Durán",
       "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "Procedimiento no quirúrgico para reducir flacidez y grasa localizada en brazos mediante inyección de solución enzimática. La enzima desinflama la grasa y mejora la firmeza de la piel sin necesidad de cirugía. Se realizan 3-4 sesiones espaciadas cada 3-4 semanas, con duración de 30-45 minutos por sesión. Sin anestesia o tópica opcional. Los resultados son visibles después de 2-3 meses cuando el proceso de renovación completa. Ideal para pacientes con flacidez leve a moderada que no desean cirugía.",
+      "category": "procedure",
+      "subcategory": "enzimas-brazos",
+      "metadata": {
+        "duration_minutes": 45,
+        "sessions": 4,
+        "interval_weeks": 4,
+        "anesthesia": "tópica opcional",
+        "recovery_days": 0,
+        "final_results_months": 3,
+        "contraindications": ["pregnancy", "breastfeeding", "enzyme_allergy", "active_infection"],
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "Tratamiento no quirúrgico que combina radiofrecuencia y ultrasonido para eliminar grasa localizada y mejorar contorno corporal sin cirugía. Ideal para reducir grasa en abdomen, muslos, flancos y brazos. Se realizan 6-8 sesiones espaciadas cada 1-2 semanas, con duración de 45-60 minutos por sesión. Sin anestesia, sin tiempo de recuperación, retorno inmediato a actividades. Los resultados son visibles después de 1-2 meses. La radiofrecuencia calienta el tejido adiposo mientras el ultrasonido rompe las células grasas, que luego son eliminadas naturalmente por el cuerpo.",
+      "category": "procedure",
+      "subcategory": "deep-slim",
+      "metadata": {
+        "duration_minutes": 60,
+        "sessions": 8,
+        "interval_weeks": 2,
+        "anesthesia": "ninguna",
+        "recovery_days": 0,
+        "final_results_months": 2,
+        "areas": ["abdomen", "muslos", "flancos", "brazos"],
+        "contraindications": ["pregnancy", "pacemaker", "metal_implants", "active_cancer"],
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "Tratamiento facial no invasivo que combina limpieza profunda, exfoliación, extracción de impurezas e hidratación intensiva mediante tecnología vórtex patentada. Resultados visibles inmediatamente con piel luminosa, hidratada y rejuvenecida. Duración 30-45 minutos, sin anestesia, sin tiempo de recuperación. Mantenimiento mensual recomendado. El tratamiento consta de 4 pasos: limpieza profunda (elimina células muertas y abre poros), exfoliación (remueve capa superficial), extracción (limpieza profunda de poros sin dolor), e hidratación (infusión de serums con ácido hialurónico, antioxidantes y péptidos).",
+      "category": "procedure",
+      "subcategory": "hydrafacial",
+      "metadata": {
+        "duration_minutes": 45,
+        "anesthesia": "ninguna",
+        "recovery_days": 0,
+        "results": "immediate",
+        "maintenance_frequency": "monthly",
+        "skin_types": "all",
+        "areas": ["rostro", "cuello", "escote"],
+        "contraindications": ["rosacea_severe", "open_wounds", "recent_sunburn"],
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "Tratamiento no quirúrgico mediante microinyecciones de toxina botulínica tipo A para reducir líneas de expresión y arrugas. Relaja temporalmente los músculos faciales responsables de las arrugas, logrando aspecto rejuvenecido y natural. Duración del procedimiento 10-15 minutos, anestesia tópica opcional. Primeros efectos visibles 3-7 días después, efecto máximo a las 2 semanas. Duración del efecto 3-4 meses. Frecuencia de mantenimiento cada 3-4 meses. Áreas tratables: frente, entrecejo, patas de gallo, líneas periorales. Cuando se aplica correctamente, el resultado es natural manteniendo expresiones faciales.",
+      "category": "procedure",
+      "subcategory": "toxina-botulinica",
+      "metadata": {
+        "duration_minutes": 15,
+        "anesthesia": "tópica opcional",
+        "results_visible_days": 7,
+        "peak_effect_weeks": 2,
+        "duration_months": 4,
+        "maintenance_frequency_months": 4,
+        "areas": ["frente", "entrecejo", "patas_gallo", "lineas_periorales"],
+        "contraindications": ["pregnancy", "breastfeeding", "neuromuscular_disease", "botox_allergy", "active_infection"],
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
     }
   ],
   "faqs": [
@@ -159,6 +230,125 @@
       },
       "validatedBy": "Dr. Andrés Durán",
       "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "Los precios de los procedimientos varían según múltiples factores individuales: área y extensión (tamaño y número de zonas a tratar), técnica específica (tecnologías utilizadas como Vaser, J Plasma), complejidad del caso (condición física, objetivos específicos), y tecnologías complementarias (equipos adicionales según necesidad). Por ejemplo, una lipoescultura varía según número de áreas (1 área vs abdomen más flancos más espalda), tecnologías incluidas (Lipo High Tech 3 básica vs con J Plasma), y complejidad (primera vez vs revisión). La valoración con el Dr. Durán es esencial para evaluación personalizada de tu caso, cotización precisa según tus necesidades específicas, y opciones de financiamiento hasta 36 meses con aprobación inmediata.",
+      "category": "faq",
+      "subcategory": "precios-personalizados",
+      "metadata": {
+        "pricing_factors": ["area_extension", "specific_technique", "case_complexity", "complementary_technologies"],
+        "financing_months": 36,
+        "financing_approval": "immediate",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "El costo del procedimiento incluye: honorarios Dr. Andrés Durán (cirujano plástico), honorarios anestesiólogo certificado, sala de cirugía certificada, hospitalización (si el procedimiento lo requiere), insumos y materiales quirúrgicos, medicamentos intrahospitalarios, implantes de marcas certificadas (cuando aplique), controles postoperatorios durante el primer año, atención 24/7 durante período de recuperación, y valoraciones de seguimiento programadas. NO incluye: exámenes preoperatorios (máximo 30 días de validez antes de cirugía), medicamentos para casa (analgésicos, antibióticos postoperatorios), prendas de compresión (fajas, sujetadores especiales), ni tratamientos complementarios opcionales. Financiamiento hasta 36 meses con aprobación inmediata. En la consulta de valoración recibes cotización detallada por escrito con desglose completo.",
+      "category": "faq",
+      "subcategory": "costo-incluido-detalle",
+      "metadata": {
+        "included": ["surgeon_fees", "anesthesiologist", "surgery_room", "hospitalization", "surgical_materials", "medications_hospital", "implants", "followup_first_year", "support_24_7"],
+        "not_included": ["preop_exams", "home_medications", "compression_garments", "optional_treatments"],
+        "financing_months": 36,
+        "financing_approval": "immediate",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "La consulta de valoración es una inversión en tu seguridad y resultados óptimos. Duración 30-45 minutos. Incluye: evaluación médica completa con el Dr. Andrés Durán, revisión de antecedentes médicos (condiciones, alergias, cirugías previas), examen físico específico según procedimiento de interés, plan de tratamiento personalizado basado en tus objetivos y anatomía, presupuesto detallado con explicación de costos incluidos y no incluidos, y resolución de todas tus dudas sin prisa. 3 modalidades disponibles: Presencial (Barranquilla o Bogotá) evaluación física completa en consultorio ideal para procedimientos quirúrgicos, Virtual (videollamada) con envío previo de fotos ideal para pacientes fuera de Barranquilla/Bogotá, y PRE-CONSULTA (solo fotos) valoración rápida con presupuesto preliminar. La valoración personalizada es esencial porque cada paciente es único - tu anatomía, objetivos y condición física requieren evaluación profesional para garantizar seguridad y resultados óptimos.",
+      "category": "faq",
+      "subcategory": "inversion-consulta",
+      "metadata": {
+        "duration_minutes": 45,
+        "modalities": ["presencial", "virtual", "pre_consulta"],
+        "what_included": ["medical_evaluation", "medical_history", "physical_exam", "treatment_plan", "detailed_budget", "doubt_resolution"],
+        "video_url": "https://youtu.be/0KuR-C_jUeQ?si=tktRFU6EPeR6i7vq",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "Ofrecemos 3 modalidades de valoración para adaptarnos a tus necesidades. VALORACIÓN PRESENCIAL (Barranquilla o Bogotá): ideal para evaluación física completa necesaria, procedimientos quirúrgicos complejos, pacientes que pueden desplazarse fácilmente. Incluye examen físico completo con el Dr. Durán, evaluación de anatomía, piel, tejidos, presupuesto detallado personalizado. Pros: evaluación más completa posible, contacto directo con Dr. Durán, resuelves dudas en persona. Contras: requiere desplazamiento. VALORACIÓN VIRTUAL (videollamada con envío previo de fotos): ideal para pacientes fuera de Barranquilla/Bogotá, consultas preliminares, pacientes con dificultad para desplazarse. Incluye análisis por videollamada en tiempo real, evaluación basada en fotos enviadas previamente, presupuesto y orientación completa. Pros: sin desplazamiento, flexible desde cualquier ciudad. Contras: sin examen físico directo, puede requerir valoración presencial posterior. PRE-CONSULTA (solo fotos): ideal para presupuesto rápido, casos simples, evaluación preliminar. Pros: más rápida sin videollamada. Contras: evaluación preliminar, puede requerir valoración completa después. Todas las modalidades requieren pago de consulta antes de agendar.",
+      "category": "faq",
+      "subcategory": "modalidades-valoracion-detalle",
+      "metadata": {
+        "modalities_count": 3,
+        "presencial_locations": ["Barranquilla", "Bogotá"],
+        "virtual_requirements": ["quiet_place", "photos_submission"],
+        "preconsulta_format": "photos_only",
+        "payment_required_before_scheduling": true,
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "Si vives fuera de Barranquilla o Bogotá, tenemos 2 opciones para ti. OPCIÓN 1 VALORACIÓN VIRTUAL: consulta por videollamada con el Dr. Durán, envías fotos según indicaciones previas, recibes presupuesto y plan de tratamiento. Si decides proceder, te ayudamos a coordinar: viaje y transporte (orientación sobre vuelos/transporte terrestre, mejores opciones según tu ciudad), hospedaje (recomendaciones de alojamiento cerca de la clínica, opciones según presupuesto), planificación de estancia (cuántos días necesitas según procedimiento, cuándo puedes viajar de regreso), y acompañamiento (coordinación de citas preoperatorias, seguimiento durante estancia). OPCIÓN 2 PRE-CONSULTA: valoración rápida por fotos, presupuesto preliminar, orientación inicial. Si decides proceder, agendas valoración presencial más procedimiento en un solo viaje. Soporte incluido: recomendaciones de alojamiento cercano a la clínica, orientación sobre transporte desde aeropuerto/terminal, cálculo de días de estancia según procedimiento, seguimiento postoperatorio (controles presenciales primeras semanas más seguimiento virtual después de regreso más atención 24/7). Muchos pacientes viajan desde otras ciudades (Cali, Medellín, Cartagena, incluso desde el exterior). Estamos acostumbrados a facilitar este proceso.",
+      "category": "faq",
+      "subcategory": "pacientes-otras-ciudades",
+      "metadata": {
+        "options_count": 2,
+        "option1": "valoracion_virtual",
+        "option2": "preconsulta",
+        "support_included": ["accommodation_recommendations", "transport_guidance", "stay_planning", "postop_followup"],
+        "support_availability": "24/7",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "TRATAMIENTOS NO QUIRÚRGICOS: resultados sutiles a moderados progresivos naturales, múltiples sesiones (típicamente 4-8 sesiones) espaciadas cada 1-4 semanas según tratamiento, sin tiempo de reposo retorno inmediato a actividades puede haber inflamación leve por 1-3 días, duración temporal (resultados duran 3-12 meses típicamente) requiere mantenimiento periódico, ideal para correcciones leves prevención de envejecimiento pacientes que no desean o no pueden someterse a cirugía complemento a estilo de vida saludable. Ejemplos: Enzimas en brazos, Deep Slim, Hydrafacial, Toxina Botulínica. TRATAMIENTOS QUIRÚRGICOS: resultados dramáticos y significativos inmediatos (visibles cuando disminuye inflamación) definitivos, una sola intervención procedimiento único con resultados permanentes o muy prolongados, recuperación 1-3 semanas según procedimiento retorno gradual a actividades, permanentes o muy prolongados (años) no requiere mantenimiento excepto cuidados normales de salud, ideal para correcciones significativas resultados definitivos deseados exceso de piel o grasa que no responde a otros tratamientos cambios dramáticos en contorno corporal. Ejemplos: Lipoescultura, Mamoplastia, Abdominoplastia, Rinoplastia. La valoración con el Dr. Durán es esencial para determinar qué opción es mejor para tu caso específico.",
+      "category": "faq",
+      "subcategory": "quirurgico-vs-no-quirurgico",
+      "metadata": {
+        "non_surgical_examples": ["enzimas_brazos", "deep_slim", "hydrafacial", "toxina_botulinica"],
+        "surgical_examples": ["lipoescultura", "mamoplastia", "abdominoplastia", "rinoplastia"],
+        "non_surgical_sessions": "4-8",
+        "non_surgical_duration_months": "3-12",
+        "surgical_recovery_weeks": "1-3",
+        "surgical_results": "permanent",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "Comparación de opciones para mejora de contorno corporal. ENZIMAS EN BRAZOS: para flacidez leve a moderada en brazos, poca grasa localizada, sin exceso de piel significativo. Solución enzimática inyectada en tejido subcutáneo, descompone grasa localizada, estimula producción de colágeno mejora firmeza. 3-4 sesiones cada 3-4 semanas. Resultados sutiles visibles después de 2-3 meses. Sin tiempo de recuperación. Mejor para pacientes que no desean cirugía y tienen flacidez leve. DEEP SLIM: para grasa localizada leve a moderada sin flacidez significativa de piel en abdomen, muslos, flancos, brazos. Radiofrecuencia más ultrasonido calienta y rompe células de grasa estimula producción de colágeno. 6-8 sesiones cada 1-2 semanas. Resultados moderados visibles después de 1-2 meses. Sin tiempo de recuperación. Mejor para pacientes que desean reducir grasa sin cirugía. LIPOESCULTURA: para grasa moderada a significativa, deseo de resultados dramáticos, áreas múltiples o extensas, grasa que no responde a dieta/ejercicio. Extracción quirúrgica de grasa con tecnologías Vaser Microaire Retraction, opcional J Plasma para retracción de piel. Una cirugía resultados permanentes. Resultados dramáticos visibles cuando disminuye inflamación (3-6 meses para resultados finales). Recuperación 2-3 semanas, uso de faja 6 semanas. Mejor para pacientes que desean cambio significativo y definitivo. La valoración con el Dr. Durán es necesaria para determinar qué opción es mejor para tu caso específico.",
+      "category": "faq",
+      "subcategory": "opciones-contorno-corporal",
+      "metadata": {
+        "options": ["enzimas_brazos", "deep_slim", "lipoescultura"],
+        "enzimas_sessions": "3-4",
+        "enzimas_results_months": "2-3",
+        "deep_slim_sessions": "6-8",
+        "deep_slim_results_months": "1-2",
+        "lipoescultura_sessions": "1",
+        "lipoescultura_recovery_weeks": "2-3",
+        "lipoescultura_compression_weeks": 6,
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
+    },
+    {
+      "content": "El Dr. Andrés Durán se especializa en cirugía plástica estética y reconstructiva, con enfoque en procedimientos con alta evidencia científica y tecnologías comprobadas. Si preguntas por un tratamiento que no ofrecemos, no significa que no tengamos soluciones para ti. Algunas alternativas pueden ser igual o más efectivas que el tratamiento que buscas inicialmente. Ejemplo EXOSOMAS: actualmente no ofrecemos exosomas, pero tenemos alternativas comprobadas para rejuvenecimiento facial y capilar: Plasma Rico en Plaquetas (PRP) factores de crecimiento de tu propia sangre, Bioestimulación con ácido hialurónico hidratación profunda y estimulación de colágeno, otros tratamientos con mayor evidencia científica según tu necesidad específica. PROCESO: Paso 1 agenda valoración con el Dr. Durán, Paso 2 el Dr. evalúa tu necesidad específica (qué problema quieres resolver), Paso 3 te recomienda alternativas disponibles y efectivas para tu objetivo, Paso 4 recibes plan personalizado con opciones comprobadas. El Dr. Durán evalúa constantemente incorporar nuevos tratamientos basado en: evidencia científica sólida (estudios clínicos publicados, resultados reproducibles, seguridad comprobada), demanda de pacientes (si muchos pacientes buscan un tratamiento específico evaluamos incorporarlo si cumple estándares de seguridad), y seguridad y efectividad (no ofrecemos tratamientos solo por ser novedosos, priorizamos seguridad y resultados comprobados). Nuestro objetivo es tu seguridad y resultados óptimos, no ofrecer todo lo que existe sino lo que realmente funciona.",
+      "category": "faq",
+      "subcategory": "tratamientos-no-ofrecidos",
+      "metadata": {
+        "example_treatment": "exosomas",
+        "alternatives_offered": ["prp", "hyaluronic_acid_biostimulation"],
+        "evaluation_criteria": ["scientific_evidence", "patient_demand", "safety_effectiveness"],
+        "philosophy": "effective_and_safe_over_novel",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
     }
   ],
   "policies": [
@@ -238,6 +428,30 @@
       },
       "validatedBy": "Dr. Andrés Durán",
       "validatedAt": "2025-12-15T00:00:00Z"
+    },
+    {
+      "content": "La clínica del Dr. Andrés Durán en Barranquilla está ubicada en Quantum Tower, Calle 85 número 50-159, Consultorio 06, Primer Piso, Barranquilla, Colombia. La consulta de valoración se realiza en el consultorio del Dr. Durán. El proceso incluye: te confirmamos la cita un día antes, tiempo de espera en sala 20 a 30 minutos, duración de la valoración 30-45 minutos. El edificio Quantum Tower cuenta con parqueadero privado con tarifa de 6.000 pesos por hora. La consulta de valoración es muy importante para identificar el procedimiento adecuado para usted de acuerdo con sus necesidades físicas y antecedentes médicos. Consultorio ubicado en Primer Piso.",
+      "category": "location",
+      "subcategory": "barranquilla-principal",
+      "metadata": {
+        "address": "Calle 85 #50-159, Consultorio 06, Primer Piso",
+        "building": "Quantum Tower",
+        "city": "Barranquilla",
+        "country": "Colombia",
+        "consultation_duration_minutes": 45,
+        "wait_time_minutes": 30,
+        "parking_available": true,
+        "parking_cost_cop_per_hour": 6000,
+        "floor": "Primer Piso",
+        "phone": "PENDING",
+        "whatsapp": "PENDING",
+        "schedule_weekdays": "PENDING",
+        "schedule_saturday": "PENDING",
+        "wheelchair_accessible": "PENDING",
+        "validation_pending": true
+      },
+      "validatedBy": "PENDING",
+      "validatedAt": "2026-01-20T00:00:00Z"
     }
   ]
 }

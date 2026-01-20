@@ -58,3 +58,10 @@ node_modules/
 # ============ OS FILES ============
 .DS_Store
 Thumbs.db
+
+crm_bird/
+feature/
+docs-global/
+docs/
+data/
+specs/

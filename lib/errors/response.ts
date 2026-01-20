@@ -1,4 +1,10 @@
 /**
+ * @file Error Response Utilities for Next.js Route Handlers
+ * @description Exports 4 functions and types
+ * @module lib/errors/response
+ * @exports createErrorResponse, createSuccessResponse, handleRouteError, toAppError
+ */
+/**
  * Error Response Utilities for Next.js Route Handlers
  * Edge Runtime Compatible
  *

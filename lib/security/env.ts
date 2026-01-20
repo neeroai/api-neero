@@ -1,4 +1,10 @@
 /**
+ * @file Environment Variable Validation
+ * @description Exports 7 functions and types
+ * @module lib/security/env
+ * @exports EnvValidationError, ValidatedEnv, getEnvVar, hasEnvVar, validateEnv, validateOpenAIEnv, validateWhatsAppEnv
+ */
+/**
  * Environment Variable Validation
  * Type-safe validation using Zod schemas
  */

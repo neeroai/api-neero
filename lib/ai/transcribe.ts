@@ -1,4 +1,10 @@
 /**
+ * @file Audio Transcription with Fallback
+ * @description Exports 3 functions and types
+ * @module lib/ai/transcribe
+ * @exports TranscribeResult, TranscriptionMetrics, transcribeWithFallback
+ */
+/**
  * Audio Transcription with Fallback
  * Primary: Groq Whisper v3 Turbo ($0.67/1K min)
  * Fallback: OpenAI Whisper ($6.00/1K min)

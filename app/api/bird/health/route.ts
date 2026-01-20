@@ -1,4 +1,11 @@
 /**
+ * @file Bird Actions Health Check Endpoint
+ * @description API route handler
+ * @module app/api/bird/health/route
+ * @exports GET, runtime
+ * @runtime edge
+ */
+/**
  * Bird Actions Health Check Endpoint
  * Verifies API and AI service availability
  * Edge Runtime compatible

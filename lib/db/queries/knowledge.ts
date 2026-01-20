@@ -1,3 +1,9 @@
+/**
+ * @file Knowledge
+ * @description Exports 7 functions and types
+ * @module lib/db/queries/knowledge
+ * @exports KnowledgeSearchResult, deactivateKnowledge, getKnowledgeById, insertKnowledge, insertKnowledgeBatch, searchKnowledge, updateKnowledge
+ */
 import { eq } from 'drizzle-orm';
 import { generateEmbedding } from '@/lib/ai/embeddings';
 import { db, sql } from '@/lib/db/client';

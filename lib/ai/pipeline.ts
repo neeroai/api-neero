@@ -1,4 +1,10 @@
 /**
+ * @file Two-Stage Image Processing Pipeline
+ * @description Exports 6 functions and types
+ * @module lib/ai/pipeline
+ * @exports PipelineOptions, PipelineResult, isDocumentData, isInvoiceData, isPhotoAnalysis, processImage
+ */
+/**
  * Two-Stage Image Processing Pipeline
  * Intelligent routing with classification + type-specific processing
  * Total budget: 8.5 seconds (9s deadline with 0.5s buffer)

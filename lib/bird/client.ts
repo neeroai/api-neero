@@ -1,3 +1,9 @@
+/**
+ * @file Client
+ * @description Client implementation
+ * @module lib/bird/client
+ * @exports birdFetch
+ */
 import { BIRD_API_BASE, getBirdConfig } from './env';
 
 interface BirdFetchOptions extends RequestInit {

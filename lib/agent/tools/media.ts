@@ -1,3 +1,9 @@
+/**
+ * @file Media
+ * @description Exports 3 functions and types
+ * @module lib/agent/tools/media
+ * @exports analyzePhotoTool, extractDocumentTool, transcribeAudioTool
+ */
 import { tool } from 'ai';
 import { and, eq } from 'drizzle-orm';
 import { z } from 'zod';

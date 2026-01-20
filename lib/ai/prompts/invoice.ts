@@ -1,4 +1,10 @@
 /**
+ * @file Invoice Extraction Prompt
+ * @description Exports getInvoiceExtractionPrompt
+ * @module lib/ai/prompts/invoice
+ * @exports getInvoiceExtractionPrompt
+ */
+/**
  * Invoice Extraction Prompt
  * Structured data extraction from invoices and receipts
  * LATAM-optimized for Colombian invoices with IVA

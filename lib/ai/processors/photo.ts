@@ -1,4 +1,10 @@
 /**
+ * @file Photo Processor
+ * @description Exports processPhoto
+ * @module lib/ai/processors/photo
+ * @exports processPhoto
+ */
+/**
  * Photo Processor
  * Analyzes photos with Gemini 2.0 Flash for people, objects, and scenes
  */

@@ -1,4 +1,10 @@
 /**
+ * @file Bird Conversations API - Media Extraction
+ * @description Test suite
+ * @module lib/bird/fetch-latest-media
+ * @exports ExtractedMedia, fetchLatestMediaFromConversation
+ */
+/**
  * Bird Conversations API - Media Extraction
  * Fetch latest media message from WhatsApp conversation
  * Edge Runtime compatible
@@ -130,6 +136,12 @@ function extractMediaFromMessage(message: BirdMessage): ExtractedMedia | null {
  * @throws Error if BIRD_ACCESS_KEY or BIRD_WORKSPACE_ID missing
  * @throws Error if Bird API request fails
  * @throws Error if no media messages found
+ *
+ * @example
+ * ```ts
+ * const media = await fetchLatestMediaFromConversation("conv_123");
+ * // media: { mediaUrl: "https://...", mediaType: "image" }
+ * ```
  */
 export async function fetchLatestMediaFromConversation(
   conversationId: string

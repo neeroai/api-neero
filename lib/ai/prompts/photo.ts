@@ -1,4 +1,10 @@
 /**
+ * @file Photo Analysis Prompt
+ * @description Exports getPhotoAnalysisPrompt
+ * @module lib/ai/prompts/photo
+ * @exports getPhotoAnalysisPrompt
+ */
+/**
  * Photo Analysis Prompt
  * Detailed photo description for people, objects, and scenes
  * LATAM-optimized for Spanish signage and locations

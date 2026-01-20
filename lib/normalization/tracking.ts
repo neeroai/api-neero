@@ -1,10 +1,8 @@
 /**
- * Contact Normalization Tracking Module
- *
- * Manages Neon PostgreSQL tracking of normalization results:
- * - Save normalization attempts (success/needs_review/error)
- * - Query contacts needing manual review
- * - Mark reviewed contacts
+ * @file Contact Normalization Tracking
+ * @description Database tracking of normalization results and manual review queue
+ * @module lib/normalization/tracking
+ * @exports saveNormalizationResult, getNeedsReview, getNormalizationHistory, markAsReviewed, getNormalizationStats, NormalizationInput
  */
 
 import { and, desc, eq } from 'drizzle-orm';

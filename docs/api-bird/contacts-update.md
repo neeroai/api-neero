@@ -57,7 +57,7 @@ X-API-Key: YOUR_API_KEY (optional)
 ```typescript
 {
   context: {
-    conversationId: string (uuid),      // Required - Bird conversation ID
+    conversationId?: string (uuid),     // Optional - Bird conversation ID (audit trail only)
     contactPhone: string (E.164),       // Required - Phone for lookup
     contactName?: string                // Optional - For logging
   },
@@ -71,7 +71,7 @@ X-API-Key: YOUR_API_KEY (optional)
 ```
 
 **Requirements:**
-- `context.conversationId` - Required (Bird conversation UUID)
+- `context.conversationId` - Optional (kept for audit trail, not used in business logic)
 - `context.contactPhone` - Required (E.164 format: `+573001234567`)
 - `updates` - At least one field must be provided
 

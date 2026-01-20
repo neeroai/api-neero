@@ -1,4 +1,10 @@
 /**
+ * @file Invoice Processor
+ * @description Exports processInvoice
+ * @module lib/ai/processors/invoice
+ * @exports processInvoice
+ */
+/**
  * Invoice Processor
  * Extracts structured data from invoices and receipts with Gemini 2.0 Flash
  * LATAM-optimized for Colombian invoices with IVA

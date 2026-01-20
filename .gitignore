@@ -46,8 +46,8 @@ pnpm-debug.log*
 plan
 
 # Symlinks
-docs-global/
-/docs-global
+#docs-global/
+#/docs-global
 
 # Archive folders
 .archive
@@ -59,13 +59,18 @@ convers/
 conversations/
 /conversations
 
+# CRM data (sensitive)
+#crm_bird/
+#/crm_bird
+
 # Documentation files
 #docs/
 validation-reports/
 results/
 plan/
-feature/
-knowledge-base/
+#feature/
+#knowledge-base/
 
 # Development scripts (local only)
-scripts/
+#scripts/
+crm_bird/

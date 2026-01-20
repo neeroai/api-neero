@@ -1,4 +1,11 @@
 /**
+ * @file Bird Actions API Endpoint v3.0
+ * @description API route handler
+ * @module app/api/bird/route
+ * @exports POST, runtime
+ * @runtime edge
+ */
+/**
  * Bird Actions API Endpoint v3.0
  * Main endpoint for multimodal processing: image, audio, document
  * Edge Runtime optimized with 9-second timeout enforcement

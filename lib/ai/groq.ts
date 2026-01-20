@@ -1,4 +1,10 @@
 /**
+ * @file Groq Audio Transcription
+ * @description Exports 5 functions and types
+ * @module lib/ai/groq
+ * @exports GroqWhisperModel, TranscriptionOptions, TranscriptionResult, transcribeAudio, transcribeAudioDetailed
+ */
+/**
  * Groq Audio Transcription
  * Vercel AI SDK integration for Groq Whisper Large v3 Turbo
  * Spanish-optimized voice note transcription

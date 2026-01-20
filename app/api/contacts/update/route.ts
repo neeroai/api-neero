@@ -1,4 +1,11 @@
 /**
+ * @file POST /api/contacts/update
+ * @description API route handler
+ * @module app/api/contacts/update/route
+ * @exports POST, runtime
+ * @runtime edge
+ */
+/**
  * POST /api/contacts/update
  * Update Bird CRM contact with validation and cleaning
  *

@@ -1,3 +1,9 @@
+/**
+ * @file Whatsapp
+ * @description Exports sendMessageTool
+ * @module lib/agent/tools/whatsapp
+ * @exports sendMessageTool
+ */
 import { tool } from 'ai';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';

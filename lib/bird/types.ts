@@ -1,4 +1,10 @@
 /**
+ * @file Bird Actions API Types
+ * @description TypeScript type definitions
+ * @module lib/bird/types
+ * @exports AudioData, AudioDataSchema, BirdActionContext, BirdActionContextSchema, BirdActionErrorResponse, BirdActionErrorResponseSchema, BirdActionRequest, BirdActionRequestSchema, BirdActionResponse, BirdActionResponseSchema, BirdActionSuccessResponse, BirdActionSuccessResponseSchema, BirdContact, BirdContactAttributes, BirdContactIdentifier, BirdContactUpdate, BirdConversation, BirdConversationParticipant, BirdConversationsResponse, BirdMessage, BirdMessageBody, BirdMessagesResponse, ContactUpdateErrorCode, ContactUpdateErrorCodeSchema, ContactUpdateErrorResponse, ContactUpdateErrorResponseSchema, ContactUpdateRequest, ContactUpdateRequestSchema, ContactUpdateResponse, ContactUpdateResponseSchema, ContactUpdateSuccessResponse, ContactUpdateSuccessResponseSchema, DocumentData, DocumentDataSchema, ErrorCode, ErrorCodeSchema, ImageData, ImageDataSchema, MediaType, MediaTypeSchema, ResponseData, ResponseDataSchema, isErrorResponse, isSuccessResponse
+ */
+/**
  * Bird Actions API Types
  * Zod schemas for type-safe Bird AI Employees Actions integration
  */
@@ -284,7 +290,7 @@ export interface BirdMessagesResponse {
  */
 export const ContactUpdateRequestSchema = z.object({
   context: z.object({
-    conversationId: z.string().uuid(),
+    conversationId: z.string().uuid().optional(), // Optional - not used in business logic, kept for audit trail
     contactPhone: z.string().min(1), // Required for searching contact
     contactName: z.string().optional(), // Optional for logging
   }),

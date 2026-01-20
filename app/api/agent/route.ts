@@ -1,3 +1,10 @@
+/**
+ * @file Route
+ * @description API route handler
+ * @module app/api/agent/route
+ * @exports POST, runtime
+ * @runtime edge
+ */
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getOptionalChannelId, getWebhookSecret } from '@/lib/bird/env';

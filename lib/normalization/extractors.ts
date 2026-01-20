@@ -1,10 +1,13 @@
 /**
- * Data Extraction Module for Bird CRM Contact Normalization
+ * @file Bird CRM Contact Normalization - Data Extraction
+ * @description Hybrid extraction strategies (Regex → AI fallback) for contact normalization
+ * @module lib/normalization/extractors
+ * @exports extractNameWithRegex, extractNameHeuristic, extractNameHybrid, extractEmail, inferCountryFromPhone, phoneToCountryCode, cleanDisplayName, isInstagramUsername, isOnlyEmojis, splitFullName, isValidName
  *
- * Provides hybrid extraction strategies (Regex → AI fallback) for:
+ * Provides hybrid extraction for:
  * - Full names (firstName/lastName with LATAM 2-apellido support)
  * - Email addresses from conversation text
- * - Country inference from phone codes
+ * - Country inference from phone codes (name + ISO code)
  * - Display name cleaning (emojis, usernames)
  */
 
@@ -62,6 +65,30 @@ const PHONE_CODE_TO_COUNTRY: Record<string, string> = {
   '+505': 'Nicaragua',
   '+1': 'Estados Unidos',
   '+34': 'España',
+};
+
+/**
+ * Phone code to ISO 3166-1 alpha-2 country code mapping
+ */
+const PHONE_CODE_TO_ISO: Record<string, string> = {
+  '+57': 'CO',
+  '+52': 'MX',
+  '+54': 'AR',
+  '+56': 'CL',
+  '+51': 'PE',
+  '+58': 'VE',
+  '+593': 'EC',
+  '+591': 'BO',
+  '+595': 'PY',
+  '+598': 'UY',
+  '+507': 'PA',
+  '+506': 'CR',
+  '+503': 'SV',
+  '+502': 'GT',
+  '+504': 'HN',
+  '+505': 'NI',
+  '+1': 'US',
+  '+34': 'ES',
 };
 
 /**
@@ -262,7 +289,41 @@ export function inferCountryFromPhone(phoneNumber: string): string | null {
 
   for (const code of sortedCodes) {
     if (normalized.startsWith(code)) {
-      return PHONE_CODE_TO_COUNTRY[code];
+      return PHONE_CODE_TO_COUNTRY[code] ?? null;
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Get ISO 3166-1 alpha-2 country code from phone number
+ * Used alongside inferCountryFromPhone() to populate attributes.country and attributes.countryName
+ *
+ * @param phoneNumber - Phone number in E.164 format (e.g., "+57300123456")
+ * @returns ISO country code (e.g., "CO") or null if not recognized
+ *
+ * @example
+ * ```ts
+ * const countryCode = phoneToCountryCode('+573001234567'); // "CO"
+ * const countryName = inferCountryFromPhone('+573001234567'); // "Colombia"
+ * await updateContact(id, {
+ *   attributes: { country: countryCode, countryName: countryName }
+ * });
+ * ```
+ */
+export function phoneToCountryCode(phoneNumber: string): string | null {
+  if (!phoneNumber) return null;
+
+  // Normalize phone number (remove spaces, dashes)
+  const normalized = phoneNumber.replace(/[\s-]/g, '');
+
+  // Try to match phone code (longest first for +593, +591, etc.)
+  const sortedCodes = Object.keys(PHONE_CODE_TO_ISO).sort((a, b) => b.length - a.length);
+
+  for (const code of sortedCodes) {
+    if (normalized.startsWith(code)) {
+      return PHONE_CODE_TO_ISO[code] ?? null;
     }
   }
 
@@ -359,25 +420,25 @@ export function splitFullName(fullName: string): {
   if (parts.length === 1) {
     // Single word: treat as firstName
     return {
-      firstName: parts[0],
+      firstName: parts[0] ?? '',
       lastName: '',
     };
   } else if (parts.length === 2) {
     // Two words: first = firstName, second = lastName
     return {
-      firstName: parts[0],
-      lastName: parts[1],
+      firstName: parts[0] ?? '',
+      lastName: parts[1] ?? '',
     };
   } else if (parts.length === 3) {
     // Three words: first = firstName, second+third = lastName
     return {
-      firstName: parts[0],
-      lastName: `${parts[1]} ${parts[2]}`,
+      firstName: parts[0] ?? '',
+      lastName: `${parts[1] ?? ''} ${parts[2] ?? ''}`,
     };
   } else {
     // Four or more words: first+second = firstName, rest = lastName
     return {
-      firstName: `${parts[0]} ${parts[1]}`,
+      firstName: `${parts[0] ?? ''} ${parts[1] ?? ''}`,
       lastName: parts.slice(2).join(' '),
     };
   }

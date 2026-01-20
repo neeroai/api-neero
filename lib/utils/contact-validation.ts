@@ -1,4 +1,10 @@
 /**
+ * @file Contact Validation Utilities
+ * @description Exports 6 functions and types
+ * @module lib/utils/contact-validation
+ * @exports ValidationResult, validateContactUpdates, validateCountryCode, validateDisplayName, validateEmail, validatePhone
+ */
+/**
  * Contact Validation Utilities
  *
  * Provides Edge Runtime compatible validation functions for contact data.

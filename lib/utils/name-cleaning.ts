@@ -1,4 +1,10 @@
 /**
+ * @file Name Cleaning Utilities
+ * @description Exports 4 functions and types
+ * @module lib/utils/name-cleaning
+ * @exports capitalizeProper, cleanDisplayName, parseFullName, removeEmojis
+ */
+/**
  * Name Cleaning Utilities
  *
  * Provides functions for cleaning and normalizing contact display names.

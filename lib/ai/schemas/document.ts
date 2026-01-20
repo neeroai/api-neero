@@ -1,3 +1,9 @@
+/**
+ * @file Document
+ * @description Exports 4 functions and types
+ * @module lib/ai/schemas/document
+ * @exports DocumentData, DocumentDataSchema, DocumentField, DocumentFieldSchema
+ */
 import { z } from 'zod';
 
 /**

@@ -1,3 +1,9 @@
+/**
+ * @file Classification
+ * @description Exports 4 functions and types
+ * @module lib/ai/schemas/classification
+ * @exports ClassificationResult, ClassificationResultSchema, ImageType, ImageTypeSchema
+ */
 import { z } from 'zod';
 
 /**

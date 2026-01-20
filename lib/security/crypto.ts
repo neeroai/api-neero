@@ -1,4 +1,10 @@
 /**
+ * @file HMAC Validation for Edge Runtime
+ * @description Exports 3 functions and types
+ * @module lib/security/crypto
+ * @exports generateHMAC, verifyHMAC, verifyWhatsAppSignature
+ */
+/**
  * HMAC Validation for Edge Runtime
  * Uses Web Crypto API (NO Node.js crypto)
  */

@@ -1,4 +1,10 @@
 /**
+ * @file Gemini AI Gateway
+ * @description Exports 6 functions and types
+ * @module lib/ai/gateway
+ * @exports GeminiModelConfig, GeminiModelId, GeminiModelIdType, getDefaultGeminiModel, getGeminiModel, getModelConfig
+ */
+/**
  * Gemini AI Gateway
  * Vercel AI SDK 5.0 integration for Google Gemini models via Vercel AI Gateway
  */

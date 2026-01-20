@@ -1,4 +1,10 @@
 /**
+ * @file Groq Text Model Gateway
+ * @description Exports 4 functions and types
+ * @module lib/ai/groq-text
+ * @exports GenerateTextOptions, GroqTextModel, GroqTextModels, generateTextWithGroq
+ */
+/**
  * Groq Text Model Gateway
  * Vercel AI SDK integration for Groq LLM text models
  * Cost-efficient text processing for transcript enhancement and classification

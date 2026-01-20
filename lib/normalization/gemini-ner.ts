@@ -1,11 +1,8 @@
 /**
- * Gemini NER (Named Entity Recognition) for Contact Normalization
- *
- * Uses Google Gemini AI to extract patient names from conversation text
- * when regex patterns fail or have low confidence.
- *
- * Fallback strategy: Regex → Gemini AI
- * Cost: ~$0.00004 per extraction (20 tokens output)
+ * @file Gemini NER for Contact Normalization
+ * @description AI-powered name extraction from conversation text using Gemini 2.0 Flash (fallback when regex fails)
+ * @module lib/normalization/gemini-ner
+ * @exports extractNameWithGemini
  */
 
 import { generateText } from 'ai';
@@ -46,7 +43,7 @@ export async function extractNameWithGemini(messages: string[]): Promise<NameExt
     const result = await generateText({
       model: getGeminiModel(GeminiModelId.FLASH_2_0),
       prompt,
-      maxTokens: 200,
+      maxRetries: 2,
       temperature: 0.1, // Low temperature for deterministic extraction
     });
 
@@ -181,12 +178,12 @@ function parseGeminiResponse(responseText: string): Omit<NameExtractionResult, '
     const lastNameMatch = responseText.match(/"lastName":\s*"([^"]+)"/);
     const confidenceMatch = responseText.match(/"confidence":\s*([0-9.]+)/);
 
-    if (fullNameMatch && firstNameMatch && lastNameMatch) {
+    if (fullNameMatch && fullNameMatch[1] && firstNameMatch && firstNameMatch[1] && lastNameMatch && lastNameMatch[1]) {
       return {
         fullName: fullNameMatch[1].trim(),
         firstName: firstNameMatch[1].trim(),
         lastName: lastNameMatch[1].trim(),
-        confidence: confidenceMatch ? parseFloat(confidenceMatch[1]) : 0.5,
+        confidence: confidenceMatch && confidenceMatch[1] ? parseFloat(confidenceMatch[1]) : 0.5,
       };
     }
 

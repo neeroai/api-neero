@@ -1,4 +1,10 @@
 /**
+ * @file Document Extraction Prompt
+ * @description Exports getDocumentExtractionPrompt
+ * @module lib/ai/prompts/document
+ * @exports getDocumentExtractionPrompt
+ */
+/**
  * Document Extraction Prompt
  * Field extraction from ID documents, contracts, and official papers
  * LATAM-optimized for cedulas colombianas and legal documents

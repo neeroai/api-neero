@@ -1,4 +1,10 @@
 /**
+ * @file Document Processor
+ * @description Exports processDocument
+ * @module lib/ai/processors/document
+ * @exports processDocument
+ */
+/**
  * Document Processor
  * Extracts structured data from official documents with Gemini 2.5 Flash
  * LATAM-optimized for cedulas colombianas, contracts, and policies

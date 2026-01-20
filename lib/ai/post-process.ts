@@ -1,4 +1,10 @@
 /**
+ * @file Transcript Post-Processing
+ * @description Exports 5 functions and types
+ * @module lib/ai/post-process
+ * @exports AudioIntent, PostProcessOptions, PostProcessedTranscript, isPostProcessingEnabled, postProcessTranscript
+ */
+/**
  * Transcript Post-Processing
  * Enhances audio transcriptions using Groq LLM
  * - Normalizes punctuation and formatting

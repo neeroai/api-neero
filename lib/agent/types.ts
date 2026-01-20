@@ -1,3 +1,9 @@
+/**
+ * @file Types
+ * @description TypeScript type definitions
+ * @module lib/agent/types
+ * @exports AgentInboundRequest, AgentInboundRequestSchema, AgentInboundResponse, AgentInboundResponseSchema, AgentOutboundRequest, AgentOutboundRequestSchema, ConsentType, ConversationContext, ConversationContextSchema, GuardrailsValidation, GuardrailsValidationSchema, MediaAnalysisRequest, MediaAnalysisRequestSchema, MediaAnalysisResponse, MediaAnalysisResponseSchema, MessageMetadata, MessageMetadataSchema, ServiceWindowStatus, ServiceWindowStatusSchema, ToolCallResult, ToolCallResultSchema
+ */
 import { z } from 'zod';
 
 /**

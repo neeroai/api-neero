@@ -1,3 +1,9 @@
+/**
+ * @file Handover
+ * @description Exports 2 functions and types
+ * @module lib/agent/tools/handover
+ * @exports createTicketTool, executeHandover
+ */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { notifyHandover as notifyHandoverWebhook } from '@/lib/bird/handover';

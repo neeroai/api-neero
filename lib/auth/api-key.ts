@@ -1,4 +1,10 @@
 /**
+ * @file API Key Authentication
+ * @description Exports 5 functions and types
+ * @module lib/auth/api-key
+ * @exports AuthenticationError, createUnauthorizedResponse, getMaskedApiKey, requireApiKey, validateApiKey
+ */
+/**
  * API Key Authentication
  * Optional API key validation for Bird Actions requests
  * Edge Runtime compatible (no Node.js crypto)

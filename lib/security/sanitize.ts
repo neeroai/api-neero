@@ -1,4 +1,10 @@
 /**
+ * @file Input Sanitization Utilities
+ * @description Exports 7 functions and types
+ * @module lib/security/sanitize
+ * @exports sanitizeEmail, sanitizePhoneNumber, sanitizeText, sanitizeUrl, sanitizeUserMessage, stripHtml, validateWebhookPayload
+ */
+/**
  * Input Sanitization Utilities
  * Prevent injection attacks and normalize input
  */

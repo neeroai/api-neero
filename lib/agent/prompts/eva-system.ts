@@ -1,4 +1,10 @@
 /**
+ * @file Eva System Prompt
+ * @description Exports EVA_SYSTEM_PROMPT
+ * @module lib/agent/prompts/eva-system
+ * @exports EVA_SYSTEM_PROMPT
+ */
+/**
  * Eva System Prompt
  * AI Assistant for Plastic Surgery Consultations
  *

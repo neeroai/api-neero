@@ -1,4 +1,10 @@
 /**
+ * @file AppError - Edge Runtime Compatible Error Class
+ * @description Exports 8 functions and types
+ * @module lib/errors/AppError
+ * @exports AppError, InternalError, NotFoundError, RateLimitError, TimeoutError, UnauthorizedError, ValidationError, isAppError
+ */
+/**
  * AppError - Edge Runtime Compatible Error Class
  * Provides consistent error handling across all API routes
  *

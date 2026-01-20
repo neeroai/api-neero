@@ -1,3 +1,9 @@
+/**
+ * @file Retrieve Knowledge
+ * @description Exports retrieveKnowledgeTool
+ * @module lib/agent/tools/retrieve-knowledge
+ * @exports retrieveKnowledgeTool
+ */
 import { tool } from 'ai';
 import { z } from 'zod';
 import { searchKnowledge } from '@/lib/db/queries/knowledge';

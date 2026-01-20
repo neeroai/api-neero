@@ -1,3 +1,9 @@
+/**
+ * @file Invoice
+ * @description Exports 4 functions and types
+ * @module lib/ai/schemas/invoice
+ * @exports InvoiceData, InvoiceDataSchema, InvoiceLineItem, InvoiceLineItemSchema
+ */
 import { z } from 'zod';
 
 /**

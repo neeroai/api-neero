@@ -1,4 +1,10 @@
 /**
+ * @file Image Processors
+ * @description Exports 8 functions and types
+ * @module lib/ai/processors/index
+ * @exports DocumentData, DocumentField, InvoiceData, InvoiceLineItem, PhotoAnalysis, processDocument, processInvoice, processPhoto
+ */
+/**
  * Image Processors
  * Barrel export for type-specific image processors
  */

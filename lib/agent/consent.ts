@@ -1,3 +1,9 @@
+/**
+ * @file Consent
+ * @description Exports 6 functions and types
+ * @module lib/agent/consent
+ * @exports checkConsent, getConsentRequestMessage, getLeadConsents, recordConsent, requiresConsentRequest, revokeConsent
+ */
 import { and, eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { consents, leads } from '@/lib/db/schema';

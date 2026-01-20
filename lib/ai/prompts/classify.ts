@@ -1,4 +1,10 @@
 /**
+ * @file Classification Prompt
+ * @description Exports getClassificationPrompt
+ * @module lib/ai/prompts/classify
+ * @exports getClassificationPrompt
+ */
+/**
  * Classification Prompt
  * Fast image type classification (2-second budget)
  * LATAM-optimized for Colombian/Spanish documents

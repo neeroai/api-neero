@@ -1,4 +1,10 @@
 /**
+ * @file Image Classification
+ * @description Exports classifyImage
+ * @module lib/ai/classify
+ * @exports classifyImage
+ */
+/**
  * Image Classification
  * Fast image type classification using Gemini 2.0 Flash (2-second budget)
  * Routes images to optimal processor based on content type

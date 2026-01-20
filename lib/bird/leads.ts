@@ -1,3 +1,9 @@
+/**
+ * @file Leads
+ * @description Exports 2 functions and types
+ * @module lib/bird/leads
+ * @exports LeadPayload, registerLead
+ */
 export interface LeadPayload {
   name?: string;
   phone?: string;
@@ -12,7 +18,33 @@ export interface LeadPayload {
 }
 
 /**
- * Register lead in an external system (if configured) or log as fallback.
+ * Register lead in external CRM or webhook if configured
+ *
+ * @param payload - Lead data to register
+ * @param payload.name - Contact name (optional)
+ * @param payload.phone - Contact phone number (optional)
+ * @param payload.email - Contact email (optional)
+ * @param payload.country - Country name (optional)
+ * @param payload.procedure - Medical procedure or service (optional)
+ * @param payload.modality - Appointment modality (optional)
+ * @param payload.city - City name (optional)
+ * @param payload.channel - Communication channel (optional)
+ * @param payload.conversationId - Bird conversation UUID (optional)
+ * @param payload.metadata - Additional custom data (optional)
+ * @returns Object with delivered status and response
+ *
+ * @example
+ * ```ts
+ * const result = await registerLead({
+ *   name: "Ana García",
+ *   phone: "+573001234567",
+ *   email: "[email protected]",
+ *   procedure: "Consulta General",
+ *   modality: "virtual",
+ *   channel: "whatsapp"
+ * });
+ * // result: { delivered: true, response: {...} }
+ * ```
  */
 export async function registerLead(payload: LeadPayload) {
   const webhook = process.env.LEADS_WEBHOOK_URL;

@@ -1,4 +1,10 @@
 /**
+ * @file 9-Second Budget Management
+ * @description Exports 12 functions and types
+ * @module lib/ai/timeout
+ * @exports AudioPhase, TimeBudget, TimeTracker, TimeoutBudgetError, checkTimeout, formatElapsed, getAudioTimeout, getElapsed, getRemaining, shouldAttemptAudioFallback, shouldAttemptPostProcessing, startTimeTracking
+ */
+/**
  * 9-Second Budget Management
  * Tracks time budget for Bird Actions API to ensure < 9 second response
  */

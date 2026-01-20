@@ -1,4 +1,10 @@
 /**
+ * @file Image Routing Table
+ * @description API route handler
+ * @module lib/ai/router
+ * @exports ROUTE_TABLE, RouteConfig, adjustTimeoutForRemaining, getAllRoutes, getRouteForType
+ */
+/**
  * Image Routing Table
  * Model selection and timeout configuration based on image type
  */

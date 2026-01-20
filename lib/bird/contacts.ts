@@ -1,4 +1,10 @@
 /**
+ * @file Bird Contacts API
+ * @description Exports 8 functions and types
+ * @module lib/bird/contacts
+ * @exports BirdContact, BirdContactUpdate, addEmailIdentifier, fetchContactById, listAllContacts, searchContactByPhone, updateContact, updateIdentifierSubscription
+ */
+/**
  * Bird Contacts API
  * Functions for fetching and updating Bird CRM contacts
  */

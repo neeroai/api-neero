@@ -1,4 +1,10 @@
 /**
+ * @file Bird Media Download
+ * @description Exports 3 functions and types
+ * @module lib/bird/media
+ * @exports bufferToBase64, downloadMedia, getMimeType
+ */
+/**
  * Bird Media Download
  * Fetches media from Bird CDN with optional authentication
  * Edge Runtime compatible (uses Web APIs)
@@ -15,6 +21,12 @@
  * - Uses fetch (Web API)
  * - Returns ArrayBuffer (not Node.js Buffer)
  * - Timeout via AbortController
+ *
+ * @example
+ * ```ts
+ * const buffer = await downloadMedia("https://cdn.bird.com/image.jpg");
+ * // buffer: ArrayBuffer with image data
+ * ```
  */
 export async function downloadMedia(url: string): Promise<ArrayBuffer> {
   const TIMEOUT_MS = 1000; // 1 second max download time
@@ -86,6 +98,12 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
  *
  * @param buffer - ArrayBuffer from downloadMedia
  * @returns Base64 encoded string
+ *
+ * @example
+ * ```ts
+ * const base64 = bufferToBase64(buffer);
+ * // base64: "/9j/4AAQSkZJRg..." (for image/jpeg)
+ * ```
  */
 export function bufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
@@ -101,6 +119,12 @@ export function bufferToBase64(buffer: ArrayBuffer): string {
  *
  * @param url - Media URL
  * @returns MIME type string
+ *
+ * @example
+ * ```ts
+ * const mime = getMimeType("https://cdn.bird.com/photo.jpg");
+ * // mime: "image/jpeg"
+ * ```
  */
 export function getMimeType(url: string): string {
   const ext = url.split('.').pop()?.toLowerCase();

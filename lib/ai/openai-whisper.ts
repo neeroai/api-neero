@@ -1,4 +1,10 @@
 /**
+ * @file OpenAI Whisper Audio Transcription
+ * @description Exports 5 functions and types
+ * @module lib/ai/openai-whisper
+ * @exports OpenAIWhisperModel, TranscriptionOptions, TranscriptionResult, transcribeAudioOpenAI, transcribeAudioOpenAIDetailed
+ */
+/**
  * OpenAI Whisper Audio Transcription
  * Vercel AI SDK integration for OpenAI Whisper
  * Fallback transcription provider when Groq fails

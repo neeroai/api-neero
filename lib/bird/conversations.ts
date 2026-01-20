@@ -1,4 +1,10 @@
 /**
+ * @file Bird Conversations API functions
+ * @description Exports 2 functions and types
+ * @module lib/bird/conversations
+ * @exports findConversationByPhone, getConversationMessages
+ */
+/**
  * Bird Conversations API functions
  *
  * Provides functions to fetch and search conversations via Bird API.

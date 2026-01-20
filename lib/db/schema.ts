@@ -1,3 +1,9 @@
+/**
+ * @file Schema
+ * @description Database schema definitions
+ * @module lib/db/schema
+ * @exports Appointment, Consent, ContactNormalization, ConversationState, Lead, MedicalKnowledge, MessageLog, NewAppointment, NewConsent, NewContactNormalization, NewConversationState, NewLead, NewMedicalKnowledge, NewMessageLog, appointments, consents, contactNormalizations, conversationState, leads, medicalKnowledge, messageLogs
+ */
 import {
   boolean,
   customType,

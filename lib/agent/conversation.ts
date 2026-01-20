@@ -1,3 +1,9 @@
+/**
+ * @file Conversation
+ * @description Exports 5 functions and types
+ * @module lib/agent/conversation
+ * @exports markForHandover, reconstructContext, requiresHandover, saveMessage, updateConversationState
+ */
 import { desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/db/client';
 import { conversationState, leads, messageLogs } from '@/lib/db/schema';

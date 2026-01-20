@@ -1,3 +1,9 @@
+/**
+ * @file Guardrails
+ * @description Exports 4 functions and types
+ * @module lib/agent/guardrails
+ * @exports auditConversation, extractMetadata, getSafeFallback, validateResponse
+ */
 import type { GuardrailsValidation, MessageMetadata } from './types';
 
 /**

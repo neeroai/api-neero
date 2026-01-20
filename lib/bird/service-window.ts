@@ -1,3 +1,9 @@
+/**
+ * @file Service Window
+ * @description Exports 3 functions and types
+ * @module lib/bird/service-window
+ * @exports ServiceWindowResult, ServiceWindowState, checkServiceWindow
+ */
 import { birdFetch } from './client';
 import { getBirdConfig } from './env';
 
@@ -16,7 +22,23 @@ interface ServiceWindowParams {
 }
 
 /**
- * Check WhatsApp 24h service window via Contacts API
+ * Check WhatsApp 24-hour messaging window status for contact
+ *
+ * @param params - Service window check parameters
+ * @param params.channelId - Bird channel ID
+ * @param params.contactId - Bird contact ID
+ * @param params.phoneNumber - Contact phone number (E.164 format)
+ * @returns Object with window state and expiration
+ *
+ * @example
+ * ```ts
+ * const result = await checkServiceWindow({
+ *   channelId: "ch_xxx",
+ *   contactId: "ct_xxx",
+ *   phoneNumber: "+573001234567"
+ * });
+ * // result: { state: "open", serviceWindowExpireAt: "2026-01-20T10:00:00Z", isPermanentSession: false }
+ * ```
  */
 export async function checkServiceWindow({
   channelId,

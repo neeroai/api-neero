@@ -1,3 +1,10 @@
+/**
+ * @file Route
+ * @description API route handler
+ * @module app/api/agent/inbound/route
+ * @exports POST, runtime
+ * @runtime edge
+ */
 import { google } from '@ai-sdk/google';
 import { generateText } from 'ai';
 import { NextResponse } from 'next/server';

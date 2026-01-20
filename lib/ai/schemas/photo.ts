@@ -1,3 +1,9 @@
+/**
+ * @file Photo
+ * @description Exports 2 functions and types
+ * @module lib/ai/schemas/photo
+ * @exports PhotoAnalysis, PhotoAnalysisSchema
+ */
 import { z } from 'zod';
 
 /**
