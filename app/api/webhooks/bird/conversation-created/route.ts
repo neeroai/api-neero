@@ -19,7 +19,6 @@ import { desc, eq } from 'drizzle-orm';
 import {
   handleRouteError,
   TimeoutError,
-  UnauthorizedError,
   ValidationError,
 } from '@/lib/errors';
 

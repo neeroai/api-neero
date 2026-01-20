@@ -216,7 +216,8 @@ async function main() {
       }
 
       // 4. Fetch conversation messages (first 10)
-      const messages = await getConversationMessages(conversation.id, { limit: 10 });
+      const allMessages = await getConversationMessages(conversation.id);
+      const messages = allMessages.slice(-10); // Last 10 messages
       const conversationText = messages
         .map((msg) => {
           if (msg.body.type === 'text') {
