@@ -76,9 +76,18 @@ export async function POST(request: Request): Promise<Response> {
     const rawBody = await request.text();
     const signature = request.headers.get('X-Bird-Signature');
 
+    // TEMPORARY DEBUG LOGGING
+    console.log('[Webhook DEBUG] Signature header:', signature);
+    console.log('[Webhook DEBUG] Body length:', rawBody.length);
+    console.log('[Webhook DEBUG] Body preview:', rawBody.substring(0, 200));
+    console.log('[Webhook DEBUG] BIRD_WEBHOOK_SECRET exists:', !!process.env.BIRD_WEBHOOK_SECRET);
+
     if (!(await verifyBirdWebhookSignature(signature, rawBody))) {
+      console.error('[Webhook DEBUG] Signature verification FAILED');
       throw new UnauthorizedError('Invalid webhook signature');
     }
+
+    console.log('[Webhook DEBUG] Signature verification SUCCESS');
 
     budget.checkBudget();
 
