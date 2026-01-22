@@ -122,9 +122,22 @@ function documentToBirdDocumentData(document: AIDocumentData): BirdDocumentData 
 
 /**
  * Parse and validate request body
+ * Normalizes conversationId: accepts both root level and context.conversationId
  */
 async function parseRequestBody(request: Request): Promise<BirdActionRequest> {
   const rawBody = await request.json();
+
+  // Normalize: Accept conversationId in root OR in context
+  // If conversationId is in root and context doesn't exist, move it to context
+  if (rawBody.conversationId && !rawBody.context) {
+    rawBody.context = { conversationId: rawBody.conversationId };
+    delete rawBody.conversationId;
+  }
+  // If conversationId is in both root AND context, context takes precedence (remove root)
+  else if (rawBody.conversationId && rawBody.context?.conversationId) {
+    delete rawBody.conversationId;
+  }
+
   return BirdActionRequestSchema.parse(rawBody);
 }
 

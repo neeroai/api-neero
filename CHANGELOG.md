@@ -18,6 +18,14 @@ Versioning: [Semantic Versioning](https://semver.org)
   - Updated 3 tests to reflect new validation logic (28 tests total, all passing)
 
 ### Added
+- **Bird Action `process_media` configuration guide (v3.0):**
+  - Complete step-by-step configuration guide in `docs/bird/bird-actions-process-media.md`
+  - Documents minimal schema (zero arguments required)
+  - Backend v3.0 automatically extracts mediaUrl from conversationId via Bird Conversations API
+  - Backend auto-detects mediaType from message contentType
+  - 10-minute configuration time (UI only, no code changes)
+  - Includes troubleshooting, performance benchmarks, cost analysis
+  - Replaces incorrect v1.0 schema (arguments.conversationId → context.conversation.id)
 - Automated validation scripts for v1.0 features (F001-F006) - 1,130 lines total
   - `scripts/validate-f001.ts` - Data Collection validation (165 lines)
   - `scripts/validate-f002.ts` - Price Inquiry Handover validation (210 lines)
@@ -36,6 +44,11 @@ Versioning: [Semantic Versioning](https://semver.org)
   - Added `conversations/` to `.gitignore` permanently
 - Consent schema validation in F005 tests (added missing required fields)
 - Pricing pattern detection in F006 tests (adjusted to match keyword patterns)
+- **Bird Action request body validation (flexible conversationId placement):**
+  - Backend now accepts `conversationId` at both root level and inside `context` object
+  - Normalizes root-level `conversationId` to `context.conversationId` before validation
+  - Maintains backward compatibility with v3.0 recommended format (context.conversationId)
+  - Unblocks Bird UI configurations where conversationId is placed at root level
 
 ### Changed
 - Updated `todo.md` to reflect v1.0 validation completion and staging deployment plan
