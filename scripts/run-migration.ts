@@ -1,5 +1,5 @@
-import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
+import { config } from 'dotenv';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 
@@ -21,7 +21,10 @@ async function runMigration() {
   }
 
   // Mask the connection string for logging
-  const maskedUrl = databaseUrl.replace(/postgresql:\/\/([^:]+):([^@]+)@(.*)/, 'postgresql://$1:***@$3');
+  const maskedUrl = databaseUrl.replace(
+    /postgresql:\/\/([^:]+):([^@]+)@(.*)/,
+    'postgresql://$1:***@$3'
+  );
   console.log(`✅ DATABASE_URL configured: ${maskedUrl}`);
 
   console.log('\n📄 Reading migration file...');

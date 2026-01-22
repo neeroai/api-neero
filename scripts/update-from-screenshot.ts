@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import * as fs from 'fs';
@@ -171,7 +172,9 @@ async function main() {
 
   for (const manualData of MANUAL_DATA) {
     processed++;
-    console.log(`📋 Contact ${processed}/${MANUAL_DATA.length}: ${manualData.screenshotName} (${manualData.phone})`);
+    console.log(
+      `📋 Contact ${processed}/${MANUAL_DATA.length}: ${manualData.screenshotName} (${manualData.phone})`
+    );
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     const report: ContactReport = {
@@ -228,17 +231,6 @@ async function main() {
         updatePayload.lastName = manualData.lastName;
         updatedFields.push('lastName');
         report.after.lastName = manualData.lastName;
-      }
-
-      // Full name in jose
-      const fullName = [manualData.firstName, manualData.lastName]
-        .filter((n) => n && n.trim())
-        .join(' ');
-
-      if (fullName) {
-        updatePayload.attributes.jose = fullName;
-        updatedFields.push('jose');
-        report.after.jose = fullName;
       }
 
       // Email: REMOVED - Email is an IDENTIFIER, not an attribute

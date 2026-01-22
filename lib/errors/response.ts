@@ -13,7 +13,7 @@
 
 import { NextResponse } from 'next/server';
 import { ZodError } from 'zod';
-import { AppError, InternalError, ValidationError, isAppError } from './AppError';
+import { type AppError, InternalError, isAppError, ValidationError } from './AppError';
 
 /**
  * Converts any error to AppError for consistent handling

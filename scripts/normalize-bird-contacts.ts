@@ -15,22 +15,16 @@
 
 // CRITICAL: Load environment variables BEFORE any imports
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
+import { type BirdContact, listAllContacts, updateContact } from '@/lib/bird/contacts';
+import { findConversationByPhone, getConversationMessages } from '@/lib/bird/conversations';
 import {
-  listAllContacts,
-  updateContact,
-  type BirdContact,
-} from '@/lib/bird/contacts';
-import {
-  findConversationByPhone,
-  getConversationMessages,
-} from '@/lib/bird/conversations';
-import {
-  extractNameHybrid,
-  extractEmail,
-  inferCountryFromPhone,
   cleanDisplayName,
+  extractEmail,
+  extractNameHybrid,
+  inferCountryFromPhone,
   isInstagramUsername,
   isOnlyEmojis,
   isValidName,
@@ -115,9 +109,7 @@ async function normalizeContact(
     };
 
     // 1. Get phone number from featured identifiers
-    const phoneIdentifier = contact.featuredIdentifiers?.find(
-      (id) => id.key === 'phonenumber'
-    );
+    const phoneIdentifier = contact.featuredIdentifiers?.find((id) => id.key === 'phonenumber');
 
     if (!phoneIdentifier) {
       console.log('  ⚠️  No phone number found - skipping');
@@ -194,9 +186,7 @@ async function normalizeContact(
 
     // 4. Validate confidence (threshold: 0.6 for Gemini-assisted extraction)
     if (nameResult.confidence < 0.6) {
-      console.log(
-        `  ⚠️  Low confidence (${nameResult.confidence.toFixed(2)}) - marking for review`
-      );
+      console.log(`  ⚠️  Low confidence (${nameResult.confidence.toFixed(2)}) - marking for review`);
 
       // Save to database for manual review
       if (!dryRun) {
@@ -223,10 +213,7 @@ async function normalizeContact(
     }
 
     // 5. Validate extracted name
-    if (
-      !isValidName(nameResult.firstName) ||
-      !isValidName(nameResult.lastName)
-    ) {
+    if (!isValidName(nameResult.firstName) || !isValidName(nameResult.lastName)) {
       console.log('  ⚠️  Invalid name format - marking for review');
 
       if (!dryRun) {
@@ -368,9 +355,7 @@ async function main() {
 
   // Safety warning for production mode
   if (!dryRun) {
-    console.log(
-      '⚠️  WARNING: Production mode will UPDATE Bird CRM contacts!'
-    );
+    console.log('⚠️  WARNING: Production mode will UPDATE Bird CRM contacts!');
     console.log('   Press Ctrl+C within 5 seconds to cancel...\n');
     await sleep(5000);
   }
@@ -414,30 +399,18 @@ async function main() {
   // 4. Print summary
   console.log('\n\n📊 Summary:');
   console.log('─'.repeat(50));
-  console.log(
-    `Success:       ${results.filter((r) => r.status === 'success').length}`
-  );
-  console.log(
-    `Needs Review:  ${results.filter((r) => r.status === 'needs_review').length}`
-  );
-  console.log(
-    `Errors:        ${results.filter((r) => r.status === 'error').length}`
-  );
-  console.log(
-    `Skipped:       ${results.filter((r) => r.status === 'skipped').length}`
-  );
+  console.log(`Success:       ${results.filter((r) => r.status === 'success').length}`);
+  console.log(`Needs Review:  ${results.filter((r) => r.status === 'needs_review').length}`);
+  console.log(`Errors:        ${results.filter((r) => r.status === 'error').length}`);
+  console.log(`Skipped:       ${results.filter((r) => r.status === 'skipped').length}`);
   console.log(`Total:         ${results.length}`);
   console.log('─'.repeat(50));
 
   if (dryRun) {
-    console.log(
-      '\n💡 This was a DRY-RUN. No changes were made to Bird CRM.'
-    );
+    console.log('\n💡 This was a DRY-RUN. No changes were made to Bird CRM.');
     console.log('   Run with --execute to apply changes.\n');
   } else {
-    console.log(
-      '\n✅ Normalization complete! Changes have been applied to Bird CRM.\n'
-    );
+    console.log('\n✅ Normalization complete! Changes have been applied to Bird CRM.\n');
   }
 }
 

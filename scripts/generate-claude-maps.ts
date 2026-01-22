@@ -5,9 +5,9 @@
  * @exports generateClaudeMaps
  */
 
-import { Project, type SourceFile } from 'ts-morph';
-import { writeFileSync, readFileSync, existsSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { Project, type SourceFile } from 'ts-morph';
 
 interface FileInfo {
   name: string;
@@ -54,7 +54,7 @@ function extractHeaderInfo(sourceFile: SourceFile): FileInfo | null {
 
   const fileTag = fileMatch[1].trim();
   const description = descMatch[1].trim();
-  const exports = exportsMatch[1].split(',').map(e => e.trim());
+  const exports = exportsMatch[1].split(',').map((e) => e.trim());
 
   return {
     name: fileName,
@@ -62,7 +62,7 @@ function extractHeaderInfo(sourceFile: SourceFile): FileInfo | null {
     fileTag,
     description,
     exports,
-    lines: lineCount
+    lines: lineCount,
   };
 }
 
@@ -102,7 +102,7 @@ function extractHeaderFromContent(filePath: string, fileName: string): FileInfo 
 
     const fileTag = fileMatch[1].trim();
     const description = descMatch[1].trim();
-    const exports = exportsMatch[1].split(',').map(e => e.trim());
+    const exports = exportsMatch[1].split(',').map((e) => e.trim());
 
     return {
       name: fileName,
@@ -110,7 +110,7 @@ function extractHeaderFromContent(filePath: string, fileName: string): FileInfo 
       fileTag,
       description,
       exports,
-      lines: lineCount
+      lines: lineCount,
     };
   } catch (error) {
     return null;
@@ -144,7 +144,7 @@ function getAllTsFiles(dirPath: string, relativeTo: string): FileInfo[] {
           const relativePath = fullPath.replace(relativeTo + '/', '');
           files.push({
             ...info,
-            name: relativePath
+            name: relativePath,
           });
         }
       }
@@ -181,7 +181,7 @@ module: "${config.path}"
 function generateFilesTable(files: FileInfo[]): string {
   if (files.length === 0) return '';
 
-  const rows = files.map(f => {
+  const rows = files.map((f) => {
     const exportsStr = f.exports.join(', ');
     return `| ${f.name} | ${f.fileTag} | ${exportsStr} | ${f.lines} |`;
   });
@@ -213,9 +213,10 @@ function extractFromIndexMd(modulePath: string): { patterns?: string[]; quickSta
   const patternsMatch = content.match(/##\s+Critical Patterns([\s\S]+?)(?=##|$)/i);
   if (patternsMatch) {
     const patternSection = patternsMatch[1].trim();
-    const patternLines = patternSection.split('\n')
-      .filter(line => line.trim().startsWith('-'))
-      .map(line => line.replace(/^-\s*\*\*(.+?)\*\*:/, '**$1**:').trim());
+    const patternLines = patternSection
+      .split('\n')
+      .filter((line) => line.trim().startsWith('-'))
+      .map((line) => line.replace(/^-\s*\*\*(.+?)\*\*:/, '**$1**:').trim());
     patterns.push(...patternLines);
   }
 
@@ -270,7 +271,9 @@ function generateClaudeMd(config: ModuleConfig, files: FileInfo[]): string {
   const patterns = generatePatternsSection(config.criticalPatterns);
   const quickStart = generateQuickStartSection(config.quickStart, config.path);
 
-  const estimatedTokens = Math.floor((frontmatter.length + filesTable.length + patterns.length + quickStart.length) / 4);
+  const estimatedTokens = Math.floor(
+    (frontmatter.length + filesTable.length + patterns.length + quickStart.length) / 4
+  );
 
   return `${frontmatter}
 
@@ -304,52 +307,59 @@ const modules: ModuleConfig[] = [
   {
     path: 'lib',
     name: 'Core Library',
-    description: 'Core library modules for api-neero: AI processing, Bird CRM integration, database, normalization, agent tools',
+    description:
+      'Core library modules for api-neero: AI processing, Bird CRM integration, database, normalization, agent tools',
     purpose: 'Root library containing all core modules',
-    tags: ['library', 'core', 'api-neero']
+    tags: ['library', 'core', 'api-neero'],
   },
   {
     path: 'lib/ai',
     name: 'AI Processing',
-    description: 'Multimodal AI processing: image classification/routing, audio transcription, embeddings, timeouts. Gemini 2.0/2.5 Flash, Groq Whisper v3.',
+    description:
+      'Multimodal AI processing: image classification/routing, audio transcription, embeddings, timeouts. Gemini 2.0/2.5 Flash, Groq Whisper v3.',
     purpose: 'AI processing pipeline for images, audio, and text embeddings',
-    tags: ['ai', 'multimodal', 'gemini', 'whisper', 'embeddings']
+    tags: ['ai', 'multimodal', 'gemini', 'whisper', 'embeddings'],
   },
   {
     path: 'lib/bird',
     name: 'Bird CRM Client',
-    description: 'Bird.com CRM integration: contacts, conversations, messages, media download, handover, service windows.',
+    description:
+      'Bird.com CRM integration: contacts, conversations, messages, media download, handover, service windows.',
     purpose: 'Client library for Bird CRM API integration',
-    tags: ['bird-crm', 'client', 'api-integration']
+    tags: ['bird-crm', 'client', 'api-integration'],
   },
   {
     path: 'lib/db',
     name: 'Database Layer',
-    description: 'Database schema and client for Neon PostgreSQL with pgvector. Drizzle ORM, semantic search.',
+    description:
+      'Database schema and client for Neon PostgreSQL with pgvector. Drizzle ORM, semantic search.',
     purpose: 'Database schema and query utilities',
-    tags: ['database', 'postgresql', 'pgvector', 'drizzle']
+    tags: ['database', 'postgresql', 'pgvector', 'drizzle'],
   },
   {
     path: 'lib/normalization',
     name: 'Contact Normalization',
-    description: 'Contact data extraction: phone numbers (regex+AI), names, addresses, emails. Hybrid extraction with validation.',
+    description:
+      'Contact data extraction: phone numbers (regex+AI), names, addresses, emails. Hybrid extraction with validation.',
     purpose: 'Contact data normalization and validation',
-    tags: ['normalization', 'contact-data', 'validation']
+    tags: ['normalization', 'contact-data', 'validation'],
   },
   {
     path: 'lib/agent',
     name: 'Agent Orchestration',
-    description: 'Agent tools and orchestration: guardrails, consent management, RAG (retrieveKnowledge), prompts.',
+    description:
+      'Agent tools and orchestration: guardrails, consent management, RAG (retrieveKnowledge), prompts.',
     purpose: 'Agent tools and conversation management',
-    tags: ['agent', 'tools', 'rag', 'orchestration']
+    tags: ['agent', 'tools', 'rag', 'orchestration'],
   },
   {
     path: 'app/api',
     name: 'API Routes',
-    description: 'Next.js 16 Edge Runtime API routes: /bird (main), /test-*, /embeddings. <9s timeout.',
+    description:
+      'Next.js 16 Edge Runtime API routes: /bird (main), /test-*, /embeddings. <9s timeout.',
     purpose: 'API route handlers for all endpoints',
-    tags: ['api', 'routes', 'edge-runtime', 'next.js']
-  }
+    tags: ['api', 'routes', 'edge-runtime', 'next.js'],
+  },
 ];
 
 /**
@@ -381,14 +391,12 @@ export async function generateClaudeMaps() {
       filesToInclude = [];
     } else if (moduleConfig.path === 'app/api') {
       // For app/api, include all route.ts files
-      filesToInclude = sourceFiles.filter(sf =>
-        sf.getBaseName() === 'route.ts' && !sf.getFilePath().includes('__tests__')
+      filesToInclude = sourceFiles.filter(
+        (sf) => sf.getBaseName() === 'route.ts' && !sf.getFilePath().includes('__tests__')
       );
     } else {
       // For other modules, include all files (excluding tests)
-      filesToInclude = sourceFiles.filter(sf =>
-        !sf.getFilePath().includes('__tests__')
-      );
+      filesToInclude = sourceFiles.filter((sf) => !sf.getFilePath().includes('__tests__'));
     }
 
     console.log(`  Found ${filesToInclude.length} files`);
@@ -412,7 +420,7 @@ export async function generateClaudeMaps() {
           const relativePath = info.path.replace(projectRoot + '/' + moduleConfig.path + '/', '');
           filesInfo.push({
             ...info,
-            name: relativePath
+            name: relativePath,
           });
         }
       }
@@ -428,7 +436,7 @@ export async function generateClaudeMaps() {
     const configWithPatterns = {
       ...moduleConfig,
       criticalPatterns: patterns,
-      quickStart
+      quickStart,
     };
 
     // Generate CLAUDE.md content

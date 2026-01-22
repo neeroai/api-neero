@@ -1,5 +1,6 @@
 // Load environment variables FIRST
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 // Import dependencies (without db client)
@@ -153,7 +154,8 @@ async function runTests() {
     }
 
     const topResult = results[0];
-    const categoryMatch = !testCase.expectedCategory || topResult.category === testCase.expectedCategory;
+    const categoryMatch =
+      !testCase.expectedCategory || topResult.category === testCase.expectedCategory;
     const subcategoryMatch =
       !testCase.expectedSubcategory || topResult.subcategory === testCase.expectedSubcategory;
 
@@ -184,7 +186,9 @@ async function runTests() {
   if (failed > 0) {
     console.log('💡 Troubleshooting Tips:');
     console.log('   - Check if embeddings were generated correctly');
-    console.log('   - Verify HNSW index is created: SELECT * FROM pg_indexes WHERE tablename = \'medical_knowledge\'');
+    console.log(
+      "   - Verify HNSW index is created: SELECT * FROM pg_indexes WHERE tablename = 'medical_knowledge'"
+    );
     console.log('   - Try lowering threshold from 0.7 to 0.6');
     console.log('   - Check seed data relevance to failed queries\n');
   } else {

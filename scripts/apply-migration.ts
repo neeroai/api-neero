@@ -27,8 +27,8 @@ async function applyMigration() {
     // Split by semicolon to execute each statement separately
     const statements = migrationSQL
       .split(';')
-      .map(s => s.trim())
-      .filter(s => s.length > 0 && !s.startsWith('--'));
+      .map((s) => s.trim())
+      .filter((s) => s.length > 0 && !s.startsWith('--'));
 
     for (const statement of statements) {
       console.log(`Executing: ${statement.substring(0, 50)}...`);

@@ -18,7 +18,7 @@ async function fetchConversations() {
 
   const response = await fetch(url, {
     headers: {
-      'Authorization': `AccessKey ${accessKey}`,
+      Authorization: `AccessKey ${accessKey}`,
       'Content-Type': 'application/json',
     },
   });

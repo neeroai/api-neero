@@ -6,6 +6,7 @@
 
 // Load environment variables FIRST
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { readdir, readFile, writeFile } from 'node:fs/promises';
@@ -83,8 +84,12 @@ function mapContactToCSVRow(contact: BirdContact): CSVRow {
     avatarUrl: attrs.avatarUrl || '',
     country: attrs.country || '',
     gender: attrs.gender || '',
-    phonenumber: Array.isArray(attrs.phonenumber) ? (attrs.phonenumber[0] || '') : (attrs.phonenumber || ''),
-    emailaddress: Array.isArray(attrs.emailaddress) ? (attrs.emailaddress[0] || '') : (attrs.emailaddress || ''),
+    phonenumber: Array.isArray(attrs.phonenumber)
+      ? attrs.phonenumber[0] || ''
+      : attrs.phonenumber || '',
+    emailaddress: Array.isArray(attrs.emailaddress)
+      ? attrs.emailaddress[0] || ''
+      : attrs.emailaddress || '',
     subscribedSms: String(attrs.subscribedSms || false),
     subscribedWhatsApp: String(attrs.subscribedWhatsApp || false),
     subscribedEmail: String(attrs.subscribedEmail || false),
@@ -204,7 +209,9 @@ async function convertJSONToCSV(): Promise<void> {
 
     // Progress logging every 10 batches
     if ((i + 1) % 10 === 0) {
-      console.log(`⏳ Procesados ${i + 1}/${batchFiles.length} batches (${allContacts.length} contactos)`);
+      console.log(
+        `⏳ Procesados ${i + 1}/${batchFiles.length} batches (${allContacts.length} contactos)`
+      );
     }
   }
 
@@ -224,21 +231,41 @@ async function convertJSONToCSV(): Promise<void> {
   console.log(`Total filas escritas: ${csvRows.length.toLocaleString()} (incluyendo header)`);
   console.log('');
   console.log('Field Coverage:');
-  console.log(`  firstName: ${formatPercentage(stats.fieldCoverage.firstName, stats.totalContacts)}`);
+  console.log(
+    `  firstName: ${formatPercentage(stats.fieldCoverage.firstName, stats.totalContacts)}`
+  );
   console.log(`  lastName: ${formatPercentage(stats.fieldCoverage.lastName, stats.totalContacts)}`);
-  console.log(`  displayName: ${formatPercentage(stats.fieldCoverage.displayName, stats.totalContacts)}`);
+  console.log(
+    `  displayName: ${formatPercentage(stats.fieldCoverage.displayName, stats.totalContacts)}`
+  );
   console.log(`  country: ${formatPercentage(stats.fieldCoverage.country, stats.totalContacts)}`);
   console.log(`  gender: ${formatPercentage(stats.fieldCoverage.gender, stats.totalContacts)}`);
-  console.log(`  phonenumber: ${formatPercentage(stats.fieldCoverage.phonenumber, stats.totalContacts)}`);
-  console.log(`  emailaddress: ${formatPercentage(stats.fieldCoverage.emailaddress, stats.totalContacts)}`);
+  console.log(
+    `  phonenumber: ${formatPercentage(stats.fieldCoverage.phonenumber, stats.totalContacts)}`
+  );
+  console.log(
+    `  emailaddress: ${formatPercentage(stats.fieldCoverage.emailaddress, stats.totalContacts)}`
+  );
   console.log('');
   console.log('Subscriptions:');
-  console.log(`  subscribedSms: ${formatPercentage(stats.subscriptions.subscribedSms, stats.totalContacts)}`);
-  console.log(`  subscribedWhatsApp: ${formatPercentage(stats.subscriptions.subscribedWhatsApp, stats.totalContacts)}`);
-  console.log(`  subscribedEmail: ${formatPercentage(stats.subscriptions.subscribedEmail, stats.totalContacts)}`);
-  console.log(`  subscribedRcs: ${formatPercentage(stats.subscriptions.subscribedRcs, stats.totalContacts)}`);
-  console.log(`  subscribedPush: ${formatPercentage(stats.subscriptions.subscribedPush, stats.totalContacts)}`);
-  console.log(`  subscribedAppInbox: ${formatPercentage(stats.subscriptions.subscribedAppInbox, stats.totalContacts)}`);
+  console.log(
+    `  subscribedSms: ${formatPercentage(stats.subscriptions.subscribedSms, stats.totalContacts)}`
+  );
+  console.log(
+    `  subscribedWhatsApp: ${formatPercentage(stats.subscriptions.subscribedWhatsApp, stats.totalContacts)}`
+  );
+  console.log(
+    `  subscribedEmail: ${formatPercentage(stats.subscriptions.subscribedEmail, stats.totalContacts)}`
+  );
+  console.log(
+    `  subscribedRcs: ${formatPercentage(stats.subscriptions.subscribedRcs, stats.totalContacts)}`
+  );
+  console.log(
+    `  subscribedPush: ${formatPercentage(stats.subscriptions.subscribedPush, stats.totalContacts)}`
+  );
+  console.log(
+    `  subscribedAppInbox: ${formatPercentage(stats.subscriptions.subscribedAppInbox, stats.totalContacts)}`
+  );
   console.log('');
   console.log(`Output: ${OUTPUT_FILE}`);
   console.log(`Duración: ${duration} segundos`);

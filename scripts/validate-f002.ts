@@ -19,7 +19,9 @@ const TEST_CONVERSATION_ID = '00000000-0000-0000-0000-000000000002';
 
 async function validateF002() {
   // Dynamic imports after dotenv config
-  const { validateResponse, getSafeFallback, extractMetadata } = await import('@/lib/agent/guardrails');
+  const { validateResponse, getSafeFallback, extractMetadata } = await import(
+    '@/lib/agent/guardrails'
+  );
   const { createTicketTool, executeHandover } = await import('@/lib/agent/tools/handover');
   const { db } = await import('@/lib/db/client');
   const { conversationState } = await import('@/lib/db/schema');
@@ -45,7 +47,7 @@ async function validateF002() {
 
   for (const query of pricingQueries) {
     const validation = validateResponse(query);
-    if (!validation.safe && validation.violations.some(v => v.includes('Pricing'))) {
+    if (!validation.safe && validation.violations.some((v) => v.includes('Pricing'))) {
       detectionCount++;
       detectedQueries.push(query);
     } else {
@@ -59,7 +61,9 @@ async function validateF002() {
   }
   if (missedQueries.length > 0) {
     console.log(`  ✗ Missed: ${missedQueries.join(' | ')}`);
-    console.log(`  ⚠️  ISSUE: Guardrails only detect AI responses WITH "$", not user questions WITHOUT "$"`);
+    console.log(
+      `  ⚠️  ISSUE: Guardrails only detect AI responses WITH "$", not user questions WITHOUT "$"`
+    );
   }
 
   // Skip this test failure for now - document as known issue
@@ -76,7 +80,9 @@ async function validateF002() {
     console.log('✓ Pricing violation correctly classified as "high" severity');
     console.log(`  Violations: ${validation.violations.join(', ')}`);
   } else {
-    console.error(`✗ Severity classification failed. Expected "high", got "${validation.severity}"`);
+    console.error(
+      `✗ Severity classification failed. Expected "high", got "${validation.severity}"`
+    );
     process.exit(1);
   }
 
@@ -96,7 +102,10 @@ async function validateF002() {
   console.log('\nTest 4: Metadata Extraction (Hybrid Approach)');
   const metadata = extractMetadata(pricingResponse, validation);
 
-  if (metadata.reason_code === 'PRICING_QUOTE_REQUEST' && metadata.risk_flags.includes('PRICE_COMMITMENT')) {
+  if (
+    metadata.reason_code === 'PRICING_QUOTE_REQUEST' &&
+    metadata.risk_flags.includes('PRICE_COMMITMENT')
+  ) {
     console.log('✓ Metadata extraction working correctly');
     console.log(`  Reason Code: ${metadata.reason_code}`);
     console.log(`  Risk Flags: ${metadata.risk_flags.join(', ')}`);
@@ -135,7 +144,9 @@ async function validateF002() {
   // Test 6: Verify Conversation State Marked for Handover
   console.log('\nTest 6: Verify Conversation State Marked for Handover');
   try {
-    const conversation = await db.select().from(conversationState)
+    const conversation = await db
+      .select()
+      .from(conversationState)
       .where(eq(conversationState.conversationId, TEST_CONVERSATION_ID))
       .limit(1);
 
@@ -148,7 +159,9 @@ async function validateF002() {
         console.log(`  Handover Reason: ${state.handoverReason}`);
         console.log(`  Current Stage: ${state.currentStage}`);
       } else {
-        throw new Error(`Conversation not marked correctly. requiresHuman=${state.requiresHuman}, handoverReason=${state.handoverReason}`);
+        throw new Error(
+          `Conversation not marked correctly. requiresHuman=${state.requiresHuman}, handoverReason=${state.handoverReason}`
+        );
       }
     } else {
       throw new Error('Conversation state not found');
@@ -185,8 +198,12 @@ async function validateF002() {
   // Test 8: Cleanup
   console.log('\nTest 8: Cleanup Test Data');
   try {
-    await db.delete(conversationState).where(eq(conversationState.conversationId, TEST_CONVERSATION_ID));
-    await db.delete(conversationState).where(eq(conversationState.conversationId, TEST_CONVERSATION_ID_2));
+    await db
+      .delete(conversationState)
+      .where(eq(conversationState.conversationId, TEST_CONVERSATION_ID));
+    await db
+      .delete(conversationState)
+      .where(eq(conversationState.conversationId, TEST_CONVERSATION_ID_2));
     console.log('✓ Test data cleaned up');
   } catch (error) {
     console.error('⚠ Cleanup failed (non-critical):', error);

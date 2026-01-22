@@ -1,14 +1,15 @@
 // Load environment variables FIRST (before any imports that use them)
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
+import { neon } from '@neondatabase/serverless';
+import { drizzle } from 'drizzle-orm/neon-http';
 // Now import modules
 import * as fs from 'fs';
 import * as path from 'path';
-import { neon } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-http';
-import { medicalKnowledge } from '@/lib/db/schema';
 import { generateEmbedding } from '@/lib/ai/embeddings';
+import { medicalKnowledge } from '@/lib/db/schema';
 
 interface KnowledgeDocument {
   content: string;
@@ -98,7 +99,9 @@ async function seedKnowledgeBase() {
 
     for (let i = 0; i < allDocuments.length; i++) {
       const doc = allDocuments[i];
-      console.log(`   [${i + 1}/${allDocuments.length}] Generating embedding for: ${doc.subcategory}...`);
+      console.log(
+        `   [${i + 1}/${allDocuments.length}] Generating embedding for: ${doc.subcategory}...`
+      );
 
       // Generate embedding
       const embedding = await generateEmbedding(doc.content);
@@ -108,7 +111,7 @@ async function seedKnowledgeBase() {
         .insert(medicalKnowledge)
         .values({
           ...doc,
-          embedding
+          embedding,
         })
         .returning();
 
@@ -118,7 +121,9 @@ async function seedKnowledgeBase() {
     const duration = ((Date.now() - startTime) / 1000).toFixed(2);
 
     console.log(`\n✅ Successfully seeded ${results.length} documents in ${duration}s`);
-    console.log(`   Average: ${(parseFloat(duration) / results.length).toFixed(2)}s per document\n`);
+    console.log(
+      `   Average: ${(parseFloat(duration) / results.length).toFixed(2)}s per document\n`
+    );
 
     // 4. Print summary
     console.log('📝 Seeded Documents Summary:');
@@ -152,7 +157,9 @@ async function seedKnowledgeBase() {
 
     console.log('🎉 Knowledge base seeded successfully!');
     console.log('💡 You can now test semantic search with:');
-    console.log('   npx tsx scripts/test-search.ts "¿Cuánto dura la recuperación de rinoplastia?"\n');
+    console.log(
+      '   npx tsx scripts/test-search.ts "¿Cuánto dura la recuperación de rinoplastia?"\n'
+    );
   } catch (error) {
     console.error('❌ Seed failed:', error);
     process.exit(1);

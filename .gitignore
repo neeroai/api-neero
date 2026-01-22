@@ -65,7 +65,7 @@ conversations/
 
 # Documentation files
 #docs/
-validation-reports/
+#validation-reports/
 results/
 plan/
 #feature/
@@ -74,3 +74,4 @@ plan/
 # Development scripts (local only)
 #scripts/
 crm_bird/
+.env.vercel

@@ -161,7 +161,13 @@
         "duration_months": 4,
         "maintenance_frequency_months": 4,
         "areas": ["frente", "entrecejo", "patas_gallo", "lineas_periorales"],
-        "contraindications": ["pregnancy", "breastfeeding", "neuromuscular_disease", "botox_allergy", "active_infection"],
+        "contraindications": [
+          "pregnancy",
+          "breastfeeding",
+          "neuromuscular_disease",
+          "botox_allergy",
+          "active_infection"
+        ],
         "validation_pending": true
       },
       "validatedBy": "PENDING",
@@ -236,7 +242,12 @@
       "category": "faq",
       "subcategory": "precios-personalizados",
       "metadata": {
-        "pricing_factors": ["area_extension", "specific_technique", "case_complexity", "complementary_technologies"],
+        "pricing_factors": [
+          "area_extension",
+          "specific_technique",
+          "case_complexity",
+          "complementary_technologies"
+        ],
         "financing_months": 36,
         "financing_approval": "immediate",
         "validation_pending": true
@@ -249,8 +260,23 @@
       "category": "faq",
       "subcategory": "costo-incluido-detalle",
       "metadata": {
-        "included": ["surgeon_fees", "anesthesiologist", "surgery_room", "hospitalization", "surgical_materials", "medications_hospital", "implants", "followup_first_year", "support_24_7"],
-        "not_included": ["preop_exams", "home_medications", "compression_garments", "optional_treatments"],
+        "included": [
+          "surgeon_fees",
+          "anesthesiologist",
+          "surgery_room",
+          "hospitalization",
+          "surgical_materials",
+          "medications_hospital",
+          "implants",
+          "followup_first_year",
+          "support_24_7"
+        ],
+        "not_included": [
+          "preop_exams",
+          "home_medications",
+          "compression_garments",
+          "optional_treatments"
+        ],
         "financing_months": 36,
         "financing_approval": "immediate",
         "validation_pending": true
@@ -265,7 +291,14 @@
       "metadata": {
         "duration_minutes": 45,
         "modalities": ["presencial", "virtual", "pre_consulta"],
-        "what_included": ["medical_evaluation", "medical_history", "physical_exam", "treatment_plan", "detailed_budget", "doubt_resolution"],
+        "what_included": [
+          "medical_evaluation",
+          "medical_history",
+          "physical_exam",
+          "treatment_plan",
+          "detailed_budget",
+          "doubt_resolution"
+        ],
         "video_url": "https://youtu.be/0KuR-C_jUeQ?si=tktRFU6EPeR6i7vq",
         "validation_pending": true
       },
@@ -295,7 +328,12 @@
         "options_count": 2,
         "option1": "valoracion_virtual",
         "option2": "preconsulta",
-        "support_included": ["accommodation_recommendations", "transport_guidance", "stay_planning", "postop_followup"],
+        "support_included": [
+          "accommodation_recommendations",
+          "transport_guidance",
+          "stay_planning",
+          "postop_followup"
+        ],
         "support_availability": "24/7",
         "validation_pending": true
       },
@@ -307,7 +345,12 @@
       "category": "faq",
       "subcategory": "quirurgico-vs-no-quirurgico",
       "metadata": {
-        "non_surgical_examples": ["enzimas_brazos", "deep_slim", "hydrafacial", "toxina_botulinica"],
+        "non_surgical_examples": [
+          "enzimas_brazos",
+          "deep_slim",
+          "hydrafacial",
+          "toxina_botulinica"
+        ],
         "surgical_examples": ["lipoescultura", "mamoplastia", "abdominoplastia", "rinoplastia"],
         "non_surgical_sessions": "4-8",
         "non_surgical_duration_months": "3-12",

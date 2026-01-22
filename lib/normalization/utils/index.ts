@@ -5,6 +5,6 @@
  * @exports cleanDisplayName, removeEmojis, EMOJI_PATTERN, isValidName, isOnlyEmojis, isInstagramUsername, splitFullName
  */
 
-export { cleanDisplayName, removeEmojis, EMOJI_PATTERN } from './cleaning';
-export { isValidName, isOnlyEmojis, isInstagramUsername } from './validation';
+export { cleanDisplayName, EMOJI_PATTERN, removeEmojis } from './cleaning';
 export { splitFullName } from './splitting';
+export { isInstagramUsername, isOnlyEmojis, isValidName } from './validation';

@@ -67,7 +67,7 @@ async function validateF001() {
       city: 'Bogotá',
       procedureInterest: 'Rinoplastia',
       stage: 'new',
-      metadata: { source: 'validation-script' }
+      metadata: { source: 'validation-script' },
     });
 
     if (insertResult.success && insertResult.leadId) {
@@ -95,7 +95,7 @@ async function validateF001() {
       city: 'Medellín',
       procedureInterest: 'Liposucción',
       stage: 'qualified',
-      metadata: { source: 'validation-script', updated: true }
+      metadata: { source: 'validation-script', updated: true },
     });
 
     if (updateResult.success && updateResult.leadId) {
@@ -115,7 +115,9 @@ async function validateF001() {
   // Test 6: Verify Final State
   console.log('\nTest 6: Verify Final State');
   try {
-    const finalLead = await db.select().from(leads)
+    const finalLead = await db
+      .select()
+      .from(leads)
       .where(eq(leads.conversationId, TEST_CONVERSATION_ID))
       .limit(1);
 
@@ -128,10 +130,12 @@ async function validateF001() {
       console.log(`  Stage: ${lead.stage} (expected: "qualified")`);
 
       // Validate data integrity
-      if (lead.name !== 'Test Patient Updated' ||
-          lead.city !== 'Medellín' ||
-          lead.procedureInterest !== 'Liposucción' ||
-          lead.stage !== 'qualified') {
+      if (
+        lead.name !== 'Test Patient Updated' ||
+        lead.city !== 'Medellín' ||
+        lead.procedureInterest !== 'Liposucción' ||
+        lead.stage !== 'qualified'
+      ) {
         throw new Error('Data integrity check failed: values do not match expected');
       }
     } else {

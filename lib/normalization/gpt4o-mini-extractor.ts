@@ -54,6 +54,9 @@ export type GPT4oMiniExtractionResult = z.infer<typeof ContactExtractionSchema> 
 const SYSTEM_PROMPT = `Eres un especialista en extracción de datos de contactos para un CRM médico.
 Tu tarea es extraer información de pacientes desde conversaciones de WhatsApp en español.
 
+NOTA: Solo recibirás mensajes escritos por el contacto/paciente.
+Mensajes de agentes, bots, o personal médico NO están incluidos.
+
 REGLAS ESTRICTAS:
 1. **Nombre completo:**
    - Formato: "Nombre Apellido" o "Nombre Apellido1 Apellido2" (LATAM)

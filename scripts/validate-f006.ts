@@ -187,10 +187,7 @@ async function validateF006() {
     const mediumFallback = getSafeFallback('medium');
 
     // Validate critical fallback mentions medical/Dr. Durán
-    if (
-      criticalFallback.includes('Dr. Durán') ||
-      criticalFallback.includes('asesor')
-    ) {
+    if (criticalFallback.includes('Dr. Durán') || criticalFallback.includes('asesor')) {
       console.log('✓ Critical fallback message appropriate');
       console.log(`  Message: "${criticalFallback.substring(0, 60)}..."`);
     } else {
@@ -198,10 +195,7 @@ async function validateF006() {
     }
 
     // Validate high fallback mentions pricing/cotización
-    if (
-      highFallback.includes('precios') ||
-      highFallback.includes('cotización')
-    ) {
+    if (highFallback.includes('precios') || highFallback.includes('cotización')) {
       console.log('✓ High fallback message appropriate');
       console.log(`  Message: "${highFallback.substring(0, 60)}..."`);
     } else {
@@ -209,10 +203,7 @@ async function validateF006() {
     }
 
     // Validate medium fallback mentions specialist
-    if (
-      mediumFallback.includes('especialistas') ||
-      mediumFallback.includes('asesor')
-    ) {
+    if (mediumFallback.includes('especialistas') || mediumFallback.includes('asesor')) {
       console.log('✓ Medium fallback message appropriate');
       console.log(`  Message: "${mediumFallback.substring(0, 60)}..."`);
     } else {
@@ -236,7 +227,9 @@ async function validateF006() {
     if (emergencyMetadata.urgency === 'emergency') {
       console.log('✓ Emergency urgency classification working');
       console.log(`  Urgency: ${emergencyMetadata.urgency}`);
-      console.log(`  Reason Code: ${emergencyMetadata.reason_code || '(null - user message, not violation)'}`);
+      console.log(
+        `  Reason Code: ${emergencyMetadata.reason_code || '(null - user message, not violation)'}`
+      );
       console.log(`  Handover: ${emergencyMetadata.handover}`);
     } else {
       throw new Error(`Emergency classification failed: urgency=${emergencyMetadata.urgency}`);
@@ -250,7 +243,9 @@ async function validateF006() {
     if (urgentMetadata.urgency === 'urgent') {
       console.log('✓ Urgent urgency classification working');
       console.log(`  Urgency: ${urgentMetadata.urgency}`);
-      console.log(`  Reason Code: ${urgentMetadata.reason_code || '(null - user message, not violation)'}`);
+      console.log(
+        `  Reason Code: ${urgentMetadata.reason_code || '(null - user message, not violation)'}`
+      );
       console.log(`  Handover: ${urgentMetadata.handover}`);
     } else {
       throw new Error(`Urgent classification failed: urgency=${urgentMetadata.urgency}`);
@@ -261,12 +256,17 @@ async function validateF006() {
     const pricingValidation = validateResponse(pricingResponse);
     const pricingMetadata = extractMetadata(pricingResponse, pricingValidation);
 
-    if (pricingMetadata.reason_code === 'PRICING_QUOTE_REQUEST' && pricingMetadata.risk_flags.includes('PRICE_COMMITMENT')) {
+    if (
+      pricingMetadata.reason_code === 'PRICING_QUOTE_REQUEST' &&
+      pricingMetadata.risk_flags.includes('PRICE_COMMITMENT')
+    ) {
       console.log('✓ Pricing quote metadata extraction working');
       console.log(`  Reason Code: ${pricingMetadata.reason_code}`);
       console.log(`  Risk Flags: ${pricingMetadata.risk_flags.join(', ')}`);
     } else {
-      throw new Error(`Pricing metadata failed: reason=${pricingMetadata.reason_code}, flags=${pricingMetadata.risk_flags}`);
+      throw new Error(
+        `Pricing metadata failed: reason=${pricingMetadata.reason_code}, flags=${pricingMetadata.risk_flags}`
+      );
     }
   } catch (error) {
     console.error('✗ Metadata extraction failed:', error);

@@ -1,5 +1,6 @@
 // Load environment variables FIRST
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { neon } from '@neondatabase/serverless';
@@ -7,7 +8,10 @@ import { neon } from '@neondatabase/serverless';
 async function verifyTable() {
   if (!process.env.DATABASE_URL) {
     console.error('❌ DATABASE_URL not found');
-    console.log('Environment variables:', Object.keys(process.env).filter(k => k.includes('DATA')));
+    console.log(
+      'Environment variables:',
+      Object.keys(process.env).filter((k) => k.includes('DATA'))
+    );
     process.exit(1);
   }
 

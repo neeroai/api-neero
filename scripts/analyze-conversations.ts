@@ -1,11 +1,12 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import * as fs from 'fs';
 import * as path from 'path';
 import {
-  extractAllPatientData,
   type ConversationMessage,
+  extractAllPatientData,
   type PatientData,
 } from '@/lib/utils/data-extraction';
 
@@ -118,9 +119,7 @@ async function main() {
 
   console.log(`\n💾 Output written to: ${outputPath}`);
   console.log('\n💡 Next steps:');
-  console.log(
-    '   1. Review extracted data quality in extracted-contacts.json'
-  );
+  console.log('   1. Review extracted data quality in extracted-contacts.json');
   console.log(
     '   2. Run dry-run update: pnpm tsx scripts/update-crm-contacts.ts --input extracted-contacts.json --dry-run --limit 10'
   );

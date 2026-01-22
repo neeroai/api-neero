@@ -84,6 +84,9 @@ function buildNERPrompt(messages: string[]): string {
 
   return `Analiza esta conversación de WhatsApp y extrae el nombre completo del paciente.
 
+NOTA: Solo recibirás mensajes escritos por el contacto/paciente.
+Mensajes de agentes, bots, o personal médico NO están incluidos.
+
 CONVERSACIÓN:
 ${conversationText}
 
@@ -178,7 +181,14 @@ function parseGeminiResponse(responseText: string): Omit<NameExtractionResult, '
     const lastNameMatch = responseText.match(/"lastName":\s*"([^"]+)"/);
     const confidenceMatch = responseText.match(/"confidence":\s*([0-9.]+)/);
 
-    if (fullNameMatch && fullNameMatch[1] && firstNameMatch && firstNameMatch[1] && lastNameMatch && lastNameMatch[1]) {
+    if (
+      fullNameMatch &&
+      fullNameMatch[1] &&
+      firstNameMatch &&
+      firstNameMatch[1] &&
+      lastNameMatch &&
+      lastNameMatch[1]
+    ) {
       return {
         fullName: fullNameMatch[1].trim(),
         firstName: firstNameMatch[1].trim(),

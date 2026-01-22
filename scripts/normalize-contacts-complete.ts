@@ -11,21 +11,12 @@
  */
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
-import {
-  listAllContacts,
-  updateContact,
-  type BirdContact,
-} from '@/lib/bird/contacts';
-import {
-  findConversationByPhone,
-  getConversationMessages,
-} from '@/lib/bird/conversations';
-import {
-  cleanDisplayName,
-  splitFullName,
-} from '@/lib/normalization/extractors';
+import { type BirdContact, listAllContacts, updateContact } from '@/lib/bird/contacts';
+import { findConversationByPhone, getConversationMessages } from '@/lib/bird/conversations';
+import { cleanDisplayName, splitFullName } from '@/lib/normalization/extractors';
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -104,9 +95,7 @@ async function normalizeContact(contact: BirdContact): Promise<{
   console.log(`\n📋 Contact: ${displayName}`);
 
   // 1. Get phone number
-  const phoneIdentifier = contact.featuredIdentifiers?.find(
-    (id) => id.key === 'phonenumber'
-  );
+  const phoneIdentifier = contact.featuredIdentifiers?.find((id) => id.key === 'phonenumber');
 
   if (!phoneIdentifier) {
     console.log('  ⏭️  Skip - No phone number');
@@ -197,7 +186,7 @@ async function normalizeContact(contact: BirdContact): Promise<{
       attributes: {
         displayName: cleanedDisplayName,
         firstName, // CRITICAL: Also update in attributes
-        lastName,  // CRITICAL: Also update in attributes
+        lastName, // CRITICAL: Also update in attributes
       },
     });
 

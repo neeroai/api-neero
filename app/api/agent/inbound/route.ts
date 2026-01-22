@@ -21,7 +21,7 @@ import {
 import { retrieveKnowledgeTool } from '@/lib/agent/tools/retrieve-knowledge';
 import { sendMessageTool } from '@/lib/agent/tools/whatsapp';
 import { AgentInboundRequestSchema, type AgentInboundResponse } from '@/lib/agent/types';
-import { InternalError, UnauthorizedError, ValidationError, handleRouteError } from '@/lib/errors';
+import { handleRouteError, InternalError, UnauthorizedError, ValidationError } from '@/lib/errors';
 
 export const runtime = 'edge';
 
@@ -107,10 +107,10 @@ export async function POST(request: Request) {
       temperature: 0.7,
     }).catch((error) => {
       console.error('[inbound] AI generation failed:', error);
-      throw new InternalError(
-        error instanceof Error ? error.message : 'AI generation failed',
-        { operation: 'ai_generation', conversationId }
-      );
+      throw new InternalError(error instanceof Error ? error.message : 'AI generation failed', {
+        operation: 'ai_generation',
+        conversationId,
+      });
     });
 
     const aiText = aiResponse.text;

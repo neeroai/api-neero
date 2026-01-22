@@ -106,9 +106,7 @@ async function registerWebhook() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(
-        `Bird API error: ${response.status} ${response.statusText}\n${errorText}`
-      );
+      throw new Error(`Bird API error: ${response.status} ${response.statusText}\n${errorText}`);
     }
 
     const subscription = (await response.json()) as WebhookSubscriptionResponse;

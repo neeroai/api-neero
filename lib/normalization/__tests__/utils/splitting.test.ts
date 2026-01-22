@@ -2,7 +2,7 @@
  * Tests for name splitting utilities
  */
 
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { splitFullName } from '../../utils/splitting';
 
 describe('splitFullName', () => {

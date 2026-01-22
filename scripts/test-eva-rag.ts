@@ -2,8 +2,10 @@
  * End-to-End RAG Pipeline Test with Eva
  * Tests the complete flow: User Query → retrieveKnowledge → Eva Response
  */
-import * as dotenv from 'dotenv';
+
 import { randomUUID } from 'crypto';
+import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 interface TestCase {
@@ -78,7 +80,9 @@ async function testEvaRAG() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(process.env.NEERO_API_KEY ? { Authorization: `Bearer ${process.env.NEERO_API_KEY}` } : {}),
+          ...(process.env.NEERO_API_KEY
+            ? { Authorization: `Bearer ${process.env.NEERO_API_KEY}` }
+            : {}),
         },
         body: JSON.stringify(requestBody),
       });

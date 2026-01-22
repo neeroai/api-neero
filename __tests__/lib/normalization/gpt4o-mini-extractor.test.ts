@@ -95,13 +95,10 @@ describe('extractContactDataGPT4oMini', () => {
   });
 
   it('should handle LATAM naming (2 apellidos)', async () => {
-    const result = await extractContactDataGPT4oMini(
-      'Mi nombre es Carlos Pérez Rodríguez',
-      {
-        contactPhone: '+573001234567',
-        fallbackToRegex: false,
-      }
-    );
+    const result = await extractContactDataGPT4oMini('Mi nombre es Carlos Pérez Rodríguez', {
+      contactPhone: '+573001234567',
+      fallbackToRegex: false,
+    });
 
     expect(result.firstName).toBe('Carlos');
     expect(result.lastName).toContain('Pérez');

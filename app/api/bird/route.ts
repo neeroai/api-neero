@@ -31,11 +31,11 @@ import type {
 } from '@/lib/bird/types';
 import { BirdActionRequestSchema } from '@/lib/bird/types';
 import {
+  handleRouteError,
   InternalError,
   TimeoutError,
   UnauthorizedError,
   ValidationError,
-  handleRouteError,
 } from '@/lib/errors';
 
 export const runtime = 'edge';
@@ -135,10 +135,10 @@ async function downloadMediaSafe(url: string): Promise<ArrayBuffer> {
   try {
     return await downloadMedia(url);
   } catch (error) {
-    throw new InternalError(
-      error instanceof Error ? error.message : 'Failed to download media',
-      { operation: 'media_download', url: url.substring(0, 50) }
-    );
+    throw new InternalError(error instanceof Error ? error.message : 'Failed to download media', {
+      operation: 'media_download',
+      url: url.substring(0, 50),
+    });
   }
 }
 
@@ -315,7 +315,6 @@ export async function POST(request: Request): Promise<Response> {
     return handleRouteError(error);
   }
 }
-
 
 /**
  * Format processing time as string (e.g., "2.3s")

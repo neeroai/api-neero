@@ -6,9 +6,10 @@
 
 // Load environment variables FIRST (before any imports that use them)
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
-import { writeFile, mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { listAllContacts } from '@/lib/bird/contacts';
 import { getBirdConfig } from '@/lib/bird/env';
@@ -142,10 +143,7 @@ function analyzeContacts(allContacts: BirdContact[]): {
   return { identifiers, customAttributes };
 }
 
-async function saveMetadata(
-  log: ExtractionLog,
-  summary: Summary
-): Promise<void> {
+async function saveMetadata(log: ExtractionLog, summary: Summary): Promise<void> {
   const logPath = join(METADATA_DIR, 'extraction-log.json');
   const summaryPath = join(METADATA_DIR, 'summary.json');
 
@@ -195,7 +193,9 @@ async function extractContacts(): Promise<void> {
     const endTime = new Date();
     const duration = formatDuration(startTime, endTime);
 
-    logProgress(`COMPLETO: ${allContacts.length} contactos extraídos → ${batchNumber - 1} archivos generados`);
+    logProgress(
+      `COMPLETO: ${allContacts.length} contactos extraídos → ${batchNumber - 1} archivos generados`
+    );
 
     // Analizar contactos
     const { identifiers, customAttributes } = analyzeContacts(allContacts);
@@ -258,7 +258,6 @@ async function extractContacts(): Promise<void> {
     for (const [key, count] of topAttributes) {
       console.log(`  ${key}: ${count}`);
     }
-
   } catch (error) {
     const endTime = new Date();
     const duration = formatDuration(startTime, endTime);

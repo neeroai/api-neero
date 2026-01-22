@@ -28,14 +28,15 @@
  */
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { listAllContacts, updateContact } from '@/lib/bird/contacts';
 import {
   cleanDisplayName,
-  splitFullName,
   inferCountryFromPhone,
   phoneToCountryCode,
+  splitFullName,
 } from '@/lib/normalization/extractors';
 
 async function main() {
@@ -46,8 +47,8 @@ async function main() {
   const allContacts = await listAllContacts();
 
   // Sort by updatedAt DESC (most recent first)
-  const sorted = allContacts.sort((a, b) =>
-    new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  const sorted = allContacts.sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
   );
 
   // Take first 100 (most recent)
@@ -127,7 +128,7 @@ async function main() {
       });
 
       // Rate limit (500ms to be safe)
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error: any) {
       const reason = 'api_error';
       console.log(`  ❌ Error: ${error.message}`);

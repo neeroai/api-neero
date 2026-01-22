@@ -6,6 +6,7 @@
  */
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { listAllContacts, updateContact } from '@/lib/bird/contacts';
@@ -90,7 +91,7 @@ async function main() {
         attributes: {
           displayName: capitalized,
           firstName, // CRITICAL: Also in attributes
-          lastName,  // CRITICAL: Also in attributes
+          lastName, // CRITICAL: Also in attributes
         },
       });
 
@@ -103,7 +104,7 @@ async function main() {
       updated++;
 
       // Rate limit
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     } catch (error: any) {
       console.log(`  ❌ Error: ${error.message}`);
       skipped++;

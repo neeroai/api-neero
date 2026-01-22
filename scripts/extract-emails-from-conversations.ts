@@ -11,13 +11,14 @@
  */
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import * as fs from 'fs';
+import { addEmailIdentifier, searchContactByPhone } from '@/lib/bird/contacts';
 import { findConversationByPhone, getConversationMessages } from '@/lib/bird/conversations';
-import { searchContactByPhone, addEmailIdentifier } from '@/lib/bird/contacts';
-import { extractEmail, type ConversationMessage } from '@/lib/utils/data-extraction';
 import type { BirdMessage, BirdMessageBody } from '@/lib/bird/types';
+import { type ConversationMessage, extractEmail } from '@/lib/utils/data-extraction';
 
 interface TargetContact {
   phone: string;
@@ -106,7 +107,9 @@ async function main() {
   const dryRun = args.includes('--dry-run');
 
   console.log('📧 Extract Emails from Conversations & Add as Identifiers\n');
-  console.log(`Mode: ${dryRun ? '🔒 DRY-RUN (no changes)' : '⚠️  PRODUCTION (will add identifiers)'}`);
+  console.log(
+    `Mode: ${dryRun ? '🔒 DRY-RUN (no changes)' : '⚠️  PRODUCTION (will add identifiers)'}`
+  );
   console.log(`Total contacts: ${TARGET_CONTACTS.length}\n`);
 
   if (!dryRun) {
@@ -122,7 +125,9 @@ async function main() {
 
   for (const target of TARGET_CONTACTS) {
     processed++;
-    console.log(`📋 Contact ${processed}/${TARGET_CONTACTS.length}: ${target.name} (${target.phone})`);
+    console.log(
+      `📋 Contact ${processed}/${TARGET_CONTACTS.length}: ${target.name} (${target.phone})`
+    );
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
     const report: ExtractionReport = {
@@ -170,7 +175,9 @@ async function main() {
 
       // 4. Find contact in Bird CRM
       console.log('  🔍 Finding contact in Bird CRM...');
-      const contact = dryRun ? { id: 'dry-run-contact-id' } : await searchContactByPhone(target.phone);
+      const contact = dryRun
+        ? { id: 'dry-run-contact-id' }
+        : await searchContactByPhone(target.phone);
 
       if (!contact) {
         console.log('  ⚠️  Contact not found in Bird CRM\n');

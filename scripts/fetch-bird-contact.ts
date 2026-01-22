@@ -1,5 +1,6 @@
 // Load environment variables FIRST (before any imports that use them)
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { fetchContactById } from '@/lib/bird/contacts';

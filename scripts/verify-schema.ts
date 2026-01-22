@@ -1,5 +1,5 @@
-import { config } from 'dotenv';
 import { neon } from '@neondatabase/serverless';
+import { config } from 'dotenv';
 import { join } from 'path';
 
 // Load .env.local
@@ -30,13 +30,17 @@ async function verifySchema() {
   columns.forEach((col: { column_name: string; data_type: string; is_nullable: string }) => {
     const nullable = col.is_nullable === 'YES' ? 'NULL' : 'NOT NULL';
     const highlight = col.column_name === 'metadata' ? '✨ ' : '   ';
-    console.log(`${highlight}${col.column_name.padEnd(25)} ${col.data_type.padEnd(20)} ${nullable}`);
+    console.log(
+      `${highlight}${col.column_name.padEnd(25)} ${col.data_type.padEnd(20)} ${nullable}`
+    );
   });
 
   console.log('─'.repeat(70));
 
   // Check if metadata column exists
-  const hasMetadata = columns.some((col: { column_name: string }) => col.column_name === 'metadata');
+  const hasMetadata = columns.some(
+    (col: { column_name: string }) => col.column_name === 'metadata'
+  );
 
   if (hasMetadata) {
     console.log('\n✅ metadata column found in message_logs table');
@@ -63,7 +67,7 @@ async function verifySchema() {
           urgency: 'routine',
           reason_code: null,
           risk_flags: [],
-          handover: false
+          handover: false,
         })}
       )
       RETURNING message_id, conversation_id, metadata

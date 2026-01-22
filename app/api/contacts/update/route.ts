@@ -7,14 +7,21 @@
  */
 /**
  * POST /api/contacts/update
- * Update Bird CRM contact with validation and cleaning
+ * Update Bird CRM contact with flexible normalization and graceful degradation
  *
  * Features:
- * - Pre-update validation (email, phone, country)
+ * - FLAT request structure (no nested context/updates)
+ * - Auto country extraction from phone number (+57 → CO, +52 → MX, +1 → US)
+ * - Flexible input normalization (espacios en email, emojis en nombre)
+ * - Graceful degradation (campos inválidos se ignoran, no fallan request)
+ * - Dual country fields (country: ISO code, countryName: full name)
  * - Auto display name cleaning (emojis, capitalization)
  * - Dual-field update strategy (displayName + firstName/lastName)
+ * - Auto estatus (datosok: displayName + email, pendiente: missing any)
  * - Post-update verification
  * - <9 second timeout (Bird constraint)
+ *
+ * Minimum required: displayName only (country auto-extracted from phone)
  */
 
 import { NextResponse } from 'next/server';
@@ -32,15 +39,18 @@ import type {
   ContactUpdateSuccessResponse,
 } from '@/lib/bird/types';
 import { ContactUpdateRequestSchema } from '@/lib/bird/types';
-import { validateContactUpdates } from '@/lib/utils/contact-validation';
-import { cleanDisplayName, parseFullName } from '@/lib/utils/name-cleaning';
 import {
+  handleRouteError,
   NotFoundError,
   TimeoutError,
   UnauthorizedError,
   ValidationError,
-  handleRouteError,
 } from '@/lib/errors';
+import {
+  extractCountryFromPhone,
+  normalizeAndValidateContactUpdates,
+} from '@/lib/utils/contact-normalization';
+import { parseFullName } from '@/lib/utils/name-cleaning';
 
 export const runtime = 'edge';
 
@@ -62,40 +72,54 @@ export async function POST(request: Request): Promise<Response> {
 
     budget.checkBudget();
 
-    // 3. Validate update fields
-    const validation = validateContactUpdates(body.updates);
-    if (!validation.valid) {
-      throw new ValidationError('Validation failed', validation.errors);
+    // 3. Extract country from phone number BEFORE normalization
+    const countryFromPhone = extractCountryFromPhone(body.contactPhone);
+
+    // 4. Normalize and validate update fields (graceful degradation)
+    const normalization = normalizeAndValidateContactUpdates({
+      displayName: body.displayName,
+      email: body.email,
+      country: countryFromPhone.valid ? countryFromPhone.code : undefined,
+    });
+
+    // Require minimum data: displayName only (country extracted from phone)
+    if (!normalization.hasRequiredFields) {
+      throw new ValidationError('Minimum required field: displayName', {
+        hasDisplayName: !!normalization.normalized.displayName,
+      });
     }
 
     budget.checkBudget();
 
-    // 4. Search contact by phone
-    console.log(`[Contact Update] Searching contact: ${maskPhone(body.context.contactPhone)}`);
-    const contact = await searchContactByPhone(body.context.contactPhone);
+    // 5. Search contact by phone
+    console.log(`[Contact Update] Searching contact: ${maskPhone(body.contactPhone)}`);
+    const contact = await searchContactByPhone(body.contactPhone);
 
     if (!contact) {
-      throw new NotFoundError(
-        `Contact with phone ${maskPhone(body.context.contactPhone)} not found`,
-        { phone: body.context.contactPhone }
-      );
+      throw new NotFoundError(`Contact with phone ${maskPhone(body.contactPhone)} not found`, {
+        phone: body.contactPhone,
+      });
     }
 
     budget.checkBudget();
 
-    // 5. Prepare update payload with cleaning
-    const updatePayload = prepareUpdatePayload(contact, body.updates);
+    // 6. Prepare update payload with cleaning and normalized data
+    const updatePayload = prepareUpdatePayload(
+      contact,
+      normalization.normalized,
+      normalization.estatus
+    );
 
-    // 6. Update contact
+    // 7. Update contact
     console.log(`[Contact Update] Updating contact ${contact.id}...`);
     await updateContact(contact.id, updatePayload.payload);
 
     budget.checkBudget();
 
-    // 7. Add email identifier if email was updated (separate API call)
-    if (body.updates.email) {
+    // 8. Add email identifier if email was updated (separate API call)
+    if (body.email) {
       try {
-        await addEmailIdentifier(contact.id, body.updates.email);
+        await addEmailIdentifier(contact.id, body.email);
       } catch (error) {
         console.warn(`[Contact Update] Failed to add email identifier: ${error}`);
         // Non-critical - continue
@@ -104,14 +128,14 @@ export async function POST(request: Request): Promise<Response> {
 
     budget.checkBudget();
 
-    // 8. Verify update
+    // 9. Verify update
     console.log(`[Contact Update] Verifying update...`);
     await sleep(500); // Small delay for Bird to process
     const updatedContact = await fetchContactById(contact.id);
 
     const verified = verifyUpdate(updatedContact, updatePayload.after);
 
-    // 9. Build response
+    // 10. Build response
     const response: ContactUpdateSuccessResponse = {
       success: true,
       message: verified
@@ -148,32 +172,40 @@ async function parseRequestBody(request: Request): Promise<ContactUpdateRequest>
 /**
  * Helper: Prepare update payload with cleaning
  */
-function prepareUpdatePayload(contact: BirdContact, updates: ContactUpdateRequest['updates']) {
+function prepareUpdatePayload(
+  contact: BirdContact,
+  updates: {
+    displayName?: string;
+    email?: string;
+    phone?: string;
+    country?: string;
+    countryName?: string;
+  },
+  estatus: 'datosok' | 'pendiente'
+) {
   const before: Record<string, any> = {};
   const after: Record<string, any> = {};
   const updatedFields: string[] = [];
   const payload: any = { attributes: {} };
 
-  // Display Name (with cleaning and dual-field strategy)
+  // Display Name (already cleaned by normalization)
   if (updates.displayName) {
     before.displayName = contact.attributes?.displayName || contact.computedDisplayName;
 
-    const cleaned = cleanDisplayName(updates.displayName);
-    const { firstName, lastName } = parseFullName(cleaned);
+    const { firstName, lastName } = parseFullName(updates.displayName);
 
     // Dual-field strategy (same as CSV script)
     payload.firstName = firstName;
     payload.lastName = lastName;
-    payload.attributes.displayName = cleaned;
+    payload.attributes.displayName = updates.displayName;
     payload.attributes.firstName = firstName;
     payload.attributes.lastName = lastName;
-    payload.attributes.jose = cleaned; // Custom full name field
 
-    after.displayName = cleaned;
-    updatedFields.push('displayName', 'firstName', 'lastName', 'jose');
+    after.displayName = updates.displayName;
+    updatedFields.push('displayName', 'firstName', 'lastName');
   }
 
-  // Email
+  // Email (already cleaned by normalization)
   if (updates.email) {
     before.email = contact.attributes?.email;
     payload.attributes.email = updates.email;
@@ -189,36 +221,25 @@ function prepareUpdatePayload(contact: BirdContact, updates: ContactUpdateReques
     updatedFields.push('telefono');
   }
 
-  // Country (convert code to full name)
-  if (updates.country) {
+  // Country (dual field: code + name)
+  if (updates.country && updates.countryName) {
     before.country = contact.attributes?.country;
-    const countryName = convertCountryCodeToName(updates.country);
-    payload.attributes.country = countryName;
-    after.country = countryName;
-    updatedFields.push('country');
+    before.countryName = contact.attributes?.countryName;
+
+    payload.attributes.country = updates.country; // ISO code (US, CO, MX)
+    payload.attributes.countryName = updates.countryName; // Full name
+
+    after.country = updates.country;
+    after.countryName = updates.countryName;
+    updatedFields.push('country', 'countryName');
   }
 
+  // Add estatus and updateBy (always set)
+  payload.attributes.estatus = estatus;
+  payload.attributes.updateBy = 'contacts';
+  updatedFields.push('estatus', 'updateBy');
+
   return { payload, before, after, updatedFields };
-}
-
-/**
- * Helper: Convert country code to full name
- */
-function convertCountryCodeToName(code: string): string {
-  const mapping: Record<string, string> = {
-    CO: 'Colombia',
-    MX: 'Mexico',
-    US: 'United States',
-    AR: 'Argentina',
-    CL: 'Chile',
-    PE: 'Peru',
-    EC: 'Ecuador',
-    VE: 'Venezuela',
-    ES: 'España',
-    NL: 'Netherlands',
-  };
-
-  return mapping[code] || code;
 }
 
 /**
@@ -246,10 +267,18 @@ function verifyUpdate(updatedContact: BirdContact, expectedAfter: Record<string,
     }
   }
 
-  // Check country
+  // Check country (ISO code)
   if (expectedAfter.country) {
     if (updatedContact.attributes?.country !== expectedAfter.country) {
-      console.warn(`[Verification] Country mismatch`);
+      console.warn(`[Verification] Country code mismatch`);
+      return false;
+    }
+  }
+
+  // Check countryName
+  if (expectedAfter.countryName) {
+    if (updatedContact.attributes?.countryName !== expectedAfter.countryName) {
+      console.warn(`[Verification] Country name mismatch`);
       return false;
     }
   }
@@ -273,7 +302,6 @@ function maskPhone(phone: string): string {
   const masked = '*'.repeat(Math.max(0, phone.length - 4));
   return masked + lastFour;
 }
-
 
 /**
  * Helper: Format processing time

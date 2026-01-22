@@ -60,9 +60,8 @@ export async function verifyBirdWebhookSignature(
     }
 
     // 3. Convert body to bytes
-    const bodyBytes = typeof rawBody === 'string'
-      ? new TextEncoder().encode(rawBody)
-      : new Uint8Array(rawBody);
+    const bodyBytes =
+      typeof rawBody === 'string' ? new TextEncoder().encode(rawBody) : new Uint8Array(rawBody);
 
     // 4. Compute HMAC-SHA256 signature
     const secretBytes = new TextEncoder().encode(secret!);

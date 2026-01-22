@@ -36,9 +36,7 @@ async function listWebhooks() {
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(
-        `Bird API error: ${response.status} ${response.statusText}\n${errorText}`
-      );
+      throw new Error(`Bird API error: ${response.status} ${response.statusText}\n${errorText}`);
     }
 
     const data = await response.json();

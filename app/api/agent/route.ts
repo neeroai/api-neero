@@ -13,7 +13,7 @@ import { notifyHandover } from '@/lib/bird/handover';
 import { registerLead } from '@/lib/bird/leads';
 import { sendTemplateMessage, sendTextMessage } from '@/lib/bird/messages';
 import { checkServiceWindow } from '@/lib/bird/service-window';
-import { UnauthorizedError, ValidationError, handleRouteError } from '@/lib/errors';
+import { handleRouteError, UnauthorizedError, ValidationError } from '@/lib/errors';
 
 export const runtime = 'edge';
 

@@ -5,8 +5,8 @@
  * @exports generateHeaders
  */
 
-import { Project, type SourceFile, SyntaxKind } from 'ts-morph';
 import { join } from 'node:path';
+import { Project, type SourceFile, SyntaxKind } from 'ts-morph';
 
 interface FileHeader {
   file: string;
@@ -80,7 +80,7 @@ function inferFileTag(sourceFile: SourceFile): string {
     const leadingComments = firstStatement.getLeadingCommentRanges();
     if (leadingComments && leadingComments.length > 0) {
       const commentText = leadingComments[0].getText();
-      const lines = commentText.split('\n').map(l => l.trim());
+      const lines = commentText.split('\n').map((l) => l.trim());
 
       // Look for descriptive first line
       for (const line of lines) {
@@ -95,7 +95,7 @@ function inferFileTag(sourceFile: SourceFile): string {
   }
 
   // Infer from filename
-  const words = fileName.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1));
+  const words = fileName.split(/[-_]/).map((w) => w.charAt(0).toUpperCase() + w.slice(1));
   return words.join(' ');
 }
 
@@ -193,7 +193,7 @@ function processFile(sourceFile: SourceFile, projectRoot: string): ProcessResult
       return {
         file: fileName,
         action: 'skipped',
-        reason: 'Already has valid header'
+        reason: 'Already has valid header',
       };
     }
 
@@ -210,7 +210,7 @@ function processFile(sourceFile: SourceFile, projectRoot: string): ProcessResult
       description,
       module: modulePath,
       exports,
-      runtime
+      runtime,
     };
 
     const headerComment = generateHeaderComment(header);
@@ -231,7 +231,6 @@ function processFile(sourceFile: SourceFile, projectRoot: string): ProcessResult
         if (line.startsWith('#!') || line.includes('use client') || line.includes('use server')) {
           insertIndex = i + 1;
         } else if (line === '') {
-          continue;
         } else {
           break;
         }
@@ -253,14 +252,13 @@ function processFile(sourceFile: SourceFile, projectRoot: string): ProcessResult
     return {
       file: fileName,
       action: 'created',
-      reason: `Added header with ${exports.length} exports`
+      reason: `Added header with ${exports.length} exports`,
     };
-
   } catch (error) {
     return {
       file: fileName,
       action: 'error',
-      reason: error instanceof Error ? error.message : String(error)
+      reason: error instanceof Error ? error.message : String(error),
     };
   }
 }
@@ -306,9 +304,9 @@ export async function generateHeaders() {
   console.log('📊 Summary:');
   console.log('='.repeat(60));
 
-  const created = results.filter(r => r.action === 'created').length;
-  const skipped = results.filter(r => r.action === 'skipped').length;
-  const errors = results.filter(r => r.action === 'error').length;
+  const created = results.filter((r) => r.action === 'created').length;
+  const skipped = results.filter((r) => r.action === 'skipped').length;
+  const errors = results.filter((r) => r.action === 'error').length;
 
   console.log(`✅ Created: ${created}`);
   console.log(`⏭️  Skipped: ${skipped}`);
@@ -317,9 +315,11 @@ export async function generateHeaders() {
 
   if (errors > 0) {
     console.log('\n❌ Errors:');
-    results.filter(r => r.action === 'error').forEach(r => {
-      console.log(`  - ${r.file}: ${r.reason}`);
-    });
+    results
+      .filter((r) => r.action === 'error')
+      .forEach((r) => {
+        console.log(`  - ${r.file}: ${r.reason}`);
+      });
   }
 
   console.log('\n✨ Header generation complete!');

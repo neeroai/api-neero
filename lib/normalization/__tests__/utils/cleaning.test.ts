@@ -2,8 +2,8 @@
  * Tests for cleaning utilities
  */
 
-import { describe, it, expect } from 'vitest';
-import { cleanDisplayName, removeEmojis, EMOJI_PATTERN } from '../../utils/cleaning';
+import { describe, expect, it } from 'vitest';
+import { cleanDisplayName, EMOJI_PATTERN, removeEmojis } from '../../utils/cleaning';
 
 describe('EMOJI_PATTERN', () => {
   it('matches common emojis', () => {

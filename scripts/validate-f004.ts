@@ -83,18 +83,9 @@ async function validateF004() {
   try {
     const { EVA_SYSTEM_PROMPT } = await import('@/lib/agent/prompts/eva-system');
 
-    const medicalPhotoInstructions = [
-      'iluminación',
-      'nitidez',
-      'ángulo',
-      'encuadre',
-    ];
+    const medicalPhotoInstructions = ['iluminación', 'nitidez', 'ángulo', 'encuadre'];
 
-    const prohibitedInstructions = [
-      'anatomía',
-      'condiciones médicas',
-      'diagnósticos',
-    ];
+    const prohibitedInstructions = ['anatomía', 'condiciones médicas', 'diagnósticos'];
 
     let foundInstructions = 0;
     for (const instruction of medicalPhotoInstructions) {
@@ -115,7 +106,9 @@ async function validateF004() {
       console.log(`  Found ${foundInstructions}/4 quality instructions`);
       console.log(`  Found ${foundProhibitions}/3 prohibition instructions`);
     } else {
-      throw new Error(`Insufficient instructions found (quality: ${foundInstructions}/4, prohibitions: ${foundProhibitions}/3)`);
+      throw new Error(
+        `Insufficient instructions found (quality: ${foundInstructions}/4, prohibitions: ${foundProhibitions}/3)`
+      );
     }
   } catch (error) {
     console.error('✗ System prompt validation failed:', error);

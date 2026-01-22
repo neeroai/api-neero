@@ -7,6 +7,16 @@ Versioning: [Semantic Versioning](https://semver.org)
 
 ## [Unreleased]
 
+### Changed
+- **Simplified `/api/contacts/update` endpoint (v2.0):**
+  - Changed request structure from nested (context + updates) to FLAT
+  - Auto-extract country from phone number country code (+57 → CO, +52 → MX, +1 → US)
+  - Reduced required fields: only `displayName` required (country extracted from phone)
+  - Updated estatus logic: `datosok` = displayName + email (country not required)
+  - Removed redundant fields: `contactName`, `phone` from request
+  - Added `extractCountryFromPhone()` utility function with LATAM + common countries support
+  - Updated 3 tests to reflect new validation logic (28 tests total, all passing)
+
 ### Added
 - Automated validation scripts for v1.0 features (F001-F006) - 1,130 lines total
   - `scripts/validate-f001.ts` - Data Collection validation (165 lines)

@@ -2,12 +2,8 @@
  * Tests for normalization Zod schemas
  */
 
-import { describe, it, expect } from 'vitest';
-import {
-  ContactInputSchema,
-  NormalizedContactSchema,
-  AIExtractionSchema,
-} from '../schemas';
+import { describe, expect, it } from 'vitest';
+import { AIExtractionSchema, ContactInputSchema, NormalizedContactSchema } from '../schemas';
 
 describe('ContactInputSchema', () => {
   it('validates valid contact input', () => {

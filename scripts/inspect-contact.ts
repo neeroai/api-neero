@@ -1,9 +1,9 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { listAllContacts } from '@/lib/bird/contacts';
-import { findConversationByPhone } from '@/lib/bird/conversations';
-import { getConversationMessages } from '@/lib/bird/conversations';
+import { findConversationByPhone, getConversationMessages } from '@/lib/bird/conversations';
 
 async function main() {
   console.log('Fetching first contact that needs normalization...\n');
@@ -14,13 +14,10 @@ async function main() {
   console.log('Contact:', {
     id: contact.id,
     displayName: contact.computedDisplayName,
-    phone: contact.featuredIdentifiers?.find((id) => id.key === 'phonenumber')
-      ?.value,
+    phone: contact.featuredIdentifiers?.find((id) => id.key === 'phonenumber')?.value,
   });
 
-  const phoneIdentifier = contact.featuredIdentifiers?.find(
-    (id) => id.key === 'phonenumber'
-  );
+  const phoneIdentifier = contact.featuredIdentifiers?.find((id) => id.key === 'phonenumber');
 
   if (!phoneIdentifier) {
     console.log('No phone number found');

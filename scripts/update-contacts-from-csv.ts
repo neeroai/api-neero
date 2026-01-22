@@ -18,16 +18,13 @@
  */
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import * as fs from 'fs';
-import { parseCSVFile } from '@/lib/utils/csv-parser';
-import {
-  searchContactByPhone,
-  updateContact,
-  fetchContactById,
-} from '@/lib/bird/contacts';
+import { fetchContactById, searchContactByPhone, updateContact } from '@/lib/bird/contacts';
 import type { BirdContact } from '@/lib/bird/types';
+import { parseCSVFile } from '@/lib/utils/csv-parser';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -263,25 +260,16 @@ async function updateContactWithVerification(
         country,
         fase: report.before.fase === '-' ? 'Contacto Inicial' : report.before.fase,
         initialSource:
-          report.before.initialSource === '-' ||
-          report.before.initialSource === 'connectors'
+          report.before.initialSource === '-' || report.before.initialSource === 'connectors'
             ? 'whatsapp'
             : report.before.initialSource,
       },
     };
 
-    const updatedFields: string[] = [
-      'firstName',
-      'lastName',
-      'displayName',
-      'jose',
-    ];
+    const updatedFields: string[] = ['firstName', 'lastName', 'displayName'];
     if (country !== '-') updatedFields.push('country');
     if (report.before.fase === '-') updatedFields.push('fase');
-    if (
-      report.before.initialSource === '-' ||
-      report.before.initialSource === 'connectors'
-    ) {
+    if (report.before.initialSource === '-' || report.before.initialSource === 'connectors') {
       updatedFields.push('initialSource');
     }
 
@@ -290,7 +278,6 @@ async function updateContactWithVerification(
       displayName: fullNameClean,
       firstName,
       lastName,
-      jose: fullNameClean,
       country,
       fase: updatePayload.attributes.fase,
       initialSource: updatePayload.attributes.initialSource,
@@ -341,24 +328,17 @@ async function updateContactWithVerification(
       updatedContact.attributes?.displayName === fullNameClean;
 
     if (displayNameUpdated) {
-      console.log(
-        `  ✅ VERIFIED: Display Name = "${updatedContact.computedDisplayName}"`
-      );
+      console.log(`  ✅ VERIFIED: Display Name = "${updatedContact.computedDisplayName}"`);
       report.verified = true;
     } else {
-      console.log(
-        `  ⚠️  VERIFICATION WARNING: Display Name may not have updated`
-      );
-      console.log(
-        `     API returned computedDisplayName: "${updatedContact.computedDisplayName}"`
-      );
+      console.log(`  ⚠️  VERIFICATION WARNING: Display Name may not have updated`);
+      console.log(`     API returned computedDisplayName: "${updatedContact.computedDisplayName}"`);
       console.log(
         `     API returned displayName attr:    "${updatedContact.attributes?.displayName || 'N/A'}"`
       );
       console.log(`     Expected: "${fullNameClean}"`);
       report.verified = false;
-      report.verificationNote =
-        'Display Name in API response does not match expected value';
+      report.verificationNote = 'Display Name in API response does not match expected value';
     }
 
     console.log('');
@@ -389,18 +369,14 @@ async function main() {
     console.log(
       '  npx tsx scripts/update-contacts-from-csv.ts --csv "path/to/contacts.csv" --dry-run'
     );
-    console.log(
-      '  npx tsx scripts/update-contacts-from-csv.ts --csv "path/to/contacts.csv"'
-    );
+    console.log('  npx tsx scripts/update-contacts-from-csv.ts --csv "path/to/contacts.csv"');
     process.exit(1);
   }
 
   const csvPath = args[csvIndex + 1];
 
   console.log('🎯 Update Bird CRM Contacts from CSV\n');
-  console.log(
-    `Mode: ${dryRun ? '🔒 DRY-RUN (no changes)' : '⚠️  PRODUCTION (will update CRM)'}`
-  );
+  console.log(`Mode: ${dryRun ? '🔒 DRY-RUN (no changes)' : '⚠️  PRODUCTION (will update CRM)'}`);
   console.log(`CSV File: ${csvPath}\n`);
 
   // Check if CSV file exists
@@ -486,9 +462,7 @@ async function main() {
       .slice(0, 10) // Show first 10
       .forEach((r) => {
         const verifyMark = r.verified ? '✅' : '⚠️';
-        console.log(
-          `  ${verifyMark} ${r.phone} (${r.csvDisplayName}) → ${r.after.displayName}`
-        );
+        console.log(`  ${verifyMark} ${r.phone} (${r.csvDisplayName}) → ${r.after.displayName}`);
       });
     if (successCount > 10) {
       console.log(`  ... and ${successCount - 10} more`);

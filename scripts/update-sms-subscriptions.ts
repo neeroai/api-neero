@@ -9,6 +9,7 @@
  */
 
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { listAllContacts, updateIdentifierSubscription } from '@/lib/bird/contacts';
@@ -45,12 +46,12 @@ async function main() {
     const contact = toProcess[i];
 
     // Find phone identifier (SMS uses phonenumber key)
-    const smsIdentifier = contact.featuredIdentifiers?.find(
-      id => id.key === 'phonenumber'
-    );
+    const smsIdentifier = contact.featuredIdentifiers?.find((id) => id.key === 'phonenumber');
 
     if (!smsIdentifier) {
-      console.log(`[${i + 1}/${toProcess.length}] ${contact.computedDisplayName} - No phone number, skipping`);
+      console.log(
+        `[${i + 1}/${toProcess.length}] ${contact.computedDisplayName} - No phone number, skipping`
+      );
       skipped++;
       continue;
     }
@@ -60,11 +61,9 @@ async function main() {
 
     try {
       // LLAMADA REAL A BIRD API - Debe retornar respuesta HTTP
-      const response = await updateIdentifierSubscription(
-        'phonenumber',
-        smsIdentifier.value,
-        { subscribedSms: true }
-      );
+      const response = await updateIdentifierSubscription('phonenumber', smsIdentifier.value, {
+        subscribedSms: true,
+      });
 
       // LOGGING DETALLADO - Prueba de ejecución real
       console.log(`  ✅ API Response received (contactId: ${response.id})`);

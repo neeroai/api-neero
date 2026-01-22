@@ -1,4 +1,5 @@
 import * as dotenv from 'dotenv';
+
 dotenv.config({ path: '.env.local' });
 
 import { neon } from '@neondatabase/serverless';
@@ -25,7 +26,9 @@ async function checkSimilarity() {
       LIMIT 5
     `;
     results.forEach((r, i) => {
-      console.log(`  ${i + 1}. ${r.category}>${r.subcategory}: ${parseFloat(r.similarity as string).toFixed(3)}`);
+      console.log(
+        `  ${i + 1}. ${r.category}>${r.subcategory}: ${parseFloat(r.similarity as string).toFixed(3)}`
+      );
     });
   }
 }

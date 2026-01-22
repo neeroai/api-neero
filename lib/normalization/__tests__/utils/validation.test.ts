@@ -2,8 +2,8 @@
  * Tests for validation utilities
  */
 
-import { describe, it, expect } from 'vitest';
-import { isValidName, isOnlyEmojis, isInstagramUsername } from '../../utils/validation';
+import { describe, expect, it } from 'vitest';
+import { isInstagramUsername, isOnlyEmojis, isValidName } from '../../utils/validation';
 
 describe('isValidName', () => {
   it('accepts valid Spanish names', () => {

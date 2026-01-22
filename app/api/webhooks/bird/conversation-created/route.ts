@@ -6,21 +6,17 @@
  * @runtime edge
  */
 
+import { desc, eq } from 'drizzle-orm';
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
-import { verifyBirdWebhookSignature } from '@/lib/bird/webhook-signature';
+import { TimeBudget, TimeoutBudgetError } from '@/lib/ai/timeout';
 import { updateContact } from '@/lib/bird/contacts';
 import { getConversationMessages } from '@/lib/bird/conversations';
-import { extractContactDataGPT4oMini } from '@/lib/normalization/gpt4o-mini-extractor';
-import { TimeBudget, TimeoutBudgetError } from '@/lib/ai/timeout';
+import { verifyBirdWebhookSignature } from '@/lib/bird/webhook-signature';
 import { db } from '@/lib/db/client';
 import { contactNormalizations } from '@/lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
-import {
-  handleRouteError,
-  TimeoutError,
-  ValidationError,
-} from '@/lib/errors';
+import { handleRouteError, TimeoutError, ValidationError } from '@/lib/errors';
+import { extractContactDataGPT4oMini } from '@/lib/normalization/gpt4o-mini-extractor';
 
 export const runtime = 'edge';
 
@@ -96,7 +92,9 @@ export async function POST(request: Request): Promise<Response> {
     const event = parseWebhookEvent(rawBody);
     const { conversationId, contactId, contactPhone } = extractEventData(event);
 
-    console.log(`[Webhook] conversation.created - Conversation: ${conversationId}, Contact: ${contactId}`);
+    console.log(
+      `[Webhook] conversation.created - Conversation: ${conversationId}, Contact: ${contactId}`
+    );
 
     budget.checkBudget();
 
@@ -110,8 +108,15 @@ export async function POST(request: Request): Promise<Response> {
 
     const existing = existingResults[0];
 
-    if (existing && existing.status === 'success' && existing.confidence && existing.confidence >= 0.6) {
-      console.log(`[Webhook] Contact ${contactId} already normalized (confidence: ${existing.confidence})`);
+    if (
+      existing &&
+      existing.status === 'success' &&
+      existing.confidence &&
+      existing.confidence >= 0.6
+    ) {
+      console.log(
+        `[Webhook] Contact ${contactId} already normalized (confidence: ${existing.confidence})`
+      );
       return NextResponse.json(
         {
           success: true,
@@ -135,12 +140,11 @@ export async function POST(request: Request): Promise<Response> {
 
     // Extract text from messages (filter out media-only messages)
     const conversationText = messages
+      .filter((msg) => msg.sender.type === 'contact') // SOLO contacto
       .map((msg) => {
         if (msg.body.type === 'text') {
           const textBody = msg.body.text as any;
-          return typeof textBody === 'string'
-            ? textBody
-            : textBody?.text || '';
+          return typeof textBody === 'string' ? textBody : textBody?.text || '';
         }
         return '';
       })
@@ -168,7 +172,9 @@ export async function POST(request: Request): Promise<Response> {
       fallbackToRegex: true,
     });
 
-    console.log(`[Webhook] Extraction result - Confidence: ${extracted.confidence}, Method: ${extracted.method}`);
+    console.log(
+      `[Webhook] Extraction result - Confidence: ${extracted.confidence}, Method: ${extracted.method}`
+    );
 
     budget.checkBudget();
 
@@ -184,7 +190,6 @@ export async function POST(request: Request): Promise<Response> {
           displayName: extracted.displayName,
           firstName: extracted.firstName,
           lastName: extracted.lastName,
-          jose: extracted.displayName, // Custom full name field
         },
       };
 

@@ -178,7 +178,6 @@ export interface BirdContactAttributes {
   lastName?: string; // Last name (can be in attributes for storage)
 
   // Custom attributes that EXIST
-  jose?: string; // Full name (custom attribute)
   telefono?: string; // Local phone number
   email?: string; // Email (system attribute, can be in attributes too)
   city?: string; // City (system attribute)
@@ -286,24 +285,15 @@ export interface BirdMessagesResponse {
  */
 
 /**
- * Contact Update Request (POST body)
+ * Contact Update Request (POST body) - FLAT structure
+ * v2.0: Simplified from nested context/updates to flat structure
+ * Country is auto-extracted from contactPhone, not sent explicitly
  */
 export const ContactUpdateRequestSchema = z.object({
-  context: z.object({
-    conversationId: z.string().uuid().optional(), // Optional - not used in business logic, kept for audit trail
-    contactPhone: z.string().min(1), // Required for searching contact
-    contactName: z.string().optional(), // Optional for logging
-  }),
-  updates: z
-    .object({
-      displayName: z.string().min(1).max(100).optional(),
-      email: z.string().email().optional(),
-      phone: z.string().optional(),
-      country: z.string().length(2).optional(), // ISO 3166-1 alpha-2
-    })
-    .refine((data) => Object.keys(data).length > 0, {
-      message: 'At least one field must be provided for update',
-    }),
+  conversationId: z.string().uuid().optional(), // Optional - for logging/tracking only
+  contactPhone: z.string().min(1), // REQUIRED - used to search contact in Bird CRM
+  displayName: z.string().min(1).max(100).optional(), // Full name provided by patient
+  email: z.string().email().optional(), // Optional - patient may not provide
 });
 
 export type ContactUpdateRequest = z.infer<typeof ContactUpdateRequestSchema>;

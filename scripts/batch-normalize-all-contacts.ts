@@ -1,4 +1,5 @@
 #!/usr/bin/env tsx
+
 /**
  * @file Batch Contact Normalization Script
  * @description Normalize ALL Bird CRM contacts using GPT-4o-mini extractor
@@ -19,12 +20,15 @@
  *   - Dry-run mode for testing
  */
 
+import { desc, eq } from 'drizzle-orm';
 import { listAllContacts, updateContact } from '../lib/bird/contacts';
-import { getConversationMessages, findConversationByPhone } from '../lib/bird/conversations';
-import { extractContactDataGPT4oMini, estimateExtractionCost } from '../lib/normalization/gpt4o-mini-extractor';
+import { findConversationByPhone, getConversationMessages } from '../lib/bird/conversations';
 import { db } from '../lib/db/client';
 import { contactNormalizations } from '../lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import {
+  estimateExtractionCost,
+  extractContactDataGPT4oMini,
+} from '../lib/normalization/gpt4o-mini-extractor';
 
 interface ScriptOptions {
   dryRun: boolean;
@@ -49,7 +53,7 @@ function parseArgs(): ScriptOptions {
   const args = process.argv.slice(2);
 
   const dryRun = !args.includes('--execute');
-  const limit = args.find(arg => arg.startsWith('--limit='))?.split('=')[1];
+  const limit = args.find((arg) => arg.startsWith('--limit='))?.split('=')[1];
   const resume = args.includes('--resume');
   const checkpointFile = './batch-normalize-checkpoint.json';
 
@@ -96,7 +100,9 @@ async function main() {
   console.log('='.repeat(80));
   console.log('BATCH CONTACT NORMALIZATION SCRIPT');
   console.log('='.repeat(80));
-  console.log(`Mode: ${options.dryRun ? 'DRY RUN (no updates)' : 'EXECUTE (will update contacts)'}`);
+  console.log(
+    `Mode: ${options.dryRun ? 'DRY RUN (no updates)' : 'EXECUTE (will update contacts)'}`
+  );
   console.log(`Limit: ${options.limit || 'All contacts'}`);
   console.log(`Resume: ${options.resume ? 'Yes' : 'No'}`);
   console.log('='.repeat(80));
@@ -158,7 +164,7 @@ async function main() {
   // Confirm execution
   if (!options.dryRun) {
     console.log('Press Ctrl+C to cancel, or wait 5 seconds to continue...');
-    await new Promise(resolve => setTimeout(resolve, 5000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     console.log('Starting normalization...');
     console.log();
   }
@@ -178,7 +184,9 @@ async function main() {
     const elapsed = Date.now() - startTime;
     const eta = (elapsed / (i + 1)) * (contactsToProcess.length - i - 1);
 
-    console.log(`[${i + 1}/${contactsToProcess.length}] (${progress.toFixed(1)}%) Contact: ${contact.id}`);
+    console.log(
+      `[${i + 1}/${contactsToProcess.length}] (${progress.toFixed(1)}%) Contact: ${contact.id}`
+    );
 
     try {
       // 1. Check if already normalized (skip)
@@ -191,14 +199,19 @@ async function main() {
 
       const existing = existingResults[0];
 
-      if (existing && existing.status === 'success' && existing.confidence && existing.confidence >= 0.6) {
+      if (
+        existing &&
+        existing.status === 'success' &&
+        existing.confidence &&
+        existing.confidence >= 0.6
+      ) {
         console.log(`  ✓ Already normalized (confidence: ${existing.confidence}) - SKIPPED`);
         skippedCount++;
         continue;
       }
 
       // 2. Get phone number from contact identifiers
-      const phoneIdentifier = contact.featuredIdentifiers.find(id => id.key === 'phonenumber');
+      const phoneIdentifier = contact.featuredIdentifiers.find((id) => id.key === 'phonenumber');
       if (!phoneIdentifier) {
         console.log(`  ✗ No phone number found - SKIPPED`);
         skippedCount++;
@@ -221,9 +234,7 @@ async function main() {
       const conversationText = messages
         .map((msg) => {
           if (msg.body.type === 'text') {
-            return typeof msg.body.text === 'string'
-              ? msg.body.text
-              : msg.body.text?.text || '';
+            return typeof msg.body.text === 'string' ? msg.body.text : msg.body.text?.text || '';
           }
           return '';
         })
@@ -242,7 +253,9 @@ async function main() {
         fallbackToRegex: true,
       });
 
-      console.log(`  → Extracted: ${extracted.displayName || '(none)'} | Confidence: ${extracted.confidence.toFixed(2)} | Method: ${extracted.method}`);
+      console.log(
+        `  → Extracted: ${extracted.displayName || '(none)'} | Confidence: ${extracted.confidence.toFixed(2)} | Method: ${extracted.method}`
+      );
 
       // Update cost tracking
       if (extracted.tokensUsed) {
@@ -260,7 +273,6 @@ async function main() {
             displayName: extracted.displayName,
             firstName: extracted.firstName,
             lastName: extracted.lastName,
-            jose: extracted.displayName,
             estatus: 'datosok', // Mark as successfully normalized
           },
         };
@@ -268,9 +280,15 @@ async function main() {
         // Add country if available
         if (extracted.country) {
           const countryNames: Record<string, string> = {
-            CO: 'Colombia', MX: 'Mexico', US: 'United States',
-            AR: 'Argentina', CL: 'Chile', PE: 'Peru', EC: 'Ecuador',
-            VE: 'Venezuela', ES: 'España',
+            CO: 'Colombia',
+            MX: 'Mexico',
+            US: 'United States',
+            AR: 'Argentina',
+            CL: 'Chile',
+            PE: 'Peru',
+            EC: 'Ecuador',
+            VE: 'Venezuela',
+            ES: 'España',
           };
           updatePayload.attributes.country = countryNames[extracted.country] || extracted.country;
         }
@@ -317,7 +335,9 @@ async function main() {
         console.log(`  ! Low confidence - marked for manual review`);
         lowConfidenceCount++;
       } else if (options.dryRun) {
-        console.log(`  → DRY RUN - would ${extracted.confidence >= 0.6 ? 'update' : 'mark for review'}`);
+        console.log(
+          `  → DRY RUN - would ${extracted.confidence >= 0.6 ? 'update' : 'mark for review'}`
+        );
         if (extracted.confidence >= 0.6) successCount++;
         else lowConfidenceCount++;
       }
@@ -335,8 +355,7 @@ async function main() {
       }
 
       // Rate limit: 600ms delay (100 req/min)
-      await new Promise(resolve => setTimeout(resolve, 600));
-
+      await new Promise((resolve) => setTimeout(resolve, 600));
     } catch (error) {
       console.log(`  ✗ Error: ${error}`);
       failureCount++;
