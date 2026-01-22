@@ -144,7 +144,17 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
  */
 export function bufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  return btoa(String.fromCharCode(...bytes));
+  const CHUNK_SIZE = 8192; // 8KB chunks (well below 65K argument limit)
+  let binary = '';
+
+  // Process in chunks to avoid "Maximum call stack size exceeded"
+  // Spread operator has ~65K argument limit in V8/Edge Runtime
+  for (let i = 0; i < bytes.length; i += CHUNK_SIZE) {
+    const chunk = bytes.subarray(i, i + CHUNK_SIZE);
+    binary += String.fromCharCode(...chunk);
+  }
+
+  return btoa(binary);
 }
 
 /**

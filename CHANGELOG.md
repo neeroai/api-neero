@@ -7,10 +7,18 @@ Versioning: [Semantic Versioning](https://semver.org)
 
 ## [Unreleased]
 
+### Fixed
+- **CRITICAL: bufferToBase64 stack overflow with large files (>65KB):**
+  - Fixed "Maximum call stack size exceeded" RangeError
+  - Root cause: Spread operator `String.fromCharCode(...bytes)` has ~65K argument limit in Edge Runtime
+  - Solution: Process in 8KB chunks to stay well below limit
+  - Now handles files up to 25MB without stack overflow
+  - Affects PDFs, large images, and audio files
+
 ### Improved
 - **lib/bird/ Optimizations and Cleanup:**
   - Fixed timeout handling in media.ts: moved clearTimeout to finally block (protects all operations)
-  - Optimized bufferToBase64: replaced O(n²) string concatenation with spread operator (625x faster for 25MB files)
+  - Optimized bufferToBase64: uses chunked processing (8KB chunks) for large file support
   - Fixed getMimeType: now handles URLs with query params via URL.pathname parsing
   - Moved MIME_TYPES constant outside function (created once vs per-call)
   - Replaced direct env access with getBirdConfig() in fetch-latest-media.ts (single source of truth)
