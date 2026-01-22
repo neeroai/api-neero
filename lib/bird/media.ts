@@ -43,10 +43,18 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
       headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
     }
 
+    // DEBUG: Log full URL and auth status
+    console.log('[Media Download] URL:', url);
+    console.log('[Media Download] Auth:', process.env.BIRD_ACCESS_KEY ? 'PRESENT' : 'MISSING');
+
     const response = await fetch(url, {
       headers,
       signal: controller.signal,
     });
+
+    // DEBUG: Log response details
+    console.log('[Media Download] Status:', response.status, response.statusText);
+    console.log('[Media Download] Headers:', Object.fromEntries(response.headers.entries()));
 
     // Safety check: Validate Content-Length before reading body
     const contentLength = response.headers.get('content-length');
@@ -62,7 +70,16 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      throw new Error(`Media download failed: ${response.status} ${response.statusText}`);
+      // Enhanced error with full URL and response body
+      let errorBody = '';
+      try {
+        errorBody = await response.text();
+      } catch {
+        // Ignore if body can't be read
+      }
+      throw new Error(
+        `Media download failed: ${response.status} ${response.statusText}. URL: ${url}. Body: ${errorBody}`
+      );
     }
 
     const buffer = await response.arrayBuffer();

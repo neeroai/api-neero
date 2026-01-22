@@ -4,11 +4,15 @@ summary: "Analysis of Bird AI Employee HTTP Request configuration capabilities b
 description: "Bird Actions HTTP Request variable access, headers configuration, and body structure patterns"
 version: "1.0"
 date: "2026-01-22"
-updated: "2026-01-22 01:30"
+updated: "2026-01-22"
 scope: "project"
+architecture_version: "v3.0"
+audience: "developers"
 ---
 
 # Bird HTTP Request Variables - UI Analysis
+
+> **Note**: For operator-focused UI configuration, see [bird-multimodal-config-guide.md](./bird-multimodal-config-guide.md)
 
 **Date**: 2026-01-22 01:30
 **Source**: Bird UI Screenshots (app.bird.com)
@@ -352,5 +356,163 @@ Based on screenshots analysis:
 
 ---
 
-**Token Budget**: ~450 lines (~1,350 tokens)
-**Last Updated**: 2026-01-22 01:30
+## Bird API Validation Plan (2026-01-22)
+
+**Method**: Programmatic validation using Bird Conversations API + Contacts API
+
+### Script: validate-bird-context-variables.ts
+
+**Location**: `scripts/validate-bird-context-variables.ts`
+
+**Purpose**: Fetch real conversation data from Bird API to validate exact Context variable structure available to AI Employees
+
+**Usage**:
+```bash
+BIRD_WORKSPACE_ID=xxx BIRD_ACCESS_KEY=xxx TEST_CONVERSATION_ID=xxx tsx scripts/validate-bird-context-variables.ts
+```
+
+### Expected API Response Structure
+
+**Conversations API** (`GET /workspaces/{id}/conversations/{id}`):
+```json
+{
+  "id": "uuid",
+  "status": "active",
+  "contact": {
+    "id": "uuid",
+    "displayName": "Juan Pérez",
+    "identifiers": [
+      {"key": "phonenumber", "value": "+573001234567"},
+      {"key": "emailaddress", "value": "email@example.com"}
+    ],
+    "attributes": {
+      "country": "CO",
+      "custom_field": "value"
+    }
+  },
+  "channels": [...],
+  "messages": [...],
+  "participants": [...]
+}
+```
+
+### Context Variable → API Path Mapping
+
+| Context Variable | Bird API Path | Type | Notes |
+|------------------|---------------|------|-------|
+| `{{context.conversation.id}}` | `conversation.id` | UUID | Direct access |
+| `{{context.conversation.status}}` | `conversation.status` | String | Direct access |
+| `{{context.contact.id}}` | `conversation.contact.id` | UUID | Direct access |
+| `{{context.contact.computedDisplayName}}` | `conversation.contact.displayName` | String | May be empty |
+| `{{context.contact.identifiers}}` | `conversation.contact.identifiers` | Array | Full array (NOT indexable) |
+| `{{context.contact.attributes}}` | `conversation.contact.attributes` | Object | Custom CRM fields |
+
+### Phone Number Access - 3 Hypotheses
+
+**Hypothesis A: identifiers array (API structure)**
+- API Path: `conversation.contact.identifiers[0].value` where `key="phonenumber"`
+- Bird Variable: `{{context.contact.identifiers}}` (full array)
+- **Problem**: Bird variables don't support array indexing `[0]`
+- **Status**: ❌ NOT VIABLE
+
+**Hypothesis B: Hidden calculated variable**
+- Bird Variable: `{{context.contact.phoneNumber}}`
+- **Assumption**: Bird internally does `identifiers.find(i => i.key === 'phonenumber').value`
+- **Status**: ⚠️ NEEDS MANUAL TESTING in Bird UI dropdown
+
+**Hypothesis C: Synced to attributes**
+- API Path: `conversation.contact.attributes.phoneNumber`
+- Bird Variable: `{{context.contact.attributes.phoneNumber}}`
+- **Status**: ⚠️ NEEDS VALIDATION via API + Bird UI test
+
+### Recommended Body Structure (Post-Validation)
+
+**FLAT structure using Context variables:**
+```json
+{
+  "conversationId": "{{context.conversation.id}}",
+  "contactId": "{{context.contact.id}}",
+  "contactPhone": "{{context.contact.phoneNumber}}",
+  "displayName": "{{arguments.displayName}}",
+  "email": "{{arguments.email}}"
+}
+```
+
+**If `phoneNumber` hidden variable doesn't exist, fallback:**
+```json
+{
+  "conversationId": "{{context.conversation.id}}",
+  "contactId": "{{context.contact.id}}",
+  "contactPhone": "{{context.contact.attributes.phoneNumber}}",
+  "displayName": "{{arguments.displayName}}",
+  "email": "{{arguments.email}}"
+}
+```
+
+### Arguments Reduction Analysis
+
+| Metric | Before | After | Change |
+|--------|--------|-------|--------|
+| Total Arguments | 6 | 2 | -67% |
+| Eliminated | conversationId, contactPhone, contactName, country | - | Now from Context |
+| Kept | displayName, email | displayName, email | AI Employee provides |
+| Source | Task Arguments | Context (auto) + Arguments (user input) | Simplified |
+
+**Eliminated Arguments Rationale:**
+- `conversationId` → `{{context.conversation.id}}` (automatic)
+- `contactPhone` → `{{context.contact.phoneNumber}}` or attributes (automatic)
+- `contactName` → Redundant with `displayName`
+- `country` → Extracted from phone in backend
+
+### Validation Checklist
+
+- [ ] Run `validate-bird-context-variables.ts` script
+- [ ] Document actual API response structure
+- [ ] Confirm `contact.identifiers` array structure
+- [ ] Test `{{context.contact.phoneNumber}}` in Bird UI
+- [ ] Test `{{context.contact.attributes.phoneNumber}}` in Bird UI
+- [ ] Update Action body with Context variables
+- [ ] Remove 4 Arguments (keep only displayName, email)
+- [ ] Test end-to-end with real conversation
+- [ ] Verify logs in Vercel (correct values received)
+
+### Next Steps After Validation
+
+1. **If phoneNumber hidden variable exists**:
+   - Use `{{context.contact.phoneNumber}}` directly
+   - Update Action immediately
+   - Document in implementation guide
+
+2. **If only attributes.phoneNumber works**:
+   - Use `{{context.contact.attributes.phoneNumber}}`
+   - Verify Bird syncs phone to attributes
+   - Document requirement
+
+3. **If neither works**:
+   - Keep `contactPhone` as Argument (6 → 3 reduction instead of 6 → 2)
+   - Document Bird platform limitation
+   - Request feature from Bird support
+
+---
+
+## Variable Categories Summary
+
+**From Bird UI Dropdown (Screenshot Analysis)**:
+
+| Category | Status | Description |
+|----------|--------|-------------|
+| Arguments | ✅ DOCUMENTED | Task Arguments configured manually in Action |
+| Global variables | ⚠️ PENDING | Workspace-level non-secret variables |
+| Context | ✅ DOCUMENTED | Runtime data (chat, contact, conversation) |
+| Steps | ⚠️ PENDING | Output from previous Flow steps |
+| Flow run | ⚠️ PENDING | Flow execution metadata |
+
+**Context subcategories (COMPLETE)**:
+- `context.chat` - 9 variables (agentId, status, connectorId, etc.)
+- `context.contact` - 7 variables (id, displayName, identifiers, attributes, etc.)
+- `context.conversation` - 9 variables (id, status, participants, etc.)
+
+---
+
+**Token Budget**: ~650 lines (~1,950 tokens)
+**Last Updated**: 2026-01-22 08:00

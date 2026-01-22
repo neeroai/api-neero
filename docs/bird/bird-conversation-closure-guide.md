@@ -321,7 +321,8 @@ T+8min: Flow checks response
 **Local Documentation:**
 - `/docs/bird/bird-abandonment-explained.md` - Abandonment deep dive
 - `/docs/bird/bird-flows-patterns.md` - More Flow patterns
-- `/docs/bird/bird-ai-employees-setup-guide.md` - General AI Employee setup
+- `/docs/bird/bird-multimodal-config-guide.md` - AI Employee configuration guide (v3.0)
+- `/docs/bird/archived-docs/v1-v2-actions/bird-ai-employees-setup-guide.md` - Archived v2.0 setup guide
 
 ---
 

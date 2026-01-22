@@ -1,6 +1,20 @@
+---
+title: "WhatsApp Message Structures via Bird API"
+summary: "Complete documentation of WhatsApp message structures as received via Bird Conversations API. Covers all media types with real examples."
+description: "WhatsApp message structure reference for Bird API"
+version: "1.0"
+date: "2025-12-13"
+updated: "2026-01-22"
+scope: "project"
+architecture_version: "v3.0"
+audience: "developers"
+---
+
 # WhatsApp Message Structures via Bird API
 
-**Version:** 1.0 | **Date:** 2025-12-13 | **Status:** Reference
+> **Note**: For operator-focused UI configuration, see [bird-multimodal-config-guide.md](./bird-multimodal-config-guide.md)
+
+**Version:** 1.0 | **Date:** 2025-12-13 | **Updated:** 2026-01-22 | **Status:** Reference
 
 > Complete documentation of WhatsApp message structures as received via Bird Conversations API
 
@@ -382,11 +396,12 @@ if (message.body.image?.images?.[0]?.mediaUrl) {
 
 ## Related Documentation
 
-- `/docs/bird/bird-ai-employees-setup-guide.md` - Setup guide for Bird AI Employees
-- `/docs/bird/bird-whatsapp-media-flow.md` - WhatsApp → Bird media flow
+- `/docs/bird/bird-multimodal-config-guide.md` - AI Employee configuration guide (v3.0)
 - `/docs/bird/bird-conversations-api-capabilities.md` - Bird Conversations API
 - `/docs/api-bird/receiving-messages.md` - Source of truth for message structures
 - `/lib/bird/fetch-latest-media.ts` - Implementation
+- `/docs/bird/archived-docs/v1-v2-actions/bird-ai-employees-setup-guide.md` - Archived v2.0 setup guide
+- `/docs/bird/archived-docs/v1-webhook-patterns/bird-whatsapp-media-flow.md` - Archived webhook flow (not used)
 
 ---
 

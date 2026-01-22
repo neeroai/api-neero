@@ -188,12 +188,14 @@ NEERO_API_KEY=xxx         # Custom API key for Actions
 
 **Project Docs (`/docs`):**
 - `architecture.md` - System design, Actions pattern, Edge Runtime
-- `bird/bird-actions-architecture.md` - Primary implementation guide
-- `bird/bird-ai-employees-setup-guide.md` - Bird setup (45-60 min)
-- `bird/bird-variables-reference.md` - Bird native variables
+- `bird/bird-multimodal-config-guide.md` - Primary operator guide (v3.0, 800 lines)
+- `bird/README.md` - Documentation index (operator vs developer paths)
+- `bird/bird-http-request-variables-analysis.md` - Context variables (developers)
+- `bird/BIRD-CONTEXT-VARIABLES-REAL-DATA.md` - API validation data
 - `ai-integration.md` - Gemini, Groq, OpenAI via AI SDK
 - `deployment.md` - Vercel deployment
 - `eva-kb-optimization-*.md` - Eva optimization guides (3 docs)
+- `bird/archived-docs/` - Obsolete docs (webhook patterns, v1.0/v2.0, 9 files)
 
 **Global Docs**: `/Users/mercadeo/neero/docs-global/platforms/{vercel,bird}/`
 

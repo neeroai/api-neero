@@ -1,6 +1,20 @@
+---
+title: "Bird Conversation API - Real Data Analysis"
+summary: "Analysis of real Bird API responses for timing, message ordering, and media types. Confirms bot acknowledgment timing and limit=5 solution."
+description: "Real conversation data analysis for Bird Conversations API"
+version: "2.0"
+date: "2025-12-13"
+updated: "2026-01-22"
+scope: "project"
+architecture_version: "v3.0"
+audience: "developers"
+---
+
 # Bird Conversation API - Real Data Analysis
 
-**Version:** 2.0 | **Date:** 2025-12-13 | **Status:** Comprehensive Reference
+> **Note**: For operator-focused UI configuration, see [bird-multimodal-config-guide.md](./bird-multimodal-config-guide.md)
+
+**Version:** 2.0 | **Date:** 2025-12-13 | **Updated:** 2026-01-22 | **Status:** Comprehensive Reference
 
 > Analysis of real Bird API responses to understand timing, message ordering, and ALL media types
 

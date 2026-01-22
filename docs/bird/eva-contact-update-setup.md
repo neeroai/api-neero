@@ -1,6 +1,20 @@
+---
+title: "Eva Valoración: Contact Update Action Setup Guide"
+summary: "Configuration guide for update_contact_data Action with validation and cleaning. v2.0 architecture with explicit arguments."
+description: "Contact update Action setup for Eva Valoración"
+version: "2.0"
+date: "2025-12-20"
+updated: "2026-01-22"
+scope: "project"
+architecture_version: "v2.0"
+audience: "operators"
+---
+
 # Eva Valoración: Contact Update Action Setup Guide
 
-**Version:** 1.0 | **Date:** 2025-12-20 18:15 | **Target:** Operators configuring Bird UI
+> **Note**: This guide uses v2.0 architecture (explicit arguments). For v3.0 multimodal setup, see [bird-multimodal-config-guide.md](./bird-multimodal-config-guide.md)
+
+**Version:** 2.0 | **Date:** 2025-12-20 | **Updated:** 2026-01-22 | **Target:** Operators configuring Bird UI
 
 ---
 
@@ -420,7 +434,8 @@ For Eva to use when validating country updates:
 
 - **API Reference:** `/docs/api/contacts-update.md` - Complete endpoint documentation
 - **Executive Summary:** `/docs/eva-executive-summary.md` - Stakeholder summary
-- **Bird Actions Architecture:** `/docs/bird/bird-actions-architecture.md` - Technical background
+- **Bird Actions v3.0:** `/docs/bird/bird-multimodal-config-guide.md` - Current architecture guide
+- **Bird Actions v1.0/v2.0 (Archived):** `/docs/bird/archived-docs/v1-v2-actions/bird-actions-architecture.md` - Historical reference
 - **Migration Plan:** `/Users/mercadeo/.claude/plans/zesty-booping-charm.md` - Complete plan
 
 ---
