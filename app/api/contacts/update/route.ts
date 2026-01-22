@@ -205,12 +205,12 @@ function prepareUpdatePayload(
     updatedFields.push('displayName', 'firstName', 'lastName');
   }
 
-  // Email (already cleaned by normalization)
+  // Email is handled separately via addEmailIdentifier() (line 122)
+  // NOT sent as an attribute because Bird treats email as an identifier
   if (updates.email) {
     before.email = contact.attributes?.email;
-    payload.attributes.email = updates.email;
     after.email = updates.email;
-    updatedFields.push('email');
+    updatedFields.push('email (identifier)');
   }
 
   // Phone
@@ -259,12 +259,11 @@ function verifyUpdate(updatedContact: BirdContact, expectedAfter: Record<string,
     }
   }
 
-  // Check email
+  // Email is set via identifier (addEmailIdentifier call)
+  // Verification happens when identifier endpoint returns success
+  // No need to check attributes.email
   if (expectedAfter.email) {
-    if (updatedContact.attributes?.email !== expectedAfter.email) {
-      console.warn(`[Verification] Email mismatch`);
-      return false;
-    }
+    console.log(`[Verification] Email identifier updated to: ${expectedAfter.email}`);
   }
 
   // Check country (ISO code)

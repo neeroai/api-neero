@@ -39,6 +39,13 @@ Versioning: [Semantic Versioning](https://semver.org)
 - Added `.claude/` (lowercase) to `.gitignore` for proper exclusion
 
 ### Fixed
+- **Bird API Contact Update - Email Attribute Error (422):**
+  - Fixed `/api/contacts/update` endpoint sending `email` as attribute when Bird treats it as identifier
+  - Removed `payload.attributes.email` from update payload (app/api/contacts/update/route.ts:211)
+  - Email now handled exclusively via `addEmailIdentifier()` call (existing working implementation)
+  - Updated verification logic to not check `attributes.email` (identifiers verified via separate API call)
+  - Commented out misleading `email?: string` in `BirdContactAttributes` interface (lib/bird/types.ts:182)
+  - Resolves Bird API 422 error: "attribute definition not found for email"
 - Git push issue with sensitive patient data in `conversations/` directory
   - Removed 3.2MB file with patient data before push
   - Added `conversations/` to `.gitignore` permanently
@@ -53,6 +60,17 @@ Versioning: [Semantic Versioning](https://semver.org)
 ### Changed
 - Updated `todo.md` to reflect v1.0 validation completion and staging deployment plan
 - Branch `docs/optimize-llm-format` merged into `main`
+- **Consolidated Bird documentation (40% reduction):**
+  - Created comprehensive multimodal config guide (`docs/bird/bird-multimodal-config-guide.md`, 800 lines)
+  - Merged 2 operator guides into single authoritative source (bird-ai-employees-setup-guide.md + bird-actions-process-media.md)
+  - Archived 8 obsolete files to `docs/bird/.archive/` (webhook patterns, v1.0/v2.0 docs)
+  - Added v3.0 migration guide with before/after code samples
+  - Added troubleshooting section with error code reference and timeout solutions
+  - Added version markers (`architecture_version: "v3.0"`) to all active files
+  - Reduced active documentation from 25 → 15 files (40% reduction)
+  - Created archive README explaining historical context and migration path
+  - Updated 6 files with frontmatter and cross-references to new guide
+  - Rewritten README.md with clear operator vs developer paths
 
 ### Validated
 - F001 (Data Collection): ✅ PASSED - All database, schema, and tool tests passing

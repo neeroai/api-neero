@@ -179,7 +179,7 @@ export interface BirdContactAttributes {
 
   // Custom attributes that EXIST
   telefono?: string; // Local phone number
-  email?: string; // Email (system attribute, can be in attributes too)
+  // email?: string; // REMOVED - Email is an identifier, not an attribute. Use addEmailIdentifier() to set email for contacts
   city?: string; // City (system attribute)
   country?: string; // Country (custom attribute for location)
   fase?: string; // Lead phase (custom attribute)
