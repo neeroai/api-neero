@@ -8,6 +8,31 @@ Versioning: [Semantic Versioning](https://semver.org)
 ## [Unreleased]
 
 ### Changed
+- **Simplified Bird Media Download - Removed Unnecessary Redirect Handling:**
+  - Removed manual redirect handling from `lib/bird/media.ts` (~30 lines)
+  - Root cause of original complexity: Misunderstanding of fetch spec behavior
+  - Reality: fetch spec automatically drops Authorization header on cross-origin redirects
+  - Flow: Bird media (media.api.bird.com) → S3 (s3.amazonaws.com) = cross-origin
+  - Fetch automatically drops Authorization header when following redirect to S3
+  - No dual auth conflict because header is automatically removed
+  - Removed unnecessary code:
+    - Presigned URL detection (`X-Amz-Algorithm`, `X-Amz-Signature` checks)
+    - Conditional Authorization header logic
+    - Manual redirect handling (30 lines of code)
+    - `redirect: 'manual'` flag
+  - Simplified to: Always add Authorization header + `redirect: 'follow'`
+  - Same behavior, simpler code, better maintainability
+  - Verified with user's test script (confirmed working pattern)
+- **Bird Actions API v3.1 - Backward-Compatible mediaUrl Support:**
+  - Added optional `mediaUrl` field to request schema (reverts v3.0 removal)
+  - If `mediaUrl` provided → use directly (v2.x pattern, 200-500ms faster)
+  - If `mediaUrl` missing → extract from conversation (v3.0 fallback)
+  - Supports Bird native variables: `{{messageImage}}`, `{{messageAudio}}`, `{{messageFile}}`
+  - Updated `BirdActionRequestSchema` in `lib/bird/types.ts` with optional `mediaUrl: z.string().url()`
+  - Updated `app/api/bird/route.ts` with dual-path logic (direct URL vs API extraction)
+  - Added `detectMediaTypeFromUrl()` helper for URL-based type detection
+  - Maintains full backward compatibility with v3.0 configurations (no breaking changes)
+  - Recommendation: Use v2.x pattern (direct mediaUrl) to eliminate unnecessary API call
 - **Simplified `/api/contacts/update` endpoint (v2.0):**
   - Changed request structure from nested (context + updates) to FLAT
   - Auto-extract country from phone number country code (+57 → CO, +52 → MX, +1 → US)

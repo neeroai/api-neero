@@ -41,41 +41,24 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
     // 1. media.api.bird.com ALWAYS redirects to S3 (never serves directly)
     // 2. Initial request requires Authorization header (401 without it)
     // 3. Bird returns 302 redirect with Location header containing S3 presigned URL
-    // 4. S3 presigned URL has auth in query params (X-Amz-Signature, etc.)
-    // 5. MUST follow redirect WITHOUT Authorization header (S3 rejects dual auth)
+    // 4. fetch spec automatically drops Authorization header on cross-origin redirect
+    //    (media.api.bird.com → s3.amazonaws.com)
+    // 5. S3 receives request with ONLY query param auth (no header conflict)
     //
-    // Solution: Manual redirect handling to control which requests get auth header
+    // Solution: Always add Authorization header, use redirect: 'follow' (automatic)
     const headers: Record<string, string> = {};
 
-    const isPresignedUrl =
-      url.includes('X-Amz-Algorithm') || url.includes('X-Amz-Signature');
-
-    // Only add Authorization header for non-presigned Bird media URLs
-    if (!isPresignedUrl && process.env.BIRD_ACCESS_KEY) {
+    // Add Authorization header if available (fetch spec drops it on cross-origin redirect)
+    if (process.env.BIRD_ACCESS_KEY) {
       headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
     }
 
-    // Request with manual redirect handling
-    let response = await fetch(url, {
+    // Automatic redirect handling (fetch spec drops Authorization on cross-origin)
+    const response = await fetch(url, {
       headers,
       signal: controller.signal,
-      redirect: 'manual', // Prevent automatic redirect following
+      redirect: 'follow', // Automatic (spec drops Authorization on cross-origin)
     });
-
-    // Handle redirect manually (if Bird returns 302/307)
-    if (response.status >= 300 && response.status < 400) {
-      const location = response.headers.get('Location');
-      if (!location) {
-        throw new Error('Redirect response missing Location header');
-      }
-
-      // Follow redirect WITHOUT Authorization header
-      // S3 presigned URL has auth in query params, adding header causes 400 error
-      response = await fetch(location, {
-        signal: controller.signal,
-        redirect: 'manual', // In case of chained redirects
-      });
-    }
 
     // Safety check: Validate Content-Length before reading body
     const contentLength = response.headers.get('content-length');
