@@ -75,3 +75,4 @@ plan/
 #scripts/
 crm_bird/
 .env.vercel
+docs/bird/bird-variables-reference.md
