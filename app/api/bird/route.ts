@@ -22,7 +22,7 @@ import { TimeBudget, TimeoutBudgetError, type TimeTracker } from '@/lib/ai/timeo
 import { transcribeWithFallback } from '@/lib/ai/transcribe';
 import { validateApiKey } from '@/lib/auth/api-key';
 import { fetchLatestMediaFromConversation } from '@/lib/bird/fetch-latest-media';
-import { downloadMedia } from '@/lib/bird/media';
+import { bufferToBase64, downloadMedia, getMimeType } from '@/lib/bird/media';
 import type {
   BirdActionRequest,
   BirdActionSuccessResponse,
@@ -303,19 +303,22 @@ export async function POST(request: Request): Promise<Response> {
 
     budget.checkBudget();
 
-    // 4. Download media
+    // 4. Download media and convert to base64 data URI
     const mediaBuffer = await downloadMediaSafe(mediaUrl);
+    const base64 = bufferToBase64(mediaBuffer);
+    const mimeType = getMimeType(mediaUrl);
+    const dataUri = `data:${mimeType};base64,${base64}`;
 
     budget.checkBudget();
 
     // 5. Process based on DETECTED media type (not body.mediaType)
     switch (mediaType) {
       case 'image':
-        return await handleImageProcessing(mediaUrl, budget, startTime);
+        return await handleImageProcessing(dataUri, budget, startTime);
       case 'audio':
         return await handleAudioProcessing(mediaBuffer, budget, startTime);
       case 'document':
-        return await handleDocumentProcessing(mediaUrl, budget, startTime);
+        return await handleDocumentProcessing(dataUri, budget, startTime);
       default: {
         const _exhaustive: never = mediaType;
         throw new ValidationError(`Unsupported media type: ${_exhaustive}`);
