@@ -11,6 +11,7 @@
  */
 
 import { z } from 'zod';
+import { getBirdConfig } from './env';
 
 // Schema para mensaje de Bird API - Estructura real de WhatsApp via Bird
 const BirdMessageSchema = z.object({
@@ -146,12 +147,7 @@ function extractMediaFromMessage(message: BirdMessage): ExtractedMedia | null {
 export async function fetchLatestMediaFromConversation(
   conversationId: string
 ): Promise<ExtractedMedia> {
-  const accessKey = process.env.BIRD_ACCESS_KEY;
-  const workspaceId = process.env.BIRD_WORKSPACE_ID;
-
-  if (!accessKey || !workspaceId) {
-    throw new Error('Missing BIRD_ACCESS_KEY or BIRD_WORKSPACE_ID');
-  }
+  const { accessKey, workspaceId } = getBirdConfig();
 
   // Fetch recent messages (limit=5 to handle bot responses between user media and action call)
   const url = `https://api.bird.com/workspaces/${workspaceId}/conversations/${conversationId}/messages?limit=5`;

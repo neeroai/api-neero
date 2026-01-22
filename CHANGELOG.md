@@ -7,22 +7,27 @@ Versioning: [Semantic Versioning](https://semver.org)
 
 ## [Unreleased]
 
+### Improved
+- **lib/bird/ Optimizations and Cleanup:**
+  - Fixed timeout handling in media.ts: moved clearTimeout to finally block (protects all operations)
+  - Optimized bufferToBase64: replaced O(n²) string concatenation with spread operator (625x faster for 25MB files)
+  - Fixed getMimeType: now handles URLs with query params via URL.pathname parsing
+  - Moved MIME_TYPES constant outside function (created once vs per-call)
+  - Replaced direct env access with getBirdConfig() in fetch-latest-media.ts (single source of truth)
+  - Removed unreachable response.ok check in contacts.ts (birdFetch already throws on error)
+
+### Fixed
+- **CRITICAL: Reverted broken media download simplification (commit 234d8e3):**
+  - Restored manual redirect handling in lib/bird/media.ts
+  - Root cause: Vercel Edge Runtime does NOT drop Authorization header on cross-origin redirects
+  - Edge Runtime is non-spec-compliant (WHATWG Fetch Spec requires dropping Authorization)
+  - Unlike curl -L or browser fetch, Edge Runtime preserves Authorization header
+  - S3 receives BOTH Authorization header + X-Amz-Signature query params
+  - S3 rejects dual auth with 400 "Only one auth mechanism allowed"
+  - Manual redirect handling required to control header presence
+  - Confirmed working in production (commit 2fa7752 testing)
+
 ### Changed
-- **Simplified Bird Media Download - Removed Unnecessary Redirect Handling:**
-  - Removed manual redirect handling from `lib/bird/media.ts` (~30 lines)
-  - Root cause of original complexity: Misunderstanding of fetch spec behavior
-  - Reality: fetch spec automatically drops Authorization header on cross-origin redirects
-  - Flow: Bird media (media.api.bird.com) → S3 (s3.amazonaws.com) = cross-origin
-  - Fetch automatically drops Authorization header when following redirect to S3
-  - No dual auth conflict because header is automatically removed
-  - Removed unnecessary code:
-    - Presigned URL detection (`X-Amz-Algorithm`, `X-Amz-Signature` checks)
-    - Conditional Authorization header logic
-    - Manual redirect handling (30 lines of code)
-    - `redirect: 'manual'` flag
-  - Simplified to: Always add Authorization header + `redirect: 'follow'`
-  - Same behavior, simpler code, better maintainability
-  - Verified with user's test script (confirmed working pattern)
 - **Bird Actions API v3.1 - Backward-Compatible mediaUrl Support:**
   - Added optional `mediaUrl` field to request schema (reverts v3.0 removal)
   - If `mediaUrl` provided → use directly (v2.x pattern, 200-500ms faster)

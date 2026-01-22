@@ -135,11 +135,6 @@ export async function addEmailIdentifier(contactId: string, email: string): Prom
     }),
   });
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(`Bird API error ${response.status}: ${JSON.stringify(errorData)}`);
-  }
-
   return response.json();
 }
 

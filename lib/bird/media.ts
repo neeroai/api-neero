@@ -41,24 +41,42 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
     // 1. media.api.bird.com ALWAYS redirects to S3 (never serves directly)
     // 2. Initial request requires Authorization header (401 without it)
     // 3. Bird returns 302 redirect with Location header containing S3 presigned URL
-    // 4. fetch spec automatically drops Authorization header on cross-origin redirect
-    //    (media.api.bird.com → s3.amazonaws.com)
-    // 5. S3 receives request with ONLY query param auth (no header conflict)
+    // 4. S3 presigned URL has auth in query params (X-Amz-Signature, etc.)
+    // 5. MUST follow redirect WITHOUT Authorization header (S3 rejects dual auth)
+    // 6. Edge Runtime does NOT drop Authorization on cross-origin redirects (non-spec-compliant)
     //
-    // Solution: Always add Authorization header, use redirect: 'follow' (automatic)
+    // Solution: Manual redirect handling to control which requests get auth header
     const headers: Record<string, string> = {};
 
-    // Add Authorization header if available (fetch spec drops it on cross-origin redirect)
-    if (process.env.BIRD_ACCESS_KEY) {
+    const isPresignedUrl =
+      url.includes('X-Amz-Algorithm') || url.includes('X-Amz-Signature');
+
+    // Only add Authorization header for non-presigned Bird media URLs
+    if (!isPresignedUrl && process.env.BIRD_ACCESS_KEY) {
       headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
     }
 
-    // Automatic redirect handling (fetch spec drops Authorization on cross-origin)
-    const response = await fetch(url, {
+    // Request with manual redirect handling
+    let response = await fetch(url, {
       headers,
       signal: controller.signal,
-      redirect: 'follow', // Automatic (spec drops Authorization on cross-origin)
+      redirect: 'manual', // Prevent automatic redirect following
     });
+
+    // Handle redirect manually (if Bird returns 302/307)
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (!location) {
+        throw new Error('Redirect response missing Location header');
+      }
+
+      // Follow redirect WITHOUT Authorization header
+      // S3 presigned URL has auth in query params, adding header causes 400 error
+      response = await fetch(location, {
+        signal: controller.signal,
+        redirect: 'manual', // In case of chained redirects
+      });
+    }
 
     // Safety check: Validate Content-Length before reading body
     const contentLength = response.headers.get('content-length');
@@ -70,8 +88,6 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
         );
       }
     }
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       // Enhanced error with full URL and response body
@@ -101,8 +117,6 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
 
     return buffer;
   } catch (error) {
-    clearTimeout(timeoutId);
-
     if (error instanceof Error) {
       if (error.name === 'AbortError') {
         throw new Error(`Media download timeout after ${TIMEOUT_MS}ms`);
@@ -111,6 +125,8 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
     }
 
     throw new Error('Unknown error during media download');
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
@@ -128,15 +144,30 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
  */
 export function bufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer);
-  let binary = '';
-  for (let i = 0; i < bytes.byteLength; i++) {
-    binary += String.fromCharCode(bytes[i] as number);
-  }
-  return btoa(binary);
+  return btoa(String.fromCharCode(...bytes));
 }
 
 /**
+ * MIME type mapping for file extensions
+ */
+const MIME_TYPES: Record<string, string> = {
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  png: 'image/png',
+  gif: 'image/gif',
+  webp: 'image/webp',
+  pdf: 'application/pdf',
+  mp3: 'audio/mpeg',
+  mp4: 'audio/mp4',
+  ogg: 'audio/ogg',
+  wav: 'audio/wav',
+  m4a: 'audio/m4a',
+};
+
+/**
  * Get media MIME type from URL or file extension
+ *
+ * Handles URLs with query parameters (e.g., image.jpg?v=123)
  *
  * @param url - Media URL
  * @returns MIME type string
@@ -148,21 +179,13 @@ export function bufferToBase64(buffer: ArrayBuffer): string {
  * ```
  */
 export function getMimeType(url: string): string {
-  const ext = url.split('.').pop()?.toLowerCase();
-
-  const mimeTypes: Record<string, string> = {
-    jpg: 'image/jpeg',
-    jpeg: 'image/jpeg',
-    png: 'image/png',
-    gif: 'image/gif',
-    webp: 'image/webp',
-    pdf: 'application/pdf',
-    mp3: 'audio/mpeg',
-    mp4: 'audio/mp4',
-    ogg: 'audio/ogg',
-    wav: 'audio/wav',
-    m4a: 'audio/m4a',
-  };
-
-  return mimeTypes[ext ?? ''] ?? 'application/octet-stream';
+  try {
+    const pathname = new URL(url).pathname;
+    const ext = pathname.split('.').pop()?.toLowerCase();
+    return MIME_TYPES[ext ?? ''] ?? 'application/octet-stream';
+  } catch {
+    // Fallback for invalid URLs - extract extension directly
+    const ext = url.split('.').pop()?.toLowerCase();
+    return MIME_TYPES[ext ?? ''] ?? 'application/octet-stream';
+  }
 }
