@@ -37,10 +37,23 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    // Bird media URLs are S3 presigned URLs with auth in query params
-    // Adding Authorization header causes AWS error: "Only one auth mechanism allowed"
-    // See: docs/bird/bird-conversations-api-capabilities.md L134
+    // Bird media URL flow (docs/bird/bird-conversations-api-capabilities.md L134):
+    // 1. Request Bird media URL WITH Authorization header
+    // 2. Bird returns 200 OK with Location header containing S3 presigned URL
+    // 3. Fetch follows redirect to S3 presigned URL (no auth needed in query params)
+    //
+    // Detection: Check if URL already has presigned params (X-Amz-Algorithm, X-Amz-Signature)
+    // - If YES → S3 presigned URL, no Authorization header needed
+    // - If NO → Bird media URL, Authorization header required
     const headers: Record<string, string> = {};
+
+    const isPresignedUrl =
+      url.includes('X-Amz-Algorithm') || url.includes('X-Amz-Signature');
+
+    // Only add Authorization header for non-presigned Bird media URLs
+    if (!isPresignedUrl && process.env.BIRD_ACCESS_KEY) {
+      headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
+    }
 
     const response = await fetch(url, {
       headers,

@@ -10,30 +10,47 @@ Bird stores WhatsApp media files on their CDN. Media URLs are S3 presigned URLs 
 
 ---
 
-## CRITICAL: Presigned URLs (2026-01-22)
+## CRITICAL: Two-Step Media Download (2026-01-22)
 
-Bird media URLs are **S3 presigned URLs** that include authentication in query parameters (`X-Amz-Algorithm`, `X-Amz-Credential`, `X-Amz-Signature`, etc.).
+Bird uses a **two-step process** for media downloads (see `bird-conversations-api-capabilities.md` L134):
 
-**DO NOT add Authorization header:**
+### Step 1: Bird Media URL (needs auth)
+```
+https://media.api.bird.com/workspaces/{id}/messages/{id}/media/{id}
+```
+- Requires `Authorization: AccessKey {key}` header
+- Returns 200 OK with `Location` header
+- Location contains S3 presigned URL
+
+### Step 2: S3 Presigned URL (no auth header)
+```
+https://...s3.amazonaws.com/...?X-Amz-Algorithm=...&X-Amz-Signature=...
+```
+- Has auth in query parameters (`X-Amz-Algorithm`, `X-Amz-Signature`, etc.)
+- NO Authorization header needed
+- Causes 400 error if Authorization header added
+
+### Implementation
+
+**Detect presigned URLs and conditionally add auth:**
 
 ```typescript
-// WRONG - causes AWS error: "Only one auth mechanism allowed"
-fetch(mediaUrl, {
-  headers: { 'Authorization': `AccessKey ${key}` }
-});
+const isPresignedUrl = url.includes('X-Amz-Algorithm') || url.includes('X-Amz-Signature');
 
-// CORRECT - presigned URL handles auth via query params
-fetch(mediaUrl);
+const headers: Record<string, string> = {};
+if (!isPresignedUrl && process.env.BIRD_ACCESS_KEY) {
+  headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
+}
+
+const response = await fetch(url, { headers });
 ```
 
-**Error if header added:**
-```xml
-<Code>InvalidArgument</Code>
-<Message>Only one auth mechanism allowed; only the X-Amz-Algorithm query parameter,
-Signature query string parameter or the Authorization header should be specified</Message>
-```
+**Why this works:**
+- Bird media URLs → Authorization header added → 200 OK with redirect
+- S3 presigned URLs → No Authorization header → Downloads directly
+- Fetch automatically follows redirects and drops Authorization header when crossing origins
 
-**Reference:** Bird Conversations API returns S3 presigned URLs in `Location` header (see `bird-conversations-api-capabilities.md` L134).
+**Reference:** `bird-conversations-api-capabilities.md` L134
 
 ---
 
@@ -50,36 +67,25 @@ https://media.nest.messagebird.com/workspaces/ws-abc123/media/media-xyz789
 
 ---
 
-## Authentication
-
-### Presigned URLs (Current)
-
-Bird Conversations API returns **S3 presigned URLs** that include authentication in query parameters. No Authorization header needed.
-
-**Example URL:**
-```
-https://media.api.bird.com/workspaces/{id}/messages/{id}/media/{id}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...&X-Amz-Signature=...
-```
-
-**Correct fetch:**
-```bash
-curl https://media.api.bird.com/workspaces/.../media/...?X-Amz-Algorithm=...
-```
-
-### Legacy Access Key (Deprecated)
-
-Older media URLs (non-presigned) may require `Authorization` header. Current API (2026-01-22) uses presigned URLs exclusively.
-
----
-
 ## Implementation (Edge Runtime)
 
-### Download Media
+### Download Media with Auto-Detection
 
 ```typescript
 async function downloadMedia(mediaUrl: string): Promise<ArrayBuffer> {
-  // No Authorization header - presigned URLs handle auth via query params
-  const response = await fetch(mediaUrl);
+  // Detect if URL is presigned (has AWS signature in query params)
+  const isPresignedUrl =
+    mediaUrl.includes('X-Amz-Algorithm') ||
+    mediaUrl.includes('X-Amz-Signature');
+
+  const headers: Record<string, string> = {};
+
+  // Only add Authorization header for non-presigned Bird media URLs
+  if (!isPresignedUrl && process.env.BIRD_ACCESS_KEY) {
+    headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
+  }
+
+  const response = await fetch(mediaUrl, { headers });
 
   if (!response.ok) {
     throw new Error(`Failed to download: ${response.status}`);
