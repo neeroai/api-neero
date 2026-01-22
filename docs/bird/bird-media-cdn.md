@@ -10,47 +10,69 @@ Bird stores WhatsApp media files on their CDN. Media URLs are S3 presigned URLs 
 
 ---
 
-## CRITICAL: Two-Step Media Download (2026-01-22)
+## CRITICAL: Two-Step Media Download with Manual Redirect Handling (2026-01-22)
 
-Bird uses a **two-step process** for media downloads (see `bird-conversations-api-capabilities.md` L134):
+Bird uses a **two-step redirect process** for media downloads (confirmed via testing conversationId 36261f66-7507-4056-aebe-c24a56e970e3):
 
 ### Step 1: Bird Media URL (needs auth)
 ```
 https://media.api.bird.com/workspaces/{id}/messages/{id}/media/{id}
 ```
-- Requires `Authorization: AccessKey {key}` header
-- Returns 200 OK with `Location` header
-- Location contains S3 presigned URL
+- Requires `Authorization: AccessKey {key}` header (401 without it)
+- **NEVER serves files directly** - ALWAYS returns 302 redirect
+- Returns 302/307 with `Location` header containing S3 presigned URL
 
 ### Step 2: S3 Presigned URL (no auth header)
 ```
 https://...s3.amazonaws.com/...?X-Amz-Algorithm=...&X-Amz-Signature=...
 ```
 - Has auth in query parameters (`X-Amz-Algorithm`, `X-Amz-Signature`, etc.)
-- NO Authorization header needed
-- Causes 400 error if Authorization header added
+- **MUST NOT have Authorization header**
+- Causes 400 "Only one auth mechanism allowed" if Authorization header present
 
-### Implementation
+### Implementation: Manual Redirect Handling
 
-**Detect presigned URLs and conditionally add auth:**
+**CRITICAL**: fetch() with `redirect: 'follow'` automatically carries Authorization header across redirects, causing S3 to reject with 400 error. Use manual redirect handling:
 
 ```typescript
+const headers: Record<string, string> = {};
+
 const isPresignedUrl = url.includes('X-Amz-Algorithm') || url.includes('X-Amz-Signature');
 
-const headers: Record<string, string> = {};
+// Only add Authorization header for non-presigned Bird media URLs
 if (!isPresignedUrl && process.env.BIRD_ACCESS_KEY) {
   headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
 }
 
-const response = await fetch(url, { headers });
+// Request with manual redirect handling
+let response = await fetch(url, {
+  headers,
+  signal: controller.signal,
+  redirect: 'manual', // Prevent automatic redirect following
+});
+
+// Handle redirect manually (if Bird returns 302/307)
+if (response.status >= 300 && response.status < 400) {
+  const location = response.headers.get('Location');
+  if (!location) {
+    throw new Error('Redirect response missing Location header');
+  }
+
+  // Follow redirect WITHOUT Authorization header
+  // S3 presigned URL has auth in query params, adding header causes 400 error
+  response = await fetch(location, {
+    signal: controller.signal,
+    redirect: 'manual', // In case of chained redirects
+  });
+}
 ```
 
 **Why this works:**
-- Bird media URLs → Authorization header added → 200 OK with redirect
-- S3 presigned URLs → No Authorization header → Downloads directly
-- Fetch automatically follows redirects and drops Authorization header when crossing origins
+- Initial Bird request: Authorization header included → Bird returns 302
+- Redirect to S3: No Authorization header (auth in query params) → S3 returns file (200 OK)
+- Manual redirect handling prevents auth header forwarding
 
-**Reference:** `bird-conversations-api-capabilities.md` L134
+**Reference:** `lib/bird/media.ts` L40-L78 | Testing: conversationId 36261f66-7507-4056-aebe-c24a56e970e3
 
 ---
 

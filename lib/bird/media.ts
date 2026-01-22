@@ -29,7 +29,7 @@
  * ```
  */
 export async function downloadMedia(url: string): Promise<ArrayBuffer> {
-  const TIMEOUT_MS = 1000; // 1 second max download time
+  const TIMEOUT_MS = 10000; // 10 seconds max download time (includes redirect handling)
   const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25MB limit for Edge Runtime (128MB max memory)
 
   // Create AbortController for timeout
@@ -37,14 +37,14 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    // Bird media URL flow (docs/bird/bird-conversations-api-capabilities.md L134):
-    // 1. Request Bird media URL WITH Authorization header
-    // 2. Bird returns 200 OK with Location header containing S3 presigned URL
-    // 3. Fetch follows redirect to S3 presigned URL (no auth needed in query params)
+    // Bird media URL flow (confirmed via testing 2026-01-22):
+    // 1. media.api.bird.com ALWAYS redirects to S3 (never serves directly)
+    // 2. Initial request requires Authorization header (401 without it)
+    // 3. Bird returns 302 redirect with Location header containing S3 presigned URL
+    // 4. S3 presigned URL has auth in query params (X-Amz-Signature, etc.)
+    // 5. MUST follow redirect WITHOUT Authorization header (S3 rejects dual auth)
     //
-    // Detection: Check if URL already has presigned params (X-Amz-Algorithm, X-Amz-Signature)
-    // - If YES → S3 presigned URL, no Authorization header needed
-    // - If NO → Bird media URL, Authorization header required
+    // Solution: Manual redirect handling to control which requests get auth header
     const headers: Record<string, string> = {};
 
     const isPresignedUrl =
@@ -55,10 +55,27 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
       headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
     }
 
-    const response = await fetch(url, {
+    // Request with manual redirect handling
+    let response = await fetch(url, {
       headers,
       signal: controller.signal,
+      redirect: 'manual', // Prevent automatic redirect following
     });
+
+    // Handle redirect manually (if Bird returns 302/307)
+    if (response.status >= 300 && response.status < 400) {
+      const location = response.headers.get('Location');
+      if (!location) {
+        throw new Error('Redirect response missing Location header');
+      }
+
+      // Follow redirect WITHOUT Authorization header
+      // S3 presigned URL has auth in query params, adding header causes 400 error
+      response = await fetch(location, {
+        signal: controller.signal,
+        redirect: 'manual', // In case of chained redirects
+      });
+    }
 
     // Safety check: Validate Content-Length before reading body
     const contentLength = response.headers.get('content-length');

@@ -39,18 +39,24 @@ Versioning: [Semantic Versioning](https://semver.org)
 - Added `.claude/` (lowercase) to `.gitignore` for proper exclusion
 
 ### Fixed
-- **CRITICAL: Bird Media Download 401/400 Errors - Presigned URL Detection:**
-  - Fixed media download errors: 401 Unauthorized and 400 "Only one auth mechanism allowed"
-  - Root cause: Bird uses two-step process (docs/bird/bird-conversations-api-capabilities.md L134):
-    1. Bird media URL (needs Authorization header) → 200 OK with Location header
-    2. S3 presigned URL in Location (has auth in query params, no header needed)
-  - Implemented presigned URL detection in `lib/bird/media.ts`:
-    - Detects presigned URLs by checking for `X-Amz-Algorithm` or `X-Amz-Signature` in URL
-    - Adds Authorization header only for non-presigned Bird media URLs
-    - No Authorization header for S3 presigned URLs (auth in query params)
+- **CRITICAL: Bird Media Download 400 Error - Manual Redirect Handling:**
+  - Fixed "Only one auth mechanism allowed" error in production media downloads
+  - Root cause (confirmed via testing conversationId 36261f66-7507-4056-aebe-c24a56e970e3):
+    1. `media.api.bird.com` NEVER serves files directly - ALWAYS returns 302 redirect to S3
+    2. Initial request to Bird requires `Authorization: AccessKey` header (401 without it)
+    3. Bird returns 302 redirect with Location header containing S3 presigned URL
+    4. S3 presigned URL has auth in query params (`X-Amz-Algorithm`, `X-Amz-Signature`, etc.)
+    5. fetch() with `redirect: 'follow'` automatically follows redirect AND carries Authorization header
+    6. S3 rejects requests with BOTH query param auth AND header auth (400 "Only one auth mechanism allowed")
+  - Solution implemented in `lib/bird/media.ts`:
+    - Added `redirect: 'manual'` to prevent automatic redirect following
+    - Manual redirect detection (status 302/307) and Location header extraction
+    - Follow redirect WITHOUT Authorization header (S3 presigned URL handles auth via query params)
+    - Preserves presigned URL detection as fallback for direct S3 URLs
+  - Testing methodology documented: Real API calls with conversationId confirmed Bird's redirect behavior
   - Removed debug logging from `lib/bird/media.ts` and `lib/bird/fetch-latest-media.ts`
-  - Updated `docs/bird/bird-media-cdn.md` with presigned URL documentation
-  - Resolves production issue preventing media processing in Bird Actions
+  - Updated `docs/bird/bird-media-cdn.md` with redirect flow documentation
+  - Resolves production issue preventing media processing in Bird Actions (commits 478ceeb, f10f4eb failures)
 - **Bird API Contact Update - Email Attribute Error (422):**
   - Fixed `/api/contacts/update` endpoint sending `email` as attribute when Bird treats it as identifier
   - Removed `payload.attributes.email` from update payload (app/api/contacts/update/route.ts:211)
