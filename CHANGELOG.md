@@ -39,7 +39,21 @@ Versioning: [Semantic Versioning](https://semver.org)
 - Added `.claude/` (lowercase) to `.gitignore` for proper exclusion
 
 ### Fixed
-- **CRITICAL: Bird Media Download 400 Error - Manual Redirect Handling:**
+- **CRITICAL: Bird Media Download - Complete Fix (2 parts):**
+
+  **Part 1: Manual Redirect Handling (commit 2fa7752):**
+  - Fixed 400 "Only one auth mechanism allowed" error
+  - Root cause: fetch() carries Authorization header across redirects to S3
+  - Solution: Manual redirect handling with `redirect: 'manual'`
+  - Follow redirect WITHOUT Authorization header (S3 has auth in query params)
+
+  **Part 2: Base64 Data URI Conversion (commit 508d1e1):**
+  - Fixed "Invalid or unsupported file uri" error in Gemini
+  - Root cause: Gemini cannot access Bird's authenticated URLs directly
+  - Solution: Download media and convert to base64 data URI
+  - Pass `data:image/jpeg;base64,{base64}` to AI pipeline
+
+  **Combined fix resolves both issues:**
   - Fixed "Only one auth mechanism allowed" error in production media downloads
   - Root cause (confirmed via testing conversationId 36261f66-7507-4056-aebe-c24a56e970e3):
     1. `media.api.bird.com` NEVER serves files directly - ALWAYS returns 302 redirect to S3
