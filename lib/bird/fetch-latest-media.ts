@@ -156,11 +156,6 @@ export async function fetchLatestMediaFromConversation(
   // Fetch recent messages (limit=5 to handle bot responses between user media and action call)
   const url = `https://api.bird.com/workspaces/${workspaceId}/conversations/${conversationId}/messages?limit=5`;
 
-  // DEBUG: Log API request
-  console.log('[Fetch Media] Conversations API URL:', url);
-  console.log('[Fetch Media] WorkspaceID:', workspaceId);
-  console.log('[Fetch Media] ConversationID:', conversationId);
-
   const response = await fetch(url, {
     headers: {
       Authorization: `AccessKey ${accessKey}`,
@@ -168,12 +163,8 @@ export async function fetchLatestMediaFromConversation(
     },
   });
 
-  // DEBUG: Log API response
-  console.log('[Fetch Media] API Status:', response.status, response.statusText);
-
   if (!response.ok) {
     const errorBody = await response.text();
-    console.log('[Fetch Media] Error body:', errorBody);
     throw new Error(
       `Bird API error: ${response.status} ${response.statusText}. Body: ${errorBody}`
     );
@@ -210,10 +201,6 @@ export async function fetchLatestMediaFromConversation(
   if (!extracted) {
     throw new Error('Could not extract media URL from latest contact message');
   }
-
-  // DEBUG: Log extracted media details
-  console.log('[Fetch Media] Extracted URL:', extracted.mediaUrl);
-  console.log('[Fetch Media] Detected type:', extracted.mediaType);
 
   return extracted;
 }

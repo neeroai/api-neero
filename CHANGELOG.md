@@ -39,6 +39,13 @@ Versioning: [Semantic Versioning](https://semver.org)
 - Added `.claude/` (lowercase) to `.gitignore` for proper exclusion
 
 ### Fixed
+- **CRITICAL: Bird Media Download 400 Error - S3 Presigned URLs:**
+  - Fixed AWS S3 error: "Only one auth mechanism allowed" when downloading Bird media
+  - Root cause: Bird media URLs are S3 presigned URLs with auth in query params (X-Amz-Algorithm, X-Amz-Signature, etc.)
+  - Removed Authorization header from `lib/bird/media.ts` (was causing conflict with presigned URL auth)
+  - Removed debug logging from `lib/bird/media.ts` and `lib/bird/fetch-latest-media.ts`
+  - Updated `docs/bird/bird-media-cdn.md` with critical presigned URL documentation
+  - Resolves production issue preventing media processing in Bird Actions
 - **Bird API Contact Update - Email Attribute Error (422):**
   - Fixed `/api/contacts/update` endpoint sending `email` as attribute when Bird treats it as identifier
   - Removed `payload.attributes.email` from update payload (app/api/contacts/update/route.ts:211)

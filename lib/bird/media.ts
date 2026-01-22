@@ -37,24 +37,15 @@ export async function downloadMedia(url: string): Promise<ArrayBuffer> {
   const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
   try {
-    // Conditional authentication based on BIRD_ACCESS_KEY
+    // Bird media URLs are S3 presigned URLs with auth in query params
+    // Adding Authorization header causes AWS error: "Only one auth mechanism allowed"
+    // See: docs/bird/bird-conversations-api-capabilities.md L134
     const headers: Record<string, string> = {};
-    if (process.env.BIRD_ACCESS_KEY) {
-      headers.Authorization = `AccessKey ${process.env.BIRD_ACCESS_KEY}`;
-    }
-
-    // DEBUG: Log full URL and auth status
-    console.log('[Media Download] URL:', url);
-    console.log('[Media Download] Auth:', process.env.BIRD_ACCESS_KEY ? 'PRESENT' : 'MISSING');
 
     const response = await fetch(url, {
       headers,
       signal: controller.signal,
     });
-
-    // DEBUG: Log response details
-    console.log('[Media Download] Status:', response.status, response.statusText);
-    console.log('[Media Download] Headers:', Object.fromEntries(response.headers.entries()));
 
     // Safety check: Validate Content-Length before reading body
     const contentLength = response.headers.get('content-length');

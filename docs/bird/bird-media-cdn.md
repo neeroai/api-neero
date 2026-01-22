@@ -1,12 +1,39 @@
 # Bird Media CDN
 
-**Last Updated:** 2025-12-03
+**Last Updated:** 2026-01-22
 
 ---
 
 ## Overview
 
-Bird stores WhatsApp media files on their CDN. Downloading requires authentication with AccessKey.
+Bird stores WhatsApp media files on their CDN. Media URLs are S3 presigned URLs that include authentication in query parameters.
+
+---
+
+## CRITICAL: Presigned URLs (2026-01-22)
+
+Bird media URLs are **S3 presigned URLs** that include authentication in query parameters (`X-Amz-Algorithm`, `X-Amz-Credential`, `X-Amz-Signature`, etc.).
+
+**DO NOT add Authorization header:**
+
+```typescript
+// WRONG - causes AWS error: "Only one auth mechanism allowed"
+fetch(mediaUrl, {
+  headers: { 'Authorization': `AccessKey ${key}` }
+});
+
+// CORRECT - presigned URL handles auth via query params
+fetch(mediaUrl);
+```
+
+**Error if header added:**
+```xml
+<Code>InvalidArgument</Code>
+<Message>Only one auth mechanism allowed; only the X-Amz-Algorithm query parameter,
+Signature query string parameter or the Authorization header should be specified</Message>
+```
+
+**Reference:** Bird Conversations API returns S3 presigned URLs in `Location` header (see `bird-conversations-api-capabilities.md` L134).
 
 ---
 
@@ -25,19 +52,23 @@ https://media.nest.messagebird.com/workspaces/ws-abc123/media/media-xyz789
 
 ## Authentication
 
-### Access Key
+### Presigned URLs (Current)
 
-Download requests require `Authorization` header:
+Bird Conversations API returns **S3 presigned URLs** that include authentication in query parameters. No Authorization header needed.
 
+**Example URL:**
 ```
-Authorization: AccessKey {BIRD_ACCESS_KEY}
+https://media.api.bird.com/workspaces/{id}/messages/{id}/media/{id}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=...&X-Amz-Signature=...
 ```
 
-**Example:**
+**Correct fetch:**
 ```bash
-curl -H "Authorization: AccessKey live_12345abc" \
-  https://media.nest.messagebird.com/workspaces/ws-abc123/media/media-xyz789
+curl https://media.api.bird.com/workspaces/.../media/...?X-Amz-Algorithm=...
 ```
+
+### Legacy Access Key (Deprecated)
+
+Older media URLs (non-presigned) may require `Authorization` header. Current API (2026-01-22) uses presigned URLs exclusively.
 
 ---
 
@@ -47,11 +78,8 @@ curl -H "Authorization: AccessKey live_12345abc" \
 
 ```typescript
 async function downloadMedia(mediaUrl: string): Promise<ArrayBuffer> {
-  const response = await fetch(mediaUrl, {
-    headers: {
-      'Authorization': `AccessKey ${process.env.BIRD_ACCESS_KEY}`
-    }
-  });
+  // No Authorization header - presigned URLs handle auth via query params
+  const response = await fetch(mediaUrl);
 
   if (!response.ok) {
     throw new Error(`Failed to download: ${response.status}`);
